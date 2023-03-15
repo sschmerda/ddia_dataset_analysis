@@ -1,0 +1,5 @@
+*.csv
+*.pickle
+./.ipynb_checkpoints/
+./utilities/__pychache__/
+./.DS_Store
