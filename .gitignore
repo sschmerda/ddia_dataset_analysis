@@ -2,4 +2,4 @@
 .DS_Store
 *.pickle
 ./dataset_analysis/.ipynb_checkpoints/
-./dataset_analysis/utilities/__pychache__/
+./dataset_analysis/utilities/__pycache__/
