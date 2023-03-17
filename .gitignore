@@ -1,5 +1,5 @@
 *.csv
 *.pickle
-./.ipynb_checkpoints/
-./utilities/__pychache__/
+./dataset_analysis/.ipynb_checkpoints/
+./dataset_analysis/utilities/__pychache__/
 ./.DS_Store
