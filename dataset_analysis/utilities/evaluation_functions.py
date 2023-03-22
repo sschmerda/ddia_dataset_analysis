@@ -355,6 +355,7 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
                                                  number_interactions_total=None,
                                                  number_attempts_total=None,
                                                  number_hints_total=None,
+                                                 time_total=None,
                                                  single_score=None,
                                                  single_score_hint_lowest=None,
                                                  single_score_not_first_attempt_lowest=None,
@@ -365,6 +366,7 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
                                                  number_interactions_until_score_highest=None,
                                                  number_attempts_until_score_highest=None,
                                                  number_hints_until_score_highest=None,
+                                                 time_until_score_highest=None,
                                                  is_correct=None,
                                                  is_correct_without_hint=None,
                                                  is_correct_first_attempt=None,
@@ -373,7 +375,8 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
                                                  is_correct_last_attempt_without_hint=None,
                                                  number_interactions_until_correct=None,
                                                  number_attempts_until_correct=None,
-                                                 number_hints_until_correct=None):
+                                                 number_hints_until_correct=None,
+                                                 time_until_correct=None):
     """ Fills the lists of the evaluation_learning_activity_merge_dict with learning activity identification and evaluation metric values
 
     Parameters
@@ -402,6 +405,8 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
         The number_attempts_total value, by default None
     number_hints_total : int, optional
         The number_hints_total value, by default None
+    time_total : float, optional
+        The time_total value in seconds, by default None
     single_score : int, optional
         The single_score value, by default None
     single_score_hint_lowest : int, optional
@@ -422,6 +427,8 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
         The number_attempts_until_score_highest value, by default None
     number_hints_until_score_highest : int, optional
         The number_hints_until_score_highest value, by default None
+    time_until_score_highest : float, optional
+        The time_until_score_highest value in seconds, by default None
     is_correct : bool, optional
         The is_correct value, by default None
     is_correct_without_hint : bool, optional
@@ -438,8 +445,10 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
         The number_interactions_until_correct value, by default None
     number_attempts_until_correct : int, optional
         The number_attempts_until_correct value, by default None
-    nubmer_hints_until_correct : int, optional
+    number_hints_until_correct : int, optional
         The nubmer_hints_until_correct value, by default None
+    time_until_correct : float, optional
+        The time_until_correct value, by default None
     """
     if group_field:
         evaluation_learning_activity_merge_dict[group_field].append(group)
@@ -451,6 +460,7 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_INTERACTIONS_TOTAL_FIELD_NAME_STR].append(number_interactions_total)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_ATTEMPTS_TOTAL_FIELD_NAME_STR].append(number_attempts_total)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_HINTS_TOTAL_FIELD_NAME_STR].append(number_hints_total)
+    evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_TIME_IN_SEC_TOTAL_FIELD_NAME_STR].append(time_total)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_SINGLE_SCORE_FIELD_NAME_STR].append(single_score)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_SINGLE_SCORE_HINT_LOWEST_FIELD_NAME_STR].append(single_score_hint_lowest)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_SINGLE_SCORE_NOT_FIRST_ATTEMPT_LOWEST_FIELD_NAME_STR].append(single_score_not_first_attempt_lowest)
@@ -461,6 +471,7 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_INTERACTIONS_UNTIL_HIGHEST_SCORE_FIELD_NAME_STR].append(number_interactions_until_score_highest)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_ATTEMPTS_UNTIL_HIGHEST_SCORE_FIELD_NAME_STR].append(number_attempts_until_score_highest)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_HINTS_UNTIL_HIGHEST_SCORE_FIELD_NAME_STR].append(number_hints_until_score_highest)
+    evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_TIME_IN_SEC_UNTIL_HIGHEST_SCORE_FIELD_NAME_STR].append(time_until_score_highest)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_IS_CORRECT_FIELD_NAME_STR].append(is_correct)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_IS_CORRECT_WITHOUT_HINTS_FIELD_NAME_STR].append(is_correct_without_hint)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_IS_CORRECT_FIRST_ATTEMPT_FIELD_NAME_STR].append(is_correct_first_attempt)
@@ -470,6 +481,7 @@ def fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_me
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_INTERACTIONS_UNTIL_CORRECT_FIELD_NAME_STR].append(number_interactions_until_correct)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_ATTEMPTS_UNTIL_CORRECT_FIELD_NAME_STR].append(number_attempts_until_correct)
     evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_HINTS_UNTIL_CORRECT_FIELD_NAME_STR].append(number_hints_until_correct)
+    evaluation_learning_activity_merge_dict[EVALUATION_LEARNING_ACTIVITY_TIME_IN_SEC_UNTIL_CORRECT_FIELD_NAME_STR].append(time_until_correct)
 
 def add_evaluation_fields_learning_activity_decorator_with_arguments(interactions_df: pd.DataFrame, 
                                                                      group_field: str,
@@ -528,6 +540,7 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
                 (number_interactions_total,
                  number_attempts_total,
                  number_hints_total,
+                 time_total,
                  single_score,
                  single_score_hint_lowest,
                  single_score_not_first_attempt_lowest,
@@ -538,6 +551,7 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
                  number_interactions_until_score_highest,
                  number_attempts_until_score_highest,
                  number_hints_until_score_highest,
+                 time_until_score_highest,
                  is_correct,
                  is_correct_without_hint,
                  is_correct_first_attempt,
@@ -546,7 +560,8 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
                  is_correct_last_attempt_without_hint,
                  number_interactions_until_correct,
                  number_attempts_until_correct,
-                 number_hints_until_correct) = eval_metric_func(df, **kwargs) 
+                 number_hints_until_correct,
+                 time_until_correct) = eval_metric_func(df, **kwargs) 
 
                 # fills the merging dictionary with the calculated evaluation metrics at the learning activity level and indentifier values
                 fill_evaluation_learning_activity_merge_dict(evaluation_learning_activity_merge_dict,
@@ -561,6 +576,7 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
                                                              number_interactions_total=number_interactions_total,
                                                              number_attempts_total=number_attempts_total,
                                                              number_hints_total=number_hints_total,
+                                                             time_total=time_total,
                                                              single_score=single_score,
                                                              single_score_hint_lowest=single_score_hint_lowest,
                                                              single_score_not_first_attempt_lowest=single_score_not_first_attempt_lowest,
@@ -571,6 +587,7 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
                                                              number_interactions_until_score_highest=number_interactions_until_score_highest,
                                                              number_attempts_until_score_highest=number_attempts_until_score_highest,
                                                              number_hints_until_score_highest=number_hints_until_score_highest,
+                                                             time_until_score_highest=time_until_score_highest,
                                                              is_correct=is_correct,
                                                              is_correct_without_hint=is_correct_without_hint,
                                                              is_correct_first_attempt=is_correct_first_attempt,
@@ -579,7 +596,8 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
                                                              is_correct_last_attempt_without_hint=is_correct_last_attempt_without_hint,
                                                              number_interactions_until_correct=number_interactions_until_correct,
                                                              number_attempts_until_correct=number_attempts_until_correct,
-                                                             number_hints_until_correct=number_hints_until_correct)
+                                                             number_hints_until_correct=number_hints_until_correct,
+                                                             time_until_correct=time_until_correct)
 
             # generate a pandas dataframe from the evaluation_learning_activity_merge_dict and transform booleans to integers
             evaluation_learning_activity_df = pd.DataFrame(evaluation_learning_activity_merge_dict)

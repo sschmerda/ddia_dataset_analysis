@@ -250,6 +250,13 @@ class ClusterEvaluation:
         if not self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
             _ = results_dict_per_group.pop(CLUSTERING_HDBSCAN_MIN_CLUST_SIZE_FIELD_NAME_STR)
 
+        # a dictionary containing information whether the min_cluster_size of hdbscan needed to be corrected to 2
+        if self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
+            min_cluster_size_correction_dict = {GROUP_FIELD_NAME_STR: [],
+                                                CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_IS_CORRECTED_NAME_STR: [],
+                                                CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_UNCORRECTED_NAME_STR: [],
+                                                CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_CORRECTED_NAME_STR: []}
+
         # loop over all groups in the sequence distance dictionary
         for group, subdict in tqdm(self.sequence_distances_dict.items()):
 
@@ -284,6 +291,17 @@ class ClusterEvaluation:
             # initialize clusterer object, cluster data and calculate cluster labels for each user sequence
             if self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
                 hdbscan_min_cluster_size = round(self.hdbscan_min_cluster_size_as_pct_of_group_seq_num * number_of_sequences)
+                uncorrected_min_cluster_size = hdbscan_min_cluster_size
+                is_corrected = False
+                if hdbscan_min_cluster_size < 2:
+                    hdbscan_min_cluster_size = 2
+                    is_corrected = True
+                    print(f'min_cluster_size was set to 2 due to {self.hdbscan_min_cluster_size_as_pct_of_group_seq_num} * number of sequences being smaller than 2')
+                min_cluster_size_correction_dict[GROUP_FIELD_NAME_STR].append(group)
+                min_cluster_size_correction_dict[CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_IS_CORRECTED_NAME_STR].append(is_corrected)
+                min_cluster_size_correction_dict[CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_UNCORRECTED_NAME_STR].append(uncorrected_min_cluster_size)
+                min_cluster_size_correction_dict[CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_CORRECTED_NAME_STR].append(hdbscan_min_cluster_size)
+
                 clusterer = self.cluster_function(min_cluster_size=hdbscan_min_cluster_size, **self.kwargs)
             else:
                 clusterer = self.cluster_function(**self.kwargs)
@@ -312,71 +330,71 @@ class ClusterEvaluation:
             self._user_cluster_mapping_per_group[group] = {user:cluster for user, cluster in zip(users, cluster_labels)}
             self._user_sequence_id_mapping_per_group[group] = {user:sequence_id for user, sequence_id in zip(users, sequence_ids)}
             self._user_sequence_array_mapping_per_group[group] = {user:sequence_arr for user, sequence_arr in zip(users, sequence_arrays)}
-            self._user_sequence_length_mapping_per_group[group] = {user:sequence_len for user, sequence_len in zip(users, sequence_lengths)}
-            self._clustered_per_group[group] = clustered
-            self._percentage_clustered_per_group[group] = percentage_clustered
-            
-            # create a dataframe containing information about user, associated cluster and evaluation metric for the user per group
-            if self.group_field:
-                user_cluster_eval_metric_df = self.interactions.copy().loc[self.interactions[self.group_field]==group, :]
-            else:
-                user_cluster_eval_metric_df = self.interactions.copy()
-            user_cluster_eval_metric_df.insert(1, CLUSTER_FIELD_NAME_STR, user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_cluster_mapping_per_group[group][x]))
-            
-            user_cluster_eval_metric_df = (user_cluster_eval_metric_df.groupby([CLUSTER_FIELD_NAME_STR, self.user_field])[self.evaluation_field]
-                                                    .first().reset_index())
-            user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_id_mapping_per_group[group][x])
-            user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_array_mapping_per_group[group][x])
-            user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_length_mapping_per_group[group][x])
+        self._user_sequence_length_mapping_per_group[group] = {user:sequence_len for user, sequence_len in zip(users, sequence_lengths)}
+        self._clustered_per_group[group] = clustered
+        self._percentage_clustered_per_group[group] = percentage_clustered
+        
+        # create a dataframe containing information about user, associated cluster and evaluation metric for the user per group
+        if self.group_field:
+            user_cluster_eval_metric_df = self.interactions.copy().loc[self.interactions[self.group_field]==group, :]
+        else:
+            user_cluster_eval_metric_df = self.interactions.copy()
+        user_cluster_eval_metric_df.insert(1, CLUSTER_FIELD_NAME_STR, user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_cluster_mapping_per_group[group][x]))
+        
+        user_cluster_eval_metric_df = (user_cluster_eval_metric_df.groupby([CLUSTER_FIELD_NAME_STR, self.user_field])[self.evaluation_field]
+                                                .first().reset_index())
+        user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_id_mapping_per_group[group][x])
+        user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_array_mapping_per_group[group][x])
+        user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_length_mapping_per_group[group][x])
 
-            # remove unclustered user sequences from the instance attribute
-            self._user_cluster_eval_metric_df_per_group[group] = user_cluster_eval_metric_df.loc[user_cluster_eval_metric_df[CLUSTER_FIELD_NAME_STR] != '-1']
+        # remove unclustered user sequences from the instance attribute
+        self._user_cluster_eval_metric_df_per_group[group] = user_cluster_eval_metric_df.loc[user_cluster_eval_metric_df[CLUSTER_FIELD_NAME_STR] != '-1']
 
-            # data per cluster dict initialization 
-            cluster_list = []
-            number_of_sequences_per_cluster_list = []
-            number_of_unique_sequences_per_cluster_list = []
-            users_per_cluster_list = []
-            sequence_ids_per_cluster_list = []
-            sequence_lengths_per_cluster_list = []
-            sequences_per_cluster_list = []
+        # data per cluster dict initialization 
+        cluster_list = []
+        number_of_sequences_per_cluster_list = []
+        number_of_unique_sequences_per_cluster_list = []
+        users_per_cluster_list = []
+        sequence_ids_per_cluster_list = []
+        sequence_lengths_per_cluster_list = []
+        sequences_per_cluster_list = []
 
-            # cluster eval metric stats per group
-            mean_cluster_eval_metric_list = []
-            median_cluster_eval_metric_list = []
-            min_cluster_eval_metric_list = []
-            max_cluster_eval_metric_list = []
-            std_cluster_eval_metric_list = []
-            iqr_cluster_eval_metric_list = []
+        # cluster eval metric stats per group
+        mean_cluster_eval_metric_list = []
+        median_cluster_eval_metric_list = []
+        min_cluster_eval_metric_list = []
+        max_cluster_eval_metric_list = []
+        std_cluster_eval_metric_list = []
+        iqr_cluster_eval_metric_list = []
 
-            # residuals for normality test
-            residual_list = []
+        # residuals for normality test
+        residual_list = []
 
-            # loop over cluster to fill initialized lists
-            for cluster, df in user_cluster_eval_metric_df.groupby(CLUSTER_FIELD_NAME_STR):
+        # loop over cluster to fill initialized lists
+        for cluster, df in user_cluster_eval_metric_df.groupby(CLUSTER_FIELD_NAME_STR):
 
-                cluster_list.append(cluster)
-                number_of_sequences_per_cluster_list.append(len(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR]))
-                number_of_unique_sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].nunique())
-                users_per_cluster_list.append(df[self.user_field].values)
-                sequence_ids_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].values)
-                sequence_lengths_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR].values)
-                sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR].values)
+            cluster_list.append(cluster)
+            number_of_sequences_per_cluster_list.append(len(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR]))
+            number_of_unique_sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].nunique())
+            users_per_cluster_list.append(df[self.user_field].values)
+            sequence_ids_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].values)
+            sequence_lengths_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR].values)
+            sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR].values)
 
-                # eval metric stats
-                mean_cluster_eval_metric = df[self.evaluation_field].mean()
+            # eval metric stats
+            mean_cluster_eval_metric = df[self.evaluation_field].mean()
 
-                mean_cluster_eval_metric_list.append(mean_cluster_eval_metric)
-                median_cluster_eval_metric_list.append(df[self.evaluation_field].median())
-                min_cluster_eval_metric_list.append(df[self.evaluation_field].min())
-                max_cluster_eval_metric_list.append(df[self.evaluation_field].max())
-                std_cluster_eval_metric_list.append(df[self.evaluation_field].std())
-                iqr_cluster_eval_metric_list.append(iqr(df[self.evaluation_field]))
+            mean_cluster_eval_metric_list.append(mean_cluster_eval_metric)
+            median_cluster_eval_metric_list.append(df[self.evaluation_field].median())
+            min_cluster_eval_metric_list.append(df[self.evaluation_field].min())
+            max_cluster_eval_metric_list.append(df[self.evaluation_field].max())
+            std_cluster_eval_metric_list.append(df[self.evaluation_field].std())
+            iqr_cluster_eval_metric_list.append(iqr(df[self.evaluation_field]))
 
-                # residuals of evaluation metric for normality test -> do not calculate for non clustered sequences
-                if cluster != '-1':
-                    residuals = list(df[self.evaluation_field] - mean_cluster_eval_metric)
-                    residual_list.extend(residuals)
+            # residuals of evaluation metric for normality test -> do not calculate for non clustered sequences
+            if cluster != '-1':
+                residuals = list(df[self.evaluation_field] - mean_cluster_eval_metric)
+                residual_list.extend(residuals)
 
             
             # only perform tests if there are at least 2 clusters per group
@@ -492,6 +510,12 @@ class ClusterEvaluation:
 
         # flag indicationg whether data is already clustered
         self._data_clustered = True
+
+        # a dictionary containing information whether the min_cluster_size of hdbscan needed to be corrected to 2
+        if self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
+            self.min_cluster_size_correction_df = pd.DataFrame(min_cluster_size_correction_dict) 
+        else:
+            self.min_cluster_size_correction_df = None
 
     def perform_post_hoc_pairwise_eval_metric_diff_tests(self,
                                                          group_str: str,
