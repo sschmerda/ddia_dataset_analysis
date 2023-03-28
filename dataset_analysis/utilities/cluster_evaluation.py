@@ -2,6 +2,157 @@ from .standard_import import *
 from .constants import *
 from .config import *
 
+class ClusterAnalysisPlotGroupSelectionCriteria():
+    """A class used for plotting the selections criteria(min_sequence_number_per_group_threshold, 
+    min_unique_sequence_number_per_group_threshold, mean_sequence_distance_range) for groups to be included
+    in the cluster analysis.
+    
+    Parameters
+    ----------
+    dataset_name: str
+        The name of the dataset.
+    learning_activity_sequence_stats_per_group : pd.DataFrame
+        A learning activity sequence statistics per group dataframe created by return_col3_sequence_stats_over_col2_per_col1 
+    sequence_distances_dict: dict
+        A nested dictionary containing results of "get_user_sequence_distances_per_group" or "get_user_sequence_distances" methods\
+        of SeqDist or SeqDistNoGroup for all available groups.
+        For each group the subdictionary must contain the following keys: 
+        ('Sequence Distance', 'Sequence Maximum Length', 'Sequence User Combination', 'User', 'Sequence Length', 'Sequence ID', 'Sequence Array').
+    use_normalized_sequence_distance: bool
+        A flag indicating whether a normalized sequence distance, ranging from 0 to 1, will be used for clustering.
+    min_sequence_number_per_group_threshold: int
+        The number of sequences a group must have to be included in the cluster analysis
+    min_unique_sequence_number_per_group_threshold: int
+        The number of uniuqe sequences a group must have to be included in the cluster analysis
+    mean_sequence_distance_range: tuple
+        The mean sequence distance lower and upper bounds a group is allowed to have to be included in the cluster
+        analysis
+
+    Methods
+    -------
+    display_group_selection_criteria   
+        Generates 2 plots:
+        1.) Displays the relationship between unique and total number of sequences per group and marks the respective specified
+        thresholds required for a group to be included in the cluster analysis
+        2.) Displays the sequence distances per group and marks the respective specified
+        thresholds required for a group to be included in the cluster analysis
+
+    Attributes
+    -------
+    count_df
+        A dataframe containing data to plot the relationship between unique and total number of sequences per group
+    seq_dist_per_group_df
+        A dataframe containing data to plot the distribution of sequence distances per proup
+    """
+    def __init__(self,
+                 dataset_name: str,
+                 learning_activity_sequence_stats_per_group: pd.DataFrame,
+                 seq_distances,
+                 use_normalized_sequence_distance: bool,
+                 min_sequence_number_per_group_threshold: int,
+                 min_unique_sequence_number_per_group_threshold: int,
+                 mean_sequence_distance_range: tuple):
+
+        self.dataset_name = dataset_name
+        self.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group
+        self.seq_distances = seq_distances
+        self.use_normalized_sequence_distance = use_normalized_sequence_distance
+        self.min_sequence_number_per_group_threshold = min_sequence_number_per_group_threshold
+        self.min_unique_sequence_number_per_group_threshold = min_unique_sequence_number_per_group_threshold
+        self.mean_sequence_distance_range = mean_sequence_distance_range
+        
+    def display_group_selection_criteria(self):
+
+        # all groups in one figure - unique seq count vs seq count -> generate df for plotting
+        self.count_df = self.learning_activity_sequence_stats_per_group.groupby(GROUP_FIELD_NAME_STR).head(1)
+        self.count_df = self.count_df.copy()
+        self.count_df[CLUSTERING_DATASET_NAME_FIELD_NAME_STR] = self.dataset_name
+        ylim = self.count_df[LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR].max()
+
+        # sequence distances per group -> generate df for plotting
+        group_list = []
+        distances_list = []
+        normalized_distances_list = []
+        max_sequence_length_list = []
+        for group, subdict in self.seq_distances.items():
+
+            # extract data from dictionary
+            distances = np.array(subdict[LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR])
+            max_sequence_len_per_distance = np.array(subdict[LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR])
+            # choose between normalized and non-normalized sequence distance
+            if self.use_normalized_sequence_distance:
+                distance_array = distances / max_sequence_len_per_distance 
+            else:
+                distance_array = distances
+
+            group_list.extend([group]*len(distances))
+            distances_list.extend(distance_array)
+
+        seq_dist_per_group_dict = {CLUSTERING_DATASET_NAME_FIELD_NAME_STR: self.dataset_name,
+                                   GROUP_FIELD_NAME_STR: group_list,
+                                   LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: distances_list}
+
+        self.seq_dist_per_group_df = pd.DataFrame(seq_dist_per_group_dict)
+
+        # plot all groups in one figure - unique seq count vs seq count
+        print('*'*100)
+        print('*'*100)
+        print(' ')
+        print('-'*100)
+        print(f'{CLUSTER_FIELD_NAME_STR} Analysis - {GROUP_FIELD_NAME_STR} Selection Criteria')
+        print('-'*100)
+        print(' ')
+        print(f'{LEARNING_ACTIVITY_UNIQUE_VS_TOTAL_NUMBER_OF_SEQUENCES_PER_GROUP_TITLE_NAME_STR}:')
+        g = sns.scatterplot(data=self.count_df,
+                            x=LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR, 
+                            y=UNIQUE_LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR, 
+                            s=100, 
+                            alpha=0.7)
+        g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR, 
+            ylabel=UNIQUE_LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR,
+            ylim=(-5,ylim))
+        g.axline(xy1=(0,0), slope=1, color='r', linewidth=3);
+
+        if self.min_sequence_number_per_group_threshold:
+            g.axvline(x=self.min_sequence_number_per_group_threshold, ymin=0, ymax=1, color='orange', linewidth=5);
+        if self.min_unique_sequence_number_per_group_threshold:
+            g.axhline(y=self.min_unique_sequence_number_per_group_threshold, xmin=0, xmax=1, color='orange', linewidth=5);
+        plt.show(g)
+
+        # plot sequence distance per group
+        if self.use_normalized_sequence_distance:
+            print(f'{LEARNING_ACTIVITY_NORMALIZED_SEQUENCE_DISTANCE_NAME_STR} per {GROUP_FIELD_NAME_STR}:')
+        else:
+            print(f'{LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR} per {GROUP_FIELD_NAME_STR}:')
+        print(f'Base: All {USER_FIELD_NAME_STR}-{SEQUENCE_STR} Combinations')
+        g = sns.boxplot(data=self.seq_dist_per_group_df, 
+                        x=LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR, 
+                        y=GROUP_FIELD_NAME_STR,
+                        showmeans=True, 
+                        meanprops=marker_config);
+
+        for patch in g.patches:
+            r, g, b, a = patch.get_facecolor()
+            patch.set_facecolor((r, g, b, 0.5))
+
+        g = sns.stripplot(data=self.seq_dist_per_group_df, 
+                        x=LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR, 
+                        y=GROUP_FIELD_NAME_STR,
+                        size=2, 
+                        color="red",
+                        alpha=0.1)
+        if self.min_sequence_number_per_group_threshold:
+            g.axvline(x=self.mean_sequence_distance_range[0], ymin=0, ymax=1, color='orange', linewidth=5);
+            g.axvline(x=self.mean_sequence_distance_range[1], ymin=0, ymax=1, color='orange', linewidth=5);
+        if self.use_normalized_sequence_distance:
+            g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR);
+        else:
+            g.set(xlabel=LEARNING_ACTIVITY_NORMALIZED_SEQUENCE_DISTANCE_NAME_STR);
+        plt.show()
+        print(' ')
+        print('*'*100)
+        print('*'*100)
+
 class ClusterEvaluation:
     """
     A class containing methods which perform several tasks:
@@ -16,7 +167,7 @@ class ClusterEvaluation:
 
         4. Calculation of sequence and cluster statistics for each group
 
-        5. Plotting of cluster results and differneces in distribution of specified evaluation metric between clusters
+        5. Plotting of cluster results and differences in distribution of specified evaluation metric between clusters
 
     Parameters
     ----------
@@ -38,6 +189,13 @@ class ClusterEvaluation:
         ('Sequence Distance', 'Sequence Maximum Length', 'Sequence User Combination', 'User', 'Sequence Length', 'Sequence ID', 'Sequence Array').
     use_normalized_sequence_distance: bool
         A flag indicating whether a normalized sequence distance, ranging from 0 to 1, will be used for clustering.
+    min_sequence_number_per_group_threshold: int
+        The number of sequences a group must have to be included in the cluster analysis
+    min_unique_sequence_number_per_group_threshold: int
+        The number of uniuqe sequences a group must have to be included in the cluster analysis
+    mean_sequence_distance_range: tuple
+        The mean sequence distance lower and upper bounds a group is allowed to have to be included in the cluster
+        analysis
     cluster_function
         A scikit-learn compatible (syntax- and method-wise) cluster algorithm.
     hdbscan_min_cluster_size_as_pct_of_group_seq_num: float, None
@@ -64,6 +222,9 @@ class ClusterEvaluation:
         Aggregates the clustering results over all groups and inter alia calculates the percentage of groups having\
         significant differences in central tendency of the evaluation metric between clusters.
 
+    display_included_groups
+        Displays the absolute value and percentages of groups included in the cluster analysis.
+
     display_clusters_by_group_umap(group_str: str
                                    **kwargs)
         Reduces the sequence distance matrix of specified group with UMAP and displays clustering in a two-dimensional projection.
@@ -75,7 +236,7 @@ class ClusterEvaluation:
         Displays the evaluation metric distribution per cluster via boxplots, violinplot, boxenplot and kde for specified group.
     
     display_cluster_size_by_group(group_str: str)
-        Displays the cluster sizes for specified group
+        Displays the cluster sizes for specified group.
     
     display_eval_metric_dist_between_cluster_all_groups
         Displays the evaluation metric distribution per cluster via boxplots for all groups.
@@ -95,8 +256,17 @@ class ClusterEvaluation:
     display_percentage_clustered_all_group
         Displays the percentage of sequencese clustered per group as barplot.
 
-    display_cluster_size_all_group
-        Displays the cluster sizes for each group as multi-grid barplot.
+    display_number_sequences_per_cluster_all_group
+        Displays the number of sequences per cluster for each group as multi-grid barplot.
+    
+    display_number_unique_sequences_per_cluster_all_group
+        Displays the number of unique sequences per cluster for each group as multi-grid barplot.
+
+    display_number_unique_sequences_vs_number_sequences_per_cluster_all_group
+        Displays the relationship between the number of unique sequences vs the number of sequences per cluster for each group as multi-grid scatterplot.
+
+    print_number_of_clusters_all_group
+        Print the number of clusters for each group.
 
     print_min_cluster_sizes_all_group
         Print the minimum cluster sizes sizes for each group.
@@ -117,6 +287,16 @@ class ClusterEvaluation:
         A dataframe containing aggregates of cluster_eval_metric_central_tendency_differences_per_group. Contains the main result
         field (percentage of groups with significant central tendency differences in evaluation metric) and includes number of sequence,
         number of unique sequence and number of cluster stats per group.
+    
+    group_cluster_analysis_inclusion_status
+        A dataframe containing information with respect to which group satisfies the conditions required to be included
+        the cluster analysis (specified via the parameters min_sequence_number_per_group_threshold, 
+        min_unique_sequence_number_per_group_threshold, mean_sequence_distance_range).
+    
+    min_cluster_size_correction_df
+        A dataframe containing information for which group the min_cluster_size parameter needed to be adjusted to a value
+        of 2 due to being smaller than 2. Will only be calculated if hdbscan_min_cluster_size_as_pct_of_group_seq_num
+        is not None.
     """
     def __init__(self, 
                  dataset_name: str,
@@ -126,6 +306,9 @@ class ClusterEvaluation:
                  evaluation_field: str,
                  sequence_distances_dict: dict,
                  use_normalized_sequence_distance: bool,
+                 min_sequence_number_per_group_threshold: int,
+                 min_unique_sequence_number_per_group_threshold: int,
+                 mean_sequence_distance_range: tuple,
                  cluster_function,
                  hdbscan_min_cluster_size_as_pct_of_group_seq_num: float,
                  normality_test_alpha: float,
@@ -139,6 +322,9 @@ class ClusterEvaluation:
         self.evaluation_field = evaluation_field
         self.sequence_distances_dict= sequence_distances_dict
         self.use_normalized_sequence_distance = use_normalized_sequence_distance
+        self.min_sequence_number_per_group_threshold = min_sequence_number_per_group_threshold
+        self.min_unique_sequence_number_per_group_threshold = min_unique_sequence_number_per_group_threshold
+        self.mean_sequence_distance_range = mean_sequence_distance_range
         self.cluster_function = cluster_function
         self.hdbscan_min_cluster_size_as_pct_of_group_seq_num = hdbscan_min_cluster_size_as_pct_of_group_seq_num
         self.normality_test_alpha = normality_test_alpha 
@@ -152,6 +338,8 @@ class ClusterEvaluation:
         self.cluster_eval_metric_central_tendency_differences_per_group = None
         self.cluster_stats_per_group = None
         self.aggregate_sequence_clustering_and_eval_metric_diff_test = None
+        self.group_cluster_analysis_inclusion_status = None
+        self.min_cluster_size_correction_df = None
         
         # intermediate results
         self._square_matrix_per_group = {}
@@ -245,6 +433,16 @@ class ClusterEvaluation:
                                                 CLUSTERING_MAX_EVAL_METRIC_PER_CLUSTER_FIELD_NAME_STR:[],
                                                 CLUSTERING_STD_EVAL_METRIC_PER_CLUSTER_FIELD_NAME_STR:[],
                                                 CLUSTERING_IQR_EVAL_METRIC_PER_CLUSTER_FIELD_NAME_STR:[]}
+
+        group_cluster_analysis_inclusion_status_dict = {DATASET_NAME_FIELD_NAME_STR: self.dataset_name,
+                                                        GROUP_FIELD_NAME_STR: [],
+                                                        CLUSTERING_GROUP_INCLUDED_IN_CLUSTER_ANALYSIS_NAME_STR: [],
+                                                        CLUSTERING_MIN_SEQUENCE_NUMBER_VALUE_NAME_STR: [],
+                                                        CLUSTERING_VIOLATED_MIN_SEQUENCE_NUMBER_NAME_STR: [],
+                                                        CLUSTERING_MIN_UNIQUE_SEQUENCE_NUMBER_VALUE_NAME_STR: [], 
+                                                        CLUSTERING_VIOLATED_MIN_UNIQUE_SEQUENCE_NUMBER_NAME_STR: [],
+                                                        CLUSTERING_MEAN_SEQUENCE_DISTANCE_RANGE_VALUE_NAME_STR: [],
+                                                        CLUSTERING_VIOLATED_MEAN_SEQUENCE_DISTANCE_RANGE_NAME_STR: []}
         
         # if a different cluster algorithm to HDBSCAN is used, delete key for chosen minimal cluster size per group
         if not self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
@@ -252,7 +450,8 @@ class ClusterEvaluation:
 
         # a dictionary containing information whether the min_cluster_size of hdbscan needed to be corrected to 2
         if self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
-            min_cluster_size_correction_dict = {GROUP_FIELD_NAME_STR: [],
+            min_cluster_size_correction_dict = {DATASET_NAME_FIELD_NAME_STR: self.dataset_name,
+                                                GROUP_FIELD_NAME_STR: [],
                                                 CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_IS_CORRECTED_NAME_STR: [],
                                                 CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_UNCORRECTED_NAME_STR: [],
                                                 CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_CORRECTED_NAME_STR: []}
@@ -275,6 +474,39 @@ class ClusterEvaluation:
                 distance_array = distances / max_sequence_len_per_distance 
             else:
                 distance_array = distances
+
+            # check if group fullfills the conditions to be included in the cluster analysis
+            is_included_in_cluster_analysis = True
+            min_sequence_number_violated = False
+            min_unique_sequence_number_violated = False
+            mean_sequence_distance_range_violated = False
+            if self.min_sequence_number_per_group_threshold:
+                if len(sequence_ids) < self.min_sequence_number_per_group_threshold:
+                    is_included_in_cluster_analysis = False
+                    min_sequence_number_violated = True
+
+            if self.min_unique_sequence_number_per_group_threshold:
+                if len(np.unique(sequence_ids)) < self.min_unique_sequence_number_per_group_threshold:
+                    is_included_in_cluster_analysis = False
+                    min_unique_sequence_number_violated = True
+
+            if self.mean_sequence_distance_range:
+                if (np.mean(distance_array) < self.mean_sequence_distance_range[0]) or (np.mean(distance_array) > self.mean_sequence_distance_range[1]):
+                    is_included_in_cluster_analysis = False
+                    mean_sequence_distance_range_violated = True
+
+            group_cluster_analysis_inclusion_status_dict[GROUP_FIELD_NAME_STR].append(group)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_GROUP_INCLUDED_IN_CLUSTER_ANALYSIS_NAME_STR].append(is_included_in_cluster_analysis)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_MIN_SEQUENCE_NUMBER_VALUE_NAME_STR].append(self.min_sequence_number_per_group_threshold)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_VIOLATED_MIN_SEQUENCE_NUMBER_NAME_STR].append(min_sequence_number_violated)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_MIN_UNIQUE_SEQUENCE_NUMBER_VALUE_NAME_STR].append(self.min_unique_sequence_number_per_group_threshold)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_VIOLATED_MIN_UNIQUE_SEQUENCE_NUMBER_NAME_STR].append(min_unique_sequence_number_violated)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_MEAN_SEQUENCE_DISTANCE_RANGE_VALUE_NAME_STR].append(self.mean_sequence_distance_range)
+            group_cluster_analysis_inclusion_status_dict[CLUSTERING_VIOLATED_MEAN_SEQUENCE_DISTANCE_RANGE_NAME_STR].append(mean_sequence_distance_range_violated)
+
+            # skip group if it does not fullfill the conditions to be included in the cluster analysis
+            if not is_included_in_cluster_analysis:
+                continue
             
             # sequence distance stats per group
             mean_sequence_metric = np.mean(distance_array)
@@ -296,7 +528,6 @@ class ClusterEvaluation:
                 if hdbscan_min_cluster_size < 2:
                     hdbscan_min_cluster_size = 2
                     is_corrected = True
-                    print(f'min_cluster_size was set to 2 due to {self.hdbscan_min_cluster_size_as_pct_of_group_seq_num} * number of sequences being smaller than 2')
                 min_cluster_size_correction_dict[GROUP_FIELD_NAME_STR].append(group)
                 min_cluster_size_correction_dict[CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_IS_CORRECTED_NAME_STR].append(is_corrected)
                 min_cluster_size_correction_dict[CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_UNCORRECTED_NAME_STR].append(uncorrected_min_cluster_size)
@@ -330,98 +561,114 @@ class ClusterEvaluation:
             self._user_cluster_mapping_per_group[group] = {user:cluster for user, cluster in zip(users, cluster_labels)}
             self._user_sequence_id_mapping_per_group[group] = {user:sequence_id for user, sequence_id in zip(users, sequence_ids)}
             self._user_sequence_array_mapping_per_group[group] = {user:sequence_arr for user, sequence_arr in zip(users, sequence_arrays)}
-        self._user_sequence_length_mapping_per_group[group] = {user:sequence_len for user, sequence_len in zip(users, sequence_lengths)}
-        self._clustered_per_group[group] = clustered
-        self._percentage_clustered_per_group[group] = percentage_clustered
+            self._user_sequence_length_mapping_per_group[group] = {user:sequence_len for user, sequence_len in zip(users, sequence_lengths)}
+            self._clustered_per_group[group] = clustered
+            self._percentage_clustered_per_group[group] = percentage_clustered
         
-        # create a dataframe containing information about user, associated cluster and evaluation metric for the user per group
-        if self.group_field:
-            user_cluster_eval_metric_df = self.interactions.copy().loc[self.interactions[self.group_field]==group, :]
-        else:
-            user_cluster_eval_metric_df = self.interactions.copy()
-        user_cluster_eval_metric_df.insert(1, CLUSTER_FIELD_NAME_STR, user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_cluster_mapping_per_group[group][x]))
+            # create a dataframe containing information about user, associated cluster and evaluation metric for the user per group
+            if self.group_field:
+                user_cluster_eval_metric_df = self.interactions.copy().loc[self.interactions[self.group_field]==group, :]
+            else:
+                user_cluster_eval_metric_df = self.interactions.copy()
+            user_cluster_eval_metric_df.insert(1, CLUSTER_FIELD_NAME_STR, user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_cluster_mapping_per_group[group][x]))
         
-        user_cluster_eval_metric_df = (user_cluster_eval_metric_df.groupby([CLUSTER_FIELD_NAME_STR, self.user_field])[self.evaluation_field]
-                                                .first().reset_index())
-        user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_id_mapping_per_group[group][x])
-        user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_array_mapping_per_group[group][x])
-        user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_length_mapping_per_group[group][x])
+            user_cluster_eval_metric_df = (user_cluster_eval_metric_df.groupby([CLUSTER_FIELD_NAME_STR, self.user_field])[self.evaluation_field]
+                                                    .first().reset_index())
+            user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_id_mapping_per_group[group][x])
+            user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_array_mapping_per_group[group][x])
+            user_cluster_eval_metric_df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR] = user_cluster_eval_metric_df[self.user_field].apply(lambda x: self._user_sequence_length_mapping_per_group[group][x])
 
-        # remove unclustered user sequences from the instance attribute
-        self._user_cluster_eval_metric_df_per_group[group] = user_cluster_eval_metric_df.loc[user_cluster_eval_metric_df[CLUSTER_FIELD_NAME_STR] != '-1']
+            # remove unclustered user sequences from the instance attribute
+            self._user_cluster_eval_metric_df_per_group[group] = user_cluster_eval_metric_df.loc[user_cluster_eval_metric_df[CLUSTER_FIELD_NAME_STR] != '-1']
 
-        # data per cluster dict initialization 
-        cluster_list = []
-        number_of_sequences_per_cluster_list = []
-        number_of_unique_sequences_per_cluster_list = []
-        users_per_cluster_list = []
-        sequence_ids_per_cluster_list = []
-        sequence_lengths_per_cluster_list = []
-        sequences_per_cluster_list = []
+            # data per cluster dict initialization 
+            cluster_list = []
+            number_of_sequences_per_cluster_list = []
+            number_of_unique_sequences_per_cluster_list = []
+            users_per_cluster_list = []
+            sequence_ids_per_cluster_list = []
+            sequence_lengths_per_cluster_list = []
+            sequences_per_cluster_list = []
 
-        # cluster eval metric stats per group
-        mean_cluster_eval_metric_list = []
-        median_cluster_eval_metric_list = []
-        min_cluster_eval_metric_list = []
-        max_cluster_eval_metric_list = []
-        std_cluster_eval_metric_list = []
-        iqr_cluster_eval_metric_list = []
+            # cluster eval metric stats per group
+            mean_cluster_eval_metric_list = []
+            median_cluster_eval_metric_list = []
+            min_cluster_eval_metric_list = []
+            max_cluster_eval_metric_list = []
+            std_cluster_eval_metric_list = []
+            iqr_cluster_eval_metric_list = []
 
-        # residuals for normality test
-        residual_list = []
+            # residuals for normality test
+            residual_list = []
 
-        # loop over cluster to fill initialized lists
-        for cluster, df in user_cluster_eval_metric_df.groupby(CLUSTER_FIELD_NAME_STR):
+            # loop over cluster to fill initialized lists
+            for cluster, df in user_cluster_eval_metric_df.groupby(CLUSTER_FIELD_NAME_STR):
 
-            cluster_list.append(cluster)
-            number_of_sequences_per_cluster_list.append(len(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR]))
-            number_of_unique_sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].nunique())
-            users_per_cluster_list.append(df[self.user_field].values)
-            sequence_ids_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].values)
-            sequence_lengths_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR].values)
-            sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR].values)
+                cluster_list.append(cluster)
+                number_of_sequences_per_cluster_list.append(len(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR]))
+                number_of_unique_sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].nunique())
+                users_per_cluster_list.append(df[self.user_field].values)
+                sequence_ids_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR].values)
+                sequence_lengths_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR].values)
+                sequences_per_cluster_list.append(df[LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR].values)
 
-            # eval metric stats
-            mean_cluster_eval_metric = df[self.evaluation_field].mean()
+                # eval metric stats
+                mean_cluster_eval_metric = df[self.evaluation_field].mean()
 
-            mean_cluster_eval_metric_list.append(mean_cluster_eval_metric)
-            median_cluster_eval_metric_list.append(df[self.evaluation_field].median())
-            min_cluster_eval_metric_list.append(df[self.evaluation_field].min())
-            max_cluster_eval_metric_list.append(df[self.evaluation_field].max())
-            std_cluster_eval_metric_list.append(df[self.evaluation_field].std())
-            iqr_cluster_eval_metric_list.append(iqr(df[self.evaluation_field]))
+                mean_cluster_eval_metric_list.append(mean_cluster_eval_metric)
+                median_cluster_eval_metric_list.append(df[self.evaluation_field].median())
+                min_cluster_eval_metric_list.append(df[self.evaluation_field].min())
+                max_cluster_eval_metric_list.append(df[self.evaluation_field].max())
+                std_cluster_eval_metric_list.append(df[self.evaluation_field].std())
+                iqr_cluster_eval_metric_list.append(iqr(df[self.evaluation_field]))
 
-            # residuals of evaluation metric for normality test -> do not calculate for non clustered sequences
-            if cluster != '-1':
-                residuals = list(df[self.evaluation_field] - mean_cluster_eval_metric)
-                residual_list.extend(residuals)
+                # residuals of evaluation metric for normality test -> do not calculate for non clustered sequences
+                if cluster != '-1':
+                    residuals = list(df[self.evaluation_field] - mean_cluster_eval_metric)
+                    residual_list.extend(residuals)
 
             
             # only perform tests if there are at least 2 clusters per group
             if number_of_clusters >= 2:
+                with warnings.catch_warnings():
+                    warnings.simplefilter("error")
+                    # test for normality of residuals of evaluatiom metric over all clusters
+                    try:
+                        shapiro_test = pg.normality(residual_list, method='shapiro', alpha=0.05)
+                        shapiro_test_pval = shapiro_test['pval'][0]
+                    except:
+                        shapiro_test_pval = None
 
-                # test for normality of residuals of evaluatiom metric over all clusters
-                shapiro_test = pg.normality(residual_list, method='shapiro', alpha=0.05)
-                shapiro_test_pval = shapiro_test['pval'][0]
+                    try: 
+                        jarque_bera_test = pg.normality(residual_list, method='jarque_bera', alpha=0.05)
+                        jarque_bera_test_pval = jarque_bera_test['pval'][0]
+                    except:
+                        jarque_bera_test_pval = None
 
-                jarque_bera_test = pg.normality(residual_list, method='jarque_bera', alpha=0.05)
-                jarque_bera_test_pval = jarque_bera_test['pval'][0]
+                    try:
+                        agostino_pearson_test = pg.normality(residual_list, method='normaltest', alpha=0.05)
+                        agostino_pearson_test_pval = agostino_pearson_test['pval'][0]
+                    except:
+                        agostino_pearson_test_pval = None
 
-                agostino_pearson_test = pg.normality(residual_list, method='normaltest', alpha=0.05)
-                agostino_pearson_test_pval = agostino_pearson_test['pval'][0]
+                    # test for homoscedasticity of evaluation metric between clusters  
+                    try:
+                        bartlett_test = pg.homoscedasticity(self._user_cluster_eval_metric_df_per_group[group], 
+                                                            dv=self.evaluation_field, 
+                                                            group=CLUSTER_FIELD_NAME_STR, 
+                                                            method='bartlett')
+                        bartlett_test_pval = bartlett_test['pval'][0]
+                    except: 
+                        bartlett_test_pval = None
 
-                # test for homoscedasticity of evaluation metric between clusters  
-                bartlett_test = pg.homoscedasticity(self._user_cluster_eval_metric_df_per_group[group], 
-                                                    dv=self.evaluation_field, 
-                                                    group=CLUSTER_FIELD_NAME_STR, 
-                                                    method='bartlett')
-                bartlett_test_pval = bartlett_test['pval'][0]
-
-                levene_test = pg.homoscedasticity(self._user_cluster_eval_metric_df_per_group[group], 
-                                                  dv=self.evaluation_field, 
-                                                  group=CLUSTER_FIELD_NAME_STR, 
-                                                  method='levene')
-                levene_test_pval = levene_test['pval'][0]
+                    try:
+                        levene_test = pg.homoscedasticity(self._user_cluster_eval_metric_df_per_group[group], 
+                                                        dv=self.evaluation_field, 
+                                                        group=CLUSTER_FIELD_NAME_STR, 
+                                                        method='levene')
+                        levene_test_pval = levene_test['pval'][0]
+                    except:
+                        levene_test_pval = None
 
                 # choose omnibus central differences test accordingly to normality and homoscedasticity test results (which test assumptions)
                 if (shapiro_test_pval > self.normality_test_alpha) and (levene_test_pval > self.homoscedasticity_test_alpha):
@@ -444,7 +691,6 @@ class ClusterEvaluation:
                 levene_test_pval = None
                 central_tendency_test_pval = None
                 central_tendency_test_method = None
-
 
             # fill the results dictionaries
             results_dict_per_group[CLUSTERING_DATASET_NAME_FIELD_NAME_STR].append(self.dataset_name)
@@ -507,15 +753,16 @@ class ClusterEvaluation:
         # result dataframes -> instance attributes
         self.cluster_eval_metric_central_tendency_differences_per_group = pd.DataFrame(results_dict_per_group)
         self.cluster_stats_per_group = pd.DataFrame(cluster_stats_results_dict_per_group)
-
-        # flag indicationg whether data is already clustered
-        self._data_clustered = True
+        self.group_cluster_analysis_inclusion_status = pd.DataFrame(group_cluster_analysis_inclusion_status_dict)
 
         # a dictionary containing information whether the min_cluster_size of hdbscan needed to be corrected to 2
         if self.hdbscan_min_cluster_size_as_pct_of_group_seq_num:
             self.min_cluster_size_correction_df = pd.DataFrame(min_cluster_size_correction_dict) 
         else:
             self.min_cluster_size_correction_df = None
+
+        # flag indicationg whether data is already clustered
+        self._data_clustered = True
 
     def perform_post_hoc_pairwise_eval_metric_diff_tests(self,
                                                          group_str: str,
@@ -690,6 +937,40 @@ class ClusterEvaluation:
             # result dataframe -> instance attribute
             self.aggregate_sequence_clustering_and_eval_metric_diff_test = pd.DataFrame(results_dict)
 
+        else:
+            raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
+
+    def display_included_groups(self):
+        """Displays the absolute value and percentages of groups included in the cluster analysis.
+
+        Raises
+        ------
+        Exception
+            Clustering via cluster_sequences_and_test_eval_metric_diff method needs to be performed first in order to use this method
+        """
+        if self._data_clustered:        
+            n_groups = self.group_cluster_analysis_inclusion_status.shape[0]
+            included_groups = self.group_cluster_analysis_inclusion_status[CLUSTERING_GROUP_INCLUDED_IN_CLUSTER_ANALYSIS_NAME_STR].sum()
+            not_included_groups = n_groups - included_groups
+            pct_included_groups = (included_groups / n_groups) * 100
+            pct_not_included_groups = (not_included_groups / n_groups) * 100
+
+            print('*'*100)
+            print('*'*100)
+            print(' ')
+            print('-'*100)
+            print(f'{CLUSTER_FIELD_NAME_STR} Analysis - Included {GROUP_FIELD_NAME_STR}s')
+            print('-'*100)
+            print(' ')
+            print(f'{included_groups} {GROUP_FIELD_NAME_STR}s out of {n_groups} are included in {CLUSTER_FIELD_NAME_STR} Analysis:')
+            g = sns.barplot(x=[f'Included', f'Not Included'], y=[included_groups, not_included_groups])
+            g.set(ylabel=f'Number of {GROUP_FIELD_NAME_STR}s');
+            plt.show()
+
+            print(f'{pct_included_groups}% of {GROUP_FIELD_NAME_STR}s are included in {CLUSTER_FIELD_NAME_STR} Analysis:')
+            g = sns.barplot(x=[f'Included', f'Not Included'], y=[pct_included_groups, pct_not_included_groups])
+            g.set(ylim=(0, 100), ylabel=f'% of {GROUP_FIELD_NAME_STR}s');
+            plt.show()
         else:
             raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
 
@@ -926,11 +1207,13 @@ class ClusterEvaluation:
 
             emb_per_group_df = pd.DataFrame()
 
+            n_clusters_per_group = []
             for group, distance_matrix in self._square_matrix_per_group.items():
 
                 embedding_2D = reducer.fit_transform(distance_matrix)
 
                 clustered_labels = np.array(list(self._user_cluster_mapping_per_group[group].values()), dtype=int)[self._clustered_per_group[group]]
+                n_clusters_per_group.append(len(np.unique(clustered_labels)))
 
                 emb_clustered = embedding_2D[self._clustered_per_group[group], :]
                 emb_not_clustered = embedding_2D[~self._clustered_per_group[group], :]
@@ -943,40 +1226,44 @@ class ClusterEvaluation:
 
                 emb_per_group_df = pd.concat([emb_per_group_df, emb_df])
 
+            max_n_clusters = np.max(n_clusters_per_group)
+
             print('*'*100)
             print('*'*100)
             print(' ')
             print('-'*100)
-            print(f'{CLUSTER_FIELD_NAME_STR}s per Group')
+            print(f'{CLUSTER_FIELD_NAME_STR}s per {GROUP_FIELD_NAME_STR}')
             print(f'Dimensionality Reducer: UMAP')
             print('-'*100)
-            g = sns.FacetGrid(emb_per_group_df, 
-                              col=GROUP_FIELD_NAME_STR, 
-                              col_wrap=6, 
-                              sharex=False,
-                              sharey=False,
-                              height=height, 
-                              aspect= 1)
-            g.map_dataframe(sns.scatterplot, 
-                            x='x_not_clust', 
-                            y='y_not_clust',
-                            color='black',
-                            alpha=1,
-                            s=10)
-            g.map_dataframe(sns.scatterplot, 
-                            x='x_clust', 
-                            y='y_clust',
-                            hue=CLUSTER_FIELD_NAME_STR,
-                            palette=sns.color_palette('deep', as_cmap=False),
-                            alpha=1,
-                            s=10)
-            g.set(xlabel='Embedding 1', 
-                  ylabel='Embedding 2')
-            for ax in g.axes.flatten():
-                ax.tick_params(labelbottom=True)
-            g.fig.subplots_adjust(top=0.95)
-            g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
-            plt.show(g)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                g = sns.FacetGrid(emb_per_group_df, 
+                                col=GROUP_FIELD_NAME_STR, 
+                                col_wrap=6, 
+                                sharex=False,
+                                sharey=False,
+                                height=height, 
+                                aspect= 1)
+                g.map_dataframe(sns.scatterplot, 
+                                x='x_not_clust', 
+                                y='y_not_clust',
+                                color='black',
+                                alpha=1,
+                                s=10)
+                g.map_dataframe(sns.scatterplot, 
+                                x='x_clust', 
+                                y='y_clust',
+                                hue=CLUSTER_FIELD_NAME_STR,
+                                palette=sns.color_palette("hls", max_n_clusters),
+                                alpha=1,
+                                s=10)
+                g.set(xlabel='Embedding 1', 
+                    ylabel='Embedding 2')
+                for ax in g.axes.flatten():
+                    ax.tick_params(labelbottom=True)
+                g.fig.subplots_adjust(top=0.95)
+                g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
+                plt.show(g)
 
         else:
             raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
@@ -1000,11 +1287,13 @@ class ClusterEvaluation:
 
             emb_per_group_df = pd.DataFrame()
 
+            n_clusters_per_group = []
             for group, distance_matrix in self._square_matrix_per_group.items():
 
                 embedding_2D = reducer.fit_transform(distance_matrix)
 
                 clustered_labels = np.array(list(self._user_cluster_mapping_per_group[group].values()), dtype=int)[self._clustered_per_group[group]]
+                n_clusters_per_group.append(len(np.unique(clustered_labels)))
 
                 emb_clustered = embedding_2D[self._clustered_per_group[group], :]
                 emb_not_clustered = embedding_2D[~self._clustered_per_group[group], :]
@@ -1017,38 +1306,42 @@ class ClusterEvaluation:
 
                 emb_per_group_df = pd.concat([emb_per_group_df, emb_df])
 
+            max_n_clusters = np.max(n_clusters_per_group)
+
             print('*'*100)
             print('*'*100)
             print(' ')
             print('-'*100)
-            print(f'{CLUSTER_FIELD_NAME_STR}s per Group')
+            print(f'{CLUSTER_FIELD_NAME_STR}s per {GROUP_FIELD_NAME_STR}')
             print(f'Dimensionality Reducer: PCA')
             print('-'*100)
-            g = sns.FacetGrid(emb_per_group_df, 
-                              col=GROUP_FIELD_NAME_STR, 
-                              col_wrap=6, 
-                              sharex=False,
-                              height=height, aspect= 1)
-            g.map_dataframe(sns.scatterplot, 
-                            x='x_not_clust', 
-                            y='y_not_clust',
-                            color='black',
-                            alpha=1,
-                            s=10)
-            g.map_dataframe(sns.scatterplot, 
-                            x='x_clust', 
-                            y='y_clust',
-                            hue=CLUSTER_FIELD_NAME_STR,
-                            palette=sns.color_palette('deep', as_cmap=False),
-                            alpha=1,
-                            s=10)
-            g.set(xlabel='Embedding 1', 
-                  ylabel='Embedding 2')
-            for ax in g.axes.flatten():
-                ax.tick_params(labelbottom=True)
-            g.fig.subplots_adjust(top=0.95)
-            g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
-            plt.show(g)
+            with warnings.catch_warnings():
+                warnings.simplefilter("ignore")
+                g = sns.FacetGrid(emb_per_group_df, 
+                                col=GROUP_FIELD_NAME_STR, 
+                                col_wrap=6, 
+                                sharex=False,
+                                height=height, aspect= 1)
+                g.map_dataframe(sns.scatterplot, 
+                                x='x_not_clust', 
+                                y='y_not_clust',
+                                color='black',
+                                alpha=1,
+                                s=10)
+                g.map_dataframe(sns.scatterplot, 
+                                x='x_clust', 
+                                y='y_clust',
+                                hue=CLUSTER_FIELD_NAME_STR,
+                                palette=sns.color_palette("hls", max_n_clusters),
+                                alpha=1,
+                                s=10)
+                g.set(xlabel='Embedding 1', 
+                    ylabel='Embedding 2')
+                for ax in g.axes.flatten():
+                    ax.tick_params(labelbottom=True)
+                g.fig.subplots_adjust(top=0.95)
+                g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
+                plt.show(g)
 
         else:
             raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
@@ -1118,9 +1411,9 @@ class ClusterEvaluation:
         else:
             raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
 
-    def display_cluster_size_all_group(self,
-                                       height: int):
-        """Displays the cluster sizes for each group as multi-grid barplot.
+    def display_number_sequences_per_cluster_all_group(self,
+                                                       height: int):
+        """Displays the number of sequences per cluster for each group as multi-grid barplot.
 
         Parameters
         ----------
@@ -1137,8 +1430,7 @@ class ClusterEvaluation:
             print('*'*100)
             print(' ')
             print('-'*100)
-            print(f'{CLUSTER_FIELD_NAME_STR} Size per {GROUP_FIELD_NAME_STR}:')
-            print(f'{CLUSTER_FIELD_NAME_STR} Size -> Number of {USER_FIELD_NAME_STR} {LEARNING_ACTIVITY_FIELD_NAME_STR}-{SEQUENCE_STR}s')
+            print(f'Number of {SEQUENCE_STR}s per {CLUSTER_FIELD_NAME_STR} for each {GROUP_FIELD_NAME_STR}:')
             print('-'*100)
             print(f'Plots:')
             g = sns.FacetGrid(self.cluster_stats_per_group, 
@@ -1157,6 +1449,115 @@ class ClusterEvaluation:
             g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
             plt.show(g)
 
+        else:
+            raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
+
+    def display_number_unique_sequences_per_cluster_all_group(self,
+                                                              height: int):
+        """Displays the number of unique sequences per cluster for each group as multi-grid barplot.
+
+        Parameters
+        ----------
+        height : int
+            The height of the subplots
+
+        Raises
+        ------
+        Exception
+            Clustering via cluster_sequences_and_test_eval_metric_diff method needs to be performed first in order to use this method
+        """
+        if self._data_clustered:        
+            print('*'*100)
+            print('*'*100)
+            print(' ')
+            print('-'*100)
+            print(f'Number of Unique {SEQUENCE_STR}s per {CLUSTER_FIELD_NAME_STR} for each {GROUP_FIELD_NAME_STR}:')
+            print('-'*100)
+            print(f'Plots:')
+            g = sns.FacetGrid(self.cluster_stats_per_group, 
+                              col=GROUP_FIELD_NAME_STR, 
+                              col_wrap=6, 
+                              sharex=False,
+                              sharey=False,
+                              height=height, 
+                              aspect= 1)
+            g.map_dataframe(sns.barplot, 
+                            x=CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR, 
+                            y=CLUSTER_FIELD_NAME_STR)
+            index = CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR.find(SEQUENCE_STR)
+            xlabel = CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR[:index] + '\n' + CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR[index:]
+            g.set_axis_labels(x_var=xlabel)
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            g.fig.subplots_adjust(top=0.95)
+            g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
+            plt.show(g)
+
+        else:
+            raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
+
+    def display_number_unique_sequences_vs_number_sequences_per_cluster_all_group(self,
+                                                                                  height: int):
+        """Displays the relationship between the number of unique sequences vs the number of sequences per cluster for each group as multi-grid scatterplot.
+
+        Parameters
+        ----------
+        height : int
+            The height of the subplots
+
+        Raises
+        ------
+        Exception
+            Clustering via cluster_sequences_and_test_eval_metric_diff method needs to be performed first in order to use this method
+        """
+        if self._data_clustered:        
+            print('*'*100)
+            print('*'*100)
+            print(' ')
+            print('-'*100)
+            print(f'Number of Unique {SEQUENCE_STR}s vs Number of {SEQUENCE_STR}s per {CLUSTER_FIELD_NAME_STR} for each {GROUP_FIELD_NAME_STR}:')
+            print('-'*100)
+            print(f'Plots:')
+            g = sns.FacetGrid(self.cluster_stats_per_group, 
+                              col=GROUP_FIELD_NAME_STR, 
+                              col_wrap=6, 
+                              sharex=False,
+                              sharey=False,
+                              height=height, 
+                              aspect= 1)
+            g.map_dataframe(sns.scatterplot, 
+                            x=CLUSTERING_NUMBER_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR, 
+                            y=CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR)
+            index = CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR.find(SEQUENCE_STR)
+            ylabel = CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR[:index] + '\n' + CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR[index:]
+            g.set_axis_labels(y_var=ylabel)
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            g.fig.subplots_adjust(top=0.95)
+            g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
+            plt.show(g)
+
+        else:
+            raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
+
+    def print_number_of_clusters_all_group(self):
+        """Print the number of clusters for each group.
+
+        Raises
+        ------
+        Exception
+            Clustering via cluster_sequences_and_test_eval_metric_diff method needs to be performed first in order to use this method
+        """
+        if self._data_clustered:        
+            print('*'*100)
+            print('*'*100)
+            print(' ')
+            print('-'*100)
+            print(f'{CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR} for each {GROUP_FIELD_NAME_STR}:')
+            print('-'*100)
+            print(self.cluster_eval_metric_central_tendency_differences_per_group[[GROUP_FIELD_NAME_STR, CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR]]\
+                  .sort_values(by=CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR)\
+                  .to_string(index=False))
         else:
             raise Exception(f'Method not applicable. Please apply "cluster_sequences_and_test_eval_metric_diff" method first!')
 

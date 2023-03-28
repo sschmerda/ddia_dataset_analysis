@@ -2,6 +2,7 @@ from .standard_import import *
 
 ### pandas options ###
 pd.set_option('display.max_rows', 100)
+pd.set_option('display.max_columns', None)
 
 ### seaborn options ###
 sns.set(rc = {'figure.figsize':(15,8)})

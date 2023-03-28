@@ -259,7 +259,22 @@ def plot_sequence_distance_matrix_all_group(seq_distances: dict,
                       sharey=False,
                       height=height, 
                       aspect= 1)
-    g.map_dataframe(draw_heatmap, 'column', 'row', 'value', cbar=True, square = True)
+    if normalize_distance:
+        g.map_dataframe(draw_heatmap, 
+                        'column', 
+                        'row', 
+                        'value',
+                        vmin=0,
+                        vmax=1,
+                        cbar=True, 
+                        square = True)
+    else:
+        g.map_dataframe(draw_heatmap, 
+                        'column', 
+                        'row', 
+                        'value', 
+                        cbar=True, 
+                        square = True)
     g.set(xlabel=SEQUENCE_STR, 
           ylabel=SEQUENCE_STR)
     # get figure background color
