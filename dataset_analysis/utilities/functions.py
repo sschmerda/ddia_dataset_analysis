@@ -51,9 +51,8 @@ def map_new_to_old_values(interactions: pd.DataFrame,
     for field in field_dict.keys():
         values = enumerate(interactions[field].dropna().unique())
         mapping_dict = {v: str(n) for n,v in values}
+        interactions[field] = interactions[field].map(mapping_dict)
         mapping_dict_all_fields[field] = mapping_dict
-
-    interactions = interactions.replace(mapping_dict_all_fields)
 
     for k,v in field_dict.items():
         mapping_dict_all_fields[v] = mapping_dict_all_fields.pop(k)
@@ -431,13 +430,16 @@ def typecast_fields(interactions: pd.DataFrame,
         The interactions dataframe
     timestamp_field : str
         The timestamp field column
+        Can be ommited if the interactions dataframe does not have a timestamp field
     group_field : str
         The group field column
         Can be ommited if the interactions dataframe does not have a group_field
     user_field : str
         The user field column
+        Can be ommited if the interactions dataframe does not have a user_field
     learning_activity_field : str
         The learning_activity field column
+        Can be ommited if the interactions dataframe does not have a learning_activity_field
 
     Returns
     -------
@@ -450,7 +452,8 @@ def typecast_fields(interactions: pd.DataFrame,
     interactions = interactions.astype(cat_typecast_dict)
 
     # typecast timestamp as datetime field
-    interactions[timestamp_field] = pd.to_datetime(interactions[timestamp_field], errors='coerce')
+    if timestamp_field:
+        interactions[timestamp_field] = pd.to_datetime(interactions[timestamp_field], errors='coerce')
 
     return interactions
 
@@ -962,7 +965,7 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
     g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_PCT_NAME_STR, 
           ylabel=LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR, 
           xlim=(-10,110), 
-          ylim=(-5))
+          ylim=(0))
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)
     g.fig.subplots_adjust(top=0.95)
@@ -983,8 +986,8 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
                     alpha=0.4)
     g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_NAME_STR, 
           ylabel=LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR, 
-          xlim=(-10), 
-          ylim=(-5))
+          xlim=(0), 
+          ylim=(0))
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)
     g.fig.subplots_adjust(top=0.95)
@@ -996,7 +999,8 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
     g = sns.FacetGrid(learning_activity_sequence_stats_per_group, 
                       col=group_field, 
                       col_wrap=6, 
-                      sharex=False)
+                      sharex=False,
+                      sharey=False)
     g.map_dataframe(sns.scatterplot, 
                     x=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_PCT_NAME_STR, 
                     y=LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR, 
@@ -1017,7 +1021,8 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
     g = sns.FacetGrid(learning_activity_sequence_stats_per_group, 
                       col=group_field, 
                       col_wrap=6, 
-                      sharex=False)
+                      sharex=False,
+                      sharey=False)
     g.map_dataframe(sns.scatterplot, 
                     x=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_NAME_STR, 
                     y=LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR, 
@@ -1025,7 +1030,7 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
                     alpha=0.4)
     g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_NAME_STR, 
           ylabel=LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR, 
-          xlim=(-10), 
+          xlim=(0), 
           ylim=(-10, 110))
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)
@@ -1038,7 +1043,8 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
     g = sns.FacetGrid(learning_activity_sequence_stats_per_group, 
                       col=group_field, 
                       col_wrap=6, 
-                      sharex=False)
+                      sharex=False,
+                      sharey=False)
     g.map_dataframe(sns.scatterplot, 
                     x=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_PCT_NAME_STR, 
                     y=LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR, 
@@ -1059,7 +1065,8 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
     g = sns.FacetGrid(learning_activity_sequence_stats_per_group, 
                       col=group_field, 
                       col_wrap=6, 
-                      sharex=False)
+                      sharex=False,
+                      sharey=False)
     g.map_dataframe(sns.scatterplot, 
                     x=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_NAME_STR, 
                     y=LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR, 
@@ -1067,7 +1074,7 @@ def plot_sequence_stats_per_group(learning_activity_sequence_stats_per_group: pd
                     alpha=0.4)
     g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_NAME_STR, 
           ylabel=LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR, 
-          xlim=(-10), 
+          xlim=(0), 
           ylim=(-10, 110))
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)

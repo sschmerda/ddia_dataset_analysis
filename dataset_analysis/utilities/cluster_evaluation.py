@@ -872,8 +872,10 @@ class ClusterEvaluation:
         """
         if self._data_clustered:        
             # calculate result fields
-            n_groups = self.cluster_eval_metric_central_tendency_differences_per_group.shape[0]
-            n_group_multiple_clusters = sum(self.cluster_eval_metric_central_tendency_differences_per_group[CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR] > 1)
+            n_groups_unfiltered = len(self.sequence_distances_dict.keys())
+            n_groups_included = self.cluster_eval_metric_central_tendency_differences_per_group.shape[0]
+            pct_groups_included = n_groups_included / n_groups_unfiltered
+            n_groups_included_multiple_clusters = sum(self.cluster_eval_metric_central_tendency_differences_per_group[CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR] > 1)
             aggregates = self.cluster_eval_metric_central_tendency_differences_per_group\
                             .groupby([CLUSTERING_DATASET_NAME_FIELD_NAME_STR])\
                             [[CLUSTERING_NUMBER_SEQUENCES_FIELD_NAME_STR, 
@@ -887,13 +889,15 @@ class ClusterEvaluation:
                                                 CLUSTERING_NUMBER_UNIQUE_SEQUENCES_FIELD_NAME_STR, 
                                                 CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR]]\
                                                 .agg([np.mean, np.median, min, max, np.std, iqr])
-            n_groups_significant_cluster_central_tendencies_differences = sum(self.cluster_eval_metric_central_tendency_differences_per_group[CLUSTERING_CENTRAL_TENDENCY_DIFFERENCES_TEST_PVAL_FIELD_NAME_STR] < 0.05)   
-            percentage_groups_significant_cluster_central_tendencies_differences = n_groups_significant_cluster_central_tendencies_differences / n_groups * 100
-            percentage_groups_with_multiple_clusters_significant_cluster_central_tendencies_differences = n_groups_significant_cluster_central_tendencies_differences / n_group_multiple_clusters * 100
+            n_groups_included_significant_cluster_central_tendencies_differences = sum(self.cluster_eval_metric_central_tendency_differences_per_group[CLUSTERING_CENTRAL_TENDENCY_DIFFERENCES_TEST_PVAL_FIELD_NAME_STR] < 0.05)   
+            percentage_groups_included_significant_cluster_central_tendencies_differences = n_groups_included_significant_cluster_central_tendencies_differences / n_groups_included * 100
+            percentage_groups_included_with_multiple_clusters_significant_cluster_central_tendencies_differences = n_groups_included_significant_cluster_central_tendencies_differences / n_groups_included_multiple_clusters * 100
 
             # fill the result dictionary
-            results_dict = {CLUSTERING_NUMBER_OF_GROUPS_FIELD_NAME_STR: n_groups,
-                            CLUSTERING_NUMBER_OF_GROUPS_WITH_MULTIPLE_CLUSTERS_FIELD_NAME_STR: n_group_multiple_clusters,
+            results_dict = {CLUSTERING_UNFILTERED_NUMBER_OF_GROUPS_FIELD_NAME_STR: n_groups_unfiltered,
+                            CLUSTERING_NUMBER_OF_GROUPS_FIELD_NAME_STR: n_groups_included,
+                            CLUSTERING_PCT_OF_UNFILTERED_GROUPS_FIELD_NAME_STR: pct_groups_included,
+                            CLUSTERING_NUMBER_OF_GROUPS_WITH_MULTIPLE_CLUSTERS_FIELD_NAME_STR: n_groups_included_multiple_clusters,
                             CLUSTERING_MEAN_NUMBER_SEQUENCES_PER_GROUP_FIELD_NAME_STR: aggregates[CLUSTERING_NUMBER_SEQUENCES_FIELD_NAME_STR]['mean'],
                             CLUSTERING_MEDIAN_NUMBER_SEQUENCES_PER_GROUP_FIELD_NAME_STR: aggregates[CLUSTERING_NUMBER_SEQUENCES_FIELD_NAME_STR]['median'],
                             CLUSTERING_MIN_NUMBER_SEQUENCES_PER_GROUP_FIELD_NAME_STR: aggregates[CLUSTERING_NUMBER_SEQUENCES_FIELD_NAME_STR]['min'],
@@ -930,9 +934,9 @@ class ClusterEvaluation:
                             CLUSTERING_MAX_NUMBER_CLUSTERS_PER_GROUP_MULTIPLE_CLUSTERS_FIELD_NAME_STR: aggregates_multiple_clusters[CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR]['max'],
                             CLUSTERING_STD_NUMBER_CLUSTERS_PER_GROUP_MULTIPLE_CLUSTERS_FIELD_NAME_STR: aggregates_multiple_clusters[CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR]['std'],
                             CLUSTERING_IQR_NUMBER_CLUSTERS_PER_GROUP_MULTIPLE_CLUSTERS_FIELD_NAME_STR: aggregates_multiple_clusters[CLUSTERING_NUMBER_CLUSTERS_FIELD_NAME_STR]['iqr'],
-                            CLUSTERING_NUMBER_OF_GROUPS_SIG_DIFF_EVAL_METRIC_CENTRAL_TENDENCIES_BETWEEN_CLUSTERES_FIELD_NAME_STR: n_groups_significant_cluster_central_tendencies_differences,
-                            CLUSTERING_PCT_OF_GROUPS_SIG_DIFF_EVAL_METRIC_CENTRAL_TENDENCIES_BETWEEN_CLUSTERES_FIELD_NAME_STR: percentage_groups_significant_cluster_central_tendencies_differences,
-                            CLUSTERING_PCT_OF_GROUPS_WITH_MULTIPLE_CLUSTERS_SIG_DIFF_EVAL_METRIC_CENTRAL_TENDENCIES_BETWEEN_CLUSTERES_FIELD_NAME_STR: percentage_groups_with_multiple_clusters_significant_cluster_central_tendencies_differences}
+                            CLUSTERING_NUMBER_OF_GROUPS_SIG_DIFF_EVAL_METRIC_CENTRAL_TENDENCIES_BETWEEN_CLUSTERES_FIELD_NAME_STR: n_groups_included_significant_cluster_central_tendencies_differences,
+                            CLUSTERING_PCT_OF_GROUPS_SIG_DIFF_EVAL_METRIC_CENTRAL_TENDENCIES_BETWEEN_CLUSTERES_FIELD_NAME_STR: percentage_groups_included_significant_cluster_central_tendencies_differences,
+                            CLUSTERING_PCT_OF_GROUPS_WITH_MULTIPLE_CLUSTERS_SIG_DIFF_EVAL_METRIC_CENTRAL_TENDENCIES_BETWEEN_CLUSTERES_FIELD_NAME_STR: percentage_groups_included_with_multiple_clusters_significant_cluster_central_tendencies_differences}
 
             # result dataframe -> instance attribute
             self.aggregate_sequence_clustering_and_eval_metric_diff_test = pd.DataFrame(results_dict)
