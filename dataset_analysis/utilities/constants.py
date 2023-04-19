@@ -1,10 +1,10 @@
 # constant paths
-PATH_TO_PLOT_FOLDER = './plots/'
-PATH_TO_PICKLED_OBJECTS_FOLDER = './pickled_objects/'
-PATH_TO_CLEANED_DATASETS = './cleaned_datasets/'
-PATH_TO_SEQUENCE_STATISTICS_PICKLE_FOLDER = '/sequence_statistics/'
+PATH_TO_PLOT_FOLDER = '../plots/'
+PATH_TO_PICKLED_OBJECTS_FOLDER = '../pickled_objects/'
+PATH_TO_CLEANED_DATASETS = '../cleaned_datasets/'
 PATH_TO_HTML_TABLES_PICKLE_FOLDER = '/html_tables/'
 PATH_TO_SEQUENCE_DISTANCES_PICKLE_FOLDER = '/sequence_distances/'
+PATH_TO_SEQUENCE_STATISTICS_PICKLE_FOLDER = '/sequence_statistics/'
 PATH_TO_SEQUENCE_CLUSTER_EVALUATION_METRIC_ANALYSIS_PICKLE_FOLDER = '/seq_dist_cluster_eval_metric_analysis/'
 
 # name of the html table pickle files

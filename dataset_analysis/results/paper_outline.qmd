@@ -1,0 +1,216 @@
+---
+title: 'Sequential Interaction Data for Educational Data Mining - A Review'
+title-block-banner: false
+description: 'Results and First Draft of Potential Publication'
+author: 'Stefan Schmerda'
+date: today
+date-format: 'DD.MM.YYYY'
+abstract: TODO
+toc: true
+toc-depth: 4
+number-sections: true
+number-depth: 4
+format: 
+    html:
+        embed-resources: true
+        page-layout: article
+        mermaid:
+          theme: neutral
+execute: 
+  echo: false
+jupyter: python3
+bibliography: references.bib
+csl: elsevier-harvard.csl
+---
+
+<!-- import data -->
+
+```{python}
+import sys
+sys.path.append('..')
+import pickle
+import pandas as pd
+
+pd.options.display.max_colwidth = 100
+
+with open('../pickled_objects/html_tables/csedm_2021_html_table.pickle', 'rb') as f:
+  html_table = pickle.load(f)
+```
+
+## Introduction
+
+TODO
+
+### Research Questions
+
+::: {.callout-note appearance="minimal"}
+## RQ1
+
+What datasets can
+:::
+
+::: {.callout-note appearance="minimal"}
+## RQ2
+
+To which degree do Learning Paths differ by User in the collected datasets?
+:::
+
+::: {.callout-note appearance="minimal"}
+## RQ3
+
+Given that there is variation in Learning Paths, to what
+:::
+
+## Methodology
+
+TODO
+
+::: {#def-learning_path}
+### Learning Path
+
+A **Learning Path** for a **User** is defined as a sequence of interactions **Learning Resources** with a clear ordering over a certain **Topic**:
+
+$$
+\{a_1,a_2,...,a_n\}_m
+$$
+:::
+
+### Dataset requirements {#sec-dataset_requirements}
+
+TODO
+
+#### Interaction Fields
+
+Therefore datasets which conform to the
+
+| Timestamp | User | Topic | Learning Resource |
+|:---------:|:----:|:-----:|:-----------------:|
+| datetime  |  1   |   1   |         1         |
+| datetime  |  ..  |  ..   |        ..         |
+| datetime  |  n   |   n   |         n         |
+
+: Requiered Fields {#tbl-req_fields}
+
+```{mermaid}
+%%| label: fig-learning_path
+%%| fig-cap: Examplatory Learning Paths for three users
+
+flowchart LR
+  direction LR
+  START(Topic 1) -.- LR11((LR 1))
+  START(Topic 1) -.- LR21((LR 1))
+  START(Topic 1) -.- LR31((LR 2))
+
+  subgraph Learning Path User 3
+  LR31((LR 2)) --> LR32((LR 1))
+  LR32((LR 1)) --> LR33((LR 3))
+  LR33((LR 3)) --> LR34((LR 1))
+  end
+
+  subgraph Learning Path User 2
+  LR21((LR 1)) --> LR22((LR 3))
+  LR22((LR 3)) --> LR23((LR 2))
+  end
+
+  subgraph Learning Path User 1
+  LR11((LR 1)) --> LR12((LR 2))
+  LR12((LR 2)) --> LR13((LR 3))
+  end
+```
+
+#### Evaluation Fields
+
+TODO
+
+### Sequence Distance
+
+TODO
+
+The closeness between different learning paths is quantified via the application of Levenshtein Distance [@levenshtein1966].
+
+### Clustering -
+
+TODO
+
+## Results
+
+TODO
+
+### Dataset Collection
+
+Datasets listed in @mihaescu2021 were surveyed and selected by conforming to the requirements listed in @sec-dataset_requirements.
+
+#### Datasets
+
+
+
+#### Summary Statistics
+
+```{python}
+#| column: body-outset
+#| label: summary_stats
+#| fig-cap: 'Summary Statistics'
+
+html_table.display_summary_statistics()
+```
+
+#### Available Fields
+
+```{python}
+#| column: body-outset
+#| label: available_fields
+#| fig-cap: 'Available Fields'
+
+html_table.display_available_fields()
+```
+
+### Sequence Similarity
+
+### Cluster Results
+
+## Discussion
+
+### Limitations
+
+### Testing
+
+::: column-body
+Outset content...
+:::
+
+::: {#fig-elephant layout-ncol="2"}
+| Timestamp | User | Topic | Learning Resource |
+|:---------:|:----:|:-----:|:-----------------:|
+| datetime  |  1   |   1   |         1         |
+| datetime  |  ..  |  ..   |        ..         |
+| datetime  |  n   |   n   |         n         |
+
+| Timestamp | User | Topic | Learning Resource |
+|:---------:|:----:|:-----:|:-----------------:|
+| datetime  |  1   |   1   |         1         |
+| datetime  |  ..  |  ..   |        ..         |
+| datetime  |  n   |   n   |         n         |
+
+Test
+:::
+
+```{python}
+
+html_table.available_fields_df
+```
+
+::: callout-important
+Thi is important
+:::
+
+$$
+s = \sqrt{\frac{1}{N-1} \sum_{i=1}^N (x_i - \overline{x})^2}
+$$ {#eq-test}
+
+```{mermaid}
+flowchart LR
+  A[Hard edge] --> B(Round edge)
+  B --> C{Decision}
+  C --> D[Result one]
+  C --> E[Result two]
+```
