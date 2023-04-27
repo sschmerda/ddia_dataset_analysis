@@ -7,24 +7,28 @@ date: today
 date-format: 'DD.MM.YYYY'
 abstract: TODO
 toc: true
+toc-title: Table of Contents
+toc-expand: true
 toc-depth: 4
 number-sections: true
 number-depth: 4
 format: 
     html:
+        theme: default
         embed-resources: true
         page-layout: article
+        smooth-scroll: true
         mermaid:
           theme: neutral
 execute: 
   echo: false
+  enable: true 
 jupyter: python3
 bibliography: references.bib
 csl: elsevier-harvard.csl
 ---
 
 <!-- import data -->
-
 ```{python}
 import sys
 sys.path.append('..')
@@ -43,54 +47,53 @@ TODO
 
 ### Research Questions
 
+Data needs to be sequential interaction data.  
+TODO: Rough overview of required dataset qualities.
+
 ::: {.callout-note appearance="minimal"}
 ## RQ1
-
-What datasets can
+Which datasets from the educational domain can be found that correspond to the requirements of representing the learning pathways of users? 
 :::
+
+TODO: write about the variability problem in MOOC learning paths
 
 ::: {.callout-note appearance="minimal"}
 ## RQ2
-
-To which degree do Learning Paths differ by User in the collected datasets?
+To which degree do learning pathways in the collected datasets differ by user?
 :::
+
+TODO: 
 
 ::: {.callout-note appearance="minimal"}
 ## RQ3
-
-Given that there is variation in Learning Paths, to what
+To what extend do different learning pathways effect the learning outcome? 
 :::
 
-## Methodology
+## Definitions
 
-TODO
+### Learning Pathways
+ 
+TODO: Short paragraph about learning pathway before the formal definition. (learning pathway -> attain learning goal)
+The following states a formal definition of a learning pathway:
 
 ::: {#def-learning_path}
-### Learning Path
+### Learning Pathway
 
-A **Learning Path** for a **User** is defined as a sequence of interactions **Learning Resources** with a clear ordering over a certain **Topic**:
+A **learning pathway** consists of as a sequence of **learning resources** with a clear ordering. Let $LR$ be the sets of all learning resources and $I \subset \mathbb{N}$ the set of consecutive sequence index values, then a **learning pathway** $LP$ is defined as:
 
 $$
-\{a_1,a_2,...,a_n\}_m
+LP:=\{lr_1,lr_2,...,lr_i\:|\: lr \in LR,\: i \in I\}
 $$
+
+A **learning pathway** $LP$ can be specific to a certain **topic** and **user**. Let $LR$, $T$, $U$ be the sets of all learning resources, topics and users respectively, then such a **learning pathway** can be written as:
+
+$$
+LP_{t, u}, where\: t\in T\: and\: u\in U
+$$
+
 :::
 
-### Dataset requirements {#sec-dataset_requirements}
-
-TODO
-
-#### Interaction Fields
-
-Therefore datasets which conform to the
-
-| Timestamp | User | Topic | Learning Resource |
-|:---------:|:----:|:-----:|:-----------------:|
-| datetime  |  1   |   1   |         1         |
-| datetime  |  ..  |  ..   |        ..         |
-| datetime  |  n   |   n   |         n         |
-
-: Requiered Fields {#tbl-req_fields}
-
+The learning pathways for a certain topic may vary by the user attempting to traverse the learning material of a topic. In @fig-learning_path
 ```{mermaid}
 %%| label: fig-learning_path
 %%| fig-cap: Examplatory Learning Paths for three users
@@ -118,9 +121,33 @@ flowchart LR
   end
 ```
 
-#### Evaluation Fields
+## Methodology
+
+### Dataset requirements {#sec-dataset_requirements}
 
 TODO
+
+Datasets need to origin from the educational domain and conform to the requirements specified in @sec-interactions_fields and @sec-evaluation_fields in order to be selected for the analysis.
+
+#### Interaction Fields {#sec-interactions_fields}
+
+Therefore datasets which conform to the
+
+| Timestamp | User | Topic | Learning Resource |
+|:---------:|:----:|:-----:|:-----------------:|
+| datetime  |  1   |   1   |         1         |
+| datetime  |  ..  |  ..   |        ..         |
+| datetime  |  n   |   n   |         n         |
+
+: Requiered Fields {#tbl-req_fields}
+
+#### Evaluation Fields {#sec-evaluation_fields}
+
+TODO
+
+#### Preprocessing Steps
+
+TODO: NA Treatment, Merging ....
 
 ### Sequence Distance
 
@@ -133,15 +160,25 @@ The closeness between different learning paths is quantified via the application
 TODO
 
 ## Results
+<!-- TODO rename repo such that it conforms to paper title -->
 
-TODO
+The following sections present the results of the paper.^[The code used for generating the cleaned datasets in @sec-results_datasets, for the sequence distance calculations in @sec-results_datasets_lp_var and for the clustering analysis in @sec-results_datasets_rel_lp_evaluation for each dataset respectively can be found in the [github repository](https://github.com/sschmerda/ddia_dataset_analysis) of the paper.]
 
-### Dataset Collection
+### Datasets {#sec-results_datasets}
 
-Datasets listed in @mihaescu2021 were surveyed and selected by conforming to the requirements listed in @sec-dataset_requirements.
+Datasets listed in @mihaescu2021 were surveyed and selected by conforming to the learning pathway requirements listed in @sec-dataset_requirements. The cleaned datasets can be downloaded from Zenodo^[Link to Zenodo repository]; the links to the raw data are listed on the paper's github repository^[https://github.com/sschmerda/ddia_dataset_analysis].
 
-#### Datasets
+#### CSEDM 2019
 
+#### CSEDM 2021
+
+#### Educational Process Mining
+
+#### KDD 2010
+
+#### KDD 2015
+
+#### Open University
 
 
 #### Summary Statistics
@@ -164,53 +201,21 @@ html_table.display_summary_statistics()
 html_table.display_available_fields()
 ```
 
-### Sequence Similarity
+### Dataset Learning Pathway Variation {#sec-results_datasets_lp_var} 
 
-### Cluster Results
+### The Relationship between Learning Pathways and Evaluation Results {#sec-results_datasets_rel_lp_evaluation}
 
 ## Discussion
 
 ### Limitations
 
-### Testing
+## Conclusion
 
-::: column-body
-Outset content...
-:::
+TODO
 
-::: {#fig-elephant layout-ncol="2"}
-| Timestamp | User | Topic | Learning Resource |
-|:---------:|:----:|:-----:|:-----------------:|
-| datetime  |  1   |   1   |         1         |
-| datetime  |  ..  |  ..   |        ..         |
-| datetime  |  n   |   n   |         n         |
+## Links to Datasets {.appendix .unnumbered}
 
-| Timestamp | User | Topic | Learning Resource |
-|:---------:|:----:|:-----:|:-----------------:|
-| datetime  |  1   |   1   |         1         |
-| datetime  |  ..  |  ..   |        ..         |
-| datetime  |  n   |   n   |         n         |
+- [CSEDM 2019]()
+- [CSEDM 2021]()
 
-Test
-:::
 
-```{python}
-
-html_table.available_fields_df
-```
-
-::: callout-important
-Thi is important
-:::
-
-$$
-s = \sqrt{\frac{1}{N-1} \sum_{i=1}^N (x_i - \overline{x})^2}
-$$ {#eq-test}
-
-```{mermaid}
-flowchart LR
-  A[Hard edge] --> B(Round edge)
-  B --> C{Decision}
-  C --> D[Result one]
-  C --> E[Result two]
-```
