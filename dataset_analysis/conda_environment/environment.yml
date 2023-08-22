@@ -1,6 +1,7 @@
 name: DDIA
 channels:
   - defaults
+  - conda-forge
 dependencies:
   - python-lsp-jsonrpc
   - black
@@ -373,4 +374,3 @@ dependencies:
   - levenshtein
   - pingouin
   - scikit-learn-extra
-prefix: C:\Users\sschmerda\Anaconda3\envs\DDIA
