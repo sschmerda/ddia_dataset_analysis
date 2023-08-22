@@ -322,7 +322,7 @@ def add_sequence_id_field(interactions: pd.DataFrame,
                           user_field: str,
                           learning_activity_field: str):
     """Adds a sequence_id field to the interactions dataframe. An unique id is mapped to each unique sequence of learning
-    activities, indicatig to which sequence a (group,user,learning_activity) entry belongs to.
+    activities, indicating to which sequence a (group,user,learning_activity) entry belongs to.
 
     Parameters
     ----------
@@ -338,7 +338,7 @@ def add_sequence_id_field(interactions: pd.DataFrame,
 
     Returns
     -------
-    pd.DatafRame
+    pd.DataFrame
         The interactions dataframe with added sequence_id field
     """     
     grouping_list = [group_field, user_field]
@@ -346,14 +346,14 @@ def add_sequence_id_field(interactions: pd.DataFrame,
 
     unique_sequences = interactions.groupby(grouping_list)[learning_activity_field].agg(tuple).rename(SEQUENCE_ID_FIELD_NAME_STR)
 
-    sequence_sequence_id_mapping_dict = {seq:str(seq_id) for seq_id, seq in enumerate(unique_sequences.unique())}
-    unique_sequences = unique_sequences.apply(lambda x: sequence_sequence_id_mapping_dict[x]).reset_index()
+    sequence_id_mapping_dict = {seq:str(seq_id) for seq_id, seq in enumerate(unique_sequences.unique())}
+    unique_sequences = unique_sequences.apply(lambda x: sequence_id_mapping_dict[x]).reset_index()
 
     interactions = interactions.merge(unique_sequences, how='inner', on=grouping_list)
 
     sequence_id_column_index_positions = list(interactions.columns).index(learning_activity_field) + 1
-    sequenc_id_column = interactions.pop(SEQUENCE_ID_FIELD_NAME_STR)
-    interactions.insert(sequence_id_column_index_positions, SEQUENCE_ID_FIELD_NAME_STR, sequenc_id_column)
+    sequence_id_column = interactions.pop(SEQUENCE_ID_FIELD_NAME_STR)
+    interactions.insert(sequence_id_column_index_positions, SEQUENCE_ID_FIELD_NAME_STR, sequence_id_column)
     
     return interactions
 

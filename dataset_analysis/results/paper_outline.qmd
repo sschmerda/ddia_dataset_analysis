@@ -44,6 +44,14 @@ with open('../pickled_objects/html_tables/csedm_2021_html_table.pickle', 'rb') a
 ## Introduction
 
 TODO
+This increased use of online learning courses  
+
+There are several applications for this kind of data in the online learning domain. Educators can use the resulting data to explore which learning pathways are most closely associated with learning success and apply this knowledge for subsequent manual course generation.
+[//TODO: Find models and their usage in the edm domain which need data to train] In a more technical use case these data is being utilized by programmers and technologists to train a variety of statistical models which among other things predict student performance[//TODO: Find literature] as well as engagement and retention[//TODO: Find literature]. In addition some models generate consecutive recommendations of learning resources [//TODO: Find literature], effectively mirroring a learning pathway, in order to improve the learning outcome of students.\ 
+As stated above predictive models as well as recommender systems need a base of benchmark datasets to be trained and evaluated on. [//TODO: The problem is that there are only few datasets available for the user case and the ones that exist do often need a lot of preprocessing or do not hold a lot of information(similar learning paths, or dissimilar learning paths with too similar learning outcome)]
+In this paper the focus lies on interaction data of users with learning resources.
+
+
 
 ### Research Questions
 
@@ -213,9 +221,18 @@ html_table.display_available_fields()
 
 TODO
 
-## Links to Datasets {.appendix .unnumbered}
+## References {.unnumbered}
+
+::: {#refs}
+:::
+
+## Links to Datasets {.unnumbered}
 
 - [CSEDM 2019]()
 - [CSEDM 2021]()
 
+## Appendix {.unnumbered}
 
+### Dataset Preprocessing and Additional Information {.unnumbered}
+
+#### CSEDM 2019 {.unnumbered}

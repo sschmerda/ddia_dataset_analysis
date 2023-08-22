@@ -1,0 +1,10 @@
+<script>
+    window.addEventListener("load", (event) => {
+      (function() {
+        let mainContent = document.querySelector('main#quarto-document-content');
+        if (!mainContent.classList.contains('column-page')) {
+         mainContent.classList.add('column-page'); 
+        };
+      })();
+    });
+</script>

@@ -304,6 +304,7 @@ def add_unique_identifier_code_to_learning_activity_in_sequence(interactions: pd
         else:
             code_list.append(code)
     
+    # learning activity code field can be hardcoded because this field will be removed anyways
     learning_activity_code_field = 'la_code_for_grouping'
     interactions[learning_activity_code_field] = code_list
 
@@ -505,6 +506,7 @@ def add_evaluation_fields_learning_activity_decorator_with_arguments(interaction
         The timestamp field column
     order_field : str
         The order field column
+
     """
     def decorator_add_evaluation_fields_learning_activity(eval_metric_func):
         def wrapper_add_evaluation_fields_learnig_activity(*args, **kwargs):
@@ -984,7 +986,7 @@ def add_evaluation_fields(interactions: pd.DataFrame,
                                                            order_field,
                                                            **kwargs)
 
-    # eliminate repeated learning activities -> information of repeated learning activity is extracted in add_evaluation_fields_learning_activity
+    # eliminate repeated learning activities -> information of repeated learning activity is extracted in method add_evaluation_fields_learning_activity
     if group_field:
         interactions = keep_last_repeated_learning_activities(interactions, 
                                                               group_field, 

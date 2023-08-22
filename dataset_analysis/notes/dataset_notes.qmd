@@ -1,0 +1,216 @@
+---
+title: 'Dataset Preprocessing and Notes'
+title-block-banner: false
+description: 'Peculiarities and Preprocessing Steps'
+author: 'Stefan Schmerda'
+date: today
+date-format: 'DD.MM.YYYY'
+toc: true
+toc-title: Table of Contents
+toc-expand: true
+toc-depth: 4
+toc-location: body
+number-sections: true
+number-depth: 4
+format: 
+    html:
+        include-in-header: add-class.html
+        theme: default
+        embed-resources: true
+        page-layout: article
+        smooth-scroll: true
+        mermaid:
+          theme: neutral
+execute: 
+  echo: false
+  enable: true 
+jupyter: python3
+bibliography: references.bib
+csl: elsevier-harvard.csl
+
+constants:
+  learning_activity: learning resource
+  group: topic
+  user: user
+  user_cap: User
+  course: course
+  timestamp: timestamp
+  learning_path: learning pathway
+  learning_path_cap: Learning pathway
+  csedm_2019: CSEDM 2019
+  csedm_2021: CSEDM 2021
+  epm: Educational Process Mining
+  kdd_2010: KDD 2010
+  kdd_2015: KDD 2015
+  naep_2017: NAEP 2017
+  naep_2019: NAEP 2019
+  riiid: Riid Answer Correctness Prediction
+  ou: Open University
+  wdyk: What Do You Know
+---
+
+```{python}
+import numpy as np
+import pandas as pd
+from IPython.display import Markdown
+```
+
+## General Preprocessing Remarks
+
+-   Fields representing {{< meta constants.user >}}, {{< meta constants.group >}}, {{< meta constants.learning_activity >}} and the {{< meta constants.timestamp >}} are identified and renamed accordingly. To recreate the original field names a remapping dataset will be generated and be made available online in combination with the final datasets.
+
+-   Values of the {{< meta constants.user >}}, {{< meta constants.group >}} and {{< meta constants.learning_activity >}} fields are remapped to integers starting from 0 and then transformed to strings. To recreate the original values a remapping dataset will be generated and be made available online in combination with the final datasets.
+
+-   A dataset can potentially contain entries or interactions which are not directly related to the learning process and therefore will be disregarded and filtered out. [//TODO: List possible non-learning related interactions] Theses interactions could among other things consist of random clicks [//TODO: Is this correct?] if the respective datasets tracks them; navigation through {{< meta constants.course >}} menu pages or the reading and writing of forum and wikis entries.\
+Concrete examples:
+    - In the **{{< meta constants.kdd_2015 >}}** dataset (see @sec-kdd_2015) only interactions labeled as `problem` or `video` will be kept.
+    - In the **{{< meta constants.ou >}}** dataset (see @sec-open_university) only interactions labeled as `resource`, `subpage` and `oucontent` will be kept.
+
+-   A {{< meta constants.learning_path >}} is defined as a sequence of {{< meta constants.learning_activity >}}es of a {{< meta constants.user >}} for a certain {{< meta constants.group >}} (or for a certain course if the course cannot be subdivided into {{< meta constants.group >}}s) ordered by some kind of {{< meta constants.timestamp >}}. The removal of an entry with a missing {{< meta constants.learning_activity >}} or a {{< meta constants.timestamp >}} within a sequence would lead to a misrepresentation or bias of this {{< meta constants.learning_path >}}, i.e. effectively omitting crucial information about the learning process. Therefore sequences that contain missing values of {{< meta constants.learning_activity >}}s or {{< meta constants.timestamp >}}s will be removed entirely. The same reasoning will be applied to necessary evaluation fields.\
+{{< meta constants.user_cap >}} and {{< meta constants.group >}} values identify to which particular {{< meta constants.learning_path >}} a certain {{< meta constants.learning_activity >}} belongs to. Therefore if those values are missing, the respective entry cannot be backtracked to a certain {{< meta constants.learning_path >}}. In those cases only the particular entry will be removed.
+
+-   The interactions within {{< meta constants.group >}}s are being sorted by {{< meta constants.user >}}s and their {{< meta constants.timestamp >}} of occurrence to represent consecutive {{< meta constants.learning_path >}}s throughout time. If a dataset does not have {{< meta constants.group >}}s the interactions are instead sorted by {{< meta constants.user >}}s and {{< meta constants.timestamp >}} over the whole {{< meta constants.course >}}.\
+In case no {{< meta constants.timestamp >}} field exists a different sorting rule, if available, must be applied or the inherent order of the original dataset taken as given.\
+Concrete examples of the sort order of interactions without explicit timestamp:  
+    -   In the **{{< meta constants.ou >}}** dataset (see @sec-open_university) there is only a so called 'date' field indicating on which day relative to the official starting day of the {{< meta constants.course >}} an interaction has been performed (days before the starting date are denoted as negative integers, days thereafter as positive ones). Therefore there is no strict ordering of interactions within a particular day. But after inspection of a subset of {{< meta constants.learning_activity >}} sequences it could be confirmed that the inherent ordering within days relative to the course starting day of the dataset is consecutive in time and constitutes valid {{< meta constants.learning_path >}}s. [//TODO: Find out if the ordering within a day in the raw dataset is already sorted from earliest to latest interaction]  
+  
+-   [//TODO] If the the score ranges over {{< meta constants.learning_activity >}}s are consistent it is possible to infer a threshold above which the {{< meta constants.learning_activity >}} can be considered as correct (if not explicitly stated in data).\
+    This is applicable for following datasets:
+
+    -   @sec-csedm_2021
+
+-   [//TODO]: Add evaluation fields ({{< meta constants.learning_activity >}}, {{< meta constants.group >}}, course if available) + averages
+
+-   Consecutive interactions of {{< meta constants.user >}}s with the same {{< meta constants.learning_activity >}} without a different {{< meta constants.learning_activity >}} between them will be reduced to one interaction keeping the last one (see @fig-learning_pathway_reduction). Before the reduction the information from repeated interactions with the same {{< meta constants.learning_activity >}} is being utilized to extract possible evaluation metrics for the {{< meta constants.learning_activity >}}(e.g. number of interactions with the {{< meta constants.learning_activity >}}, number of hints, highest score...).      
+  - //TODO examples here
+  - 
+Non-consecutive but reoccurring interactions with an already known {{< meta constants.learning_activity >}} along a {{< meta constants.learning_path >}} will be kept since a revisit is of educational relevancy potentially implying a not yet finished familiarization with a given learning material.
+
+::: {#fig-learning_pathway_reduction layout-nrow="2"}
+```{mermaid}
+%%| label: fig-learning_path_before_reduction_before
+%%| fig-cap: The learning pathway before reduction
+
+flowchart LR
+  subgraph  
+    direction LR
+    LR11((LR 1)) --> LR12((LR 2))
+    LR12((LR 2)) --> LR13((LR 2))
+    LR13((LR 2)) --> LR14((LR 3))
+    LR14((LR 3)) --> LR15((LR 1))
+  end
+```
+
+```{mermaid}
+%%| label: fig-learning_path_after_reduction_after
+%%| fig-cap: The learning pathway after reduction
+
+flowchart LR
+  subgraph  
+    direction LR
+    LR11((LR 1)) --> LR12((LR 2))
+    LR12((LR 2)) --> LR13((LR 3))
+    LR13((LR 3)) --> LR14((LR 1))
+    LR14((LR 1)) ~~~ LR15((test)):::hidden
+  end
+```
+
+
+Exemplary reduction of consecutive repeated {{< meta constants.learning_activity >}}s 
+:::
+
+-   Each unique sequence of {{< meta constants.learning_activity >}}s over a {{< meta constants.group >}} (or over a course if the course cannot be subdivided into {{< meta constants.group >}}s) receives an unique sequence id which allows for backtracking of {{< meta constants.user >}}s who follow in their learning process a particular {{< meta constants.learning_path >}}.
+
+## Datasets
+
+### {{< meta constants.csedm_2021 >}} {#sec-csedm_2021}
+
+### {{< meta constants.epm >}} {#sec-epm}
+
+### {{< meta constants.kdd_2015 >}} {#sec-kdd_2015}
+
+```{python}
+# paths
+PATH_TO_INTERACTION_DATA = '../../../../../../data/ddia/kdd_2015/complete/log_train.csv'
+PATH_TO_ENROLLMENT_DATA = '../../../../../../data/ddia/kdd_2015/complete/enrollment_train.csv'
+PATH_TO_DROPOUT_DATA = '../../../../../../data/ddia/kdd_2015/complete/truth_train.csv'
+PATH_TO_OBJECT_DATA = '../../../../../../data/ddia/kdd_2015/ObjectData/object.csv'
+# fields used in dataset preparation
+ENROLLMENT_FIELD = 'enrollment_id'
+DROPOUT_FIELD = 'is_dropout'
+
+
+interactions = pd.read_csv(PATH_TO_INTERACTION_DATA)
+enrollments = pd.read_csv(PATH_TO_ENROLLMENT_DATA)
+dropouts = pd.read_csv(PATH_TO_DROPOUT_DATA, names=[ENROLLMENT_FIELD, DROPOUT_FIELD])
+objects = pd.read_csv(PATH_TO_OBJECT_DATA) 
+
+df_to_merge = objects[['module_id', 'category']].rename(columns={'module_id': 'object'})
+df_to_merge = df_to_merge.loc[~df_to_merge.duplicated(), :]
+interactions_merged = interactions.merge(df_to_merge, how='left', on='object')
+```
+
+#### Datasets used for Generation of the Final Interactions Dataframe
+
+| Dataset Name                  | Description                                                                                                                          |
+|-----------------------|-------------------------------------------------|
+| complete/log_train.csv        | Contains interactions of enrollment ids ({{< meta constants.user >}}s-course pairs)/ with {{< meta constants.learning_activity >}}s |
+| complete/enrollment_train.csv | Links enrollment ids to username and course                                                                                         |
+| complete/truth_train.csv      | Contains information whether a certain enrollment id was a dropout (evaluation metric)                                              |
+| ObjectData/object.csv         | Contains object descriptions (used for understanding objects which can be interacted with)                                          |
+
+: KDD 2015 Datasets {#tbl-kdd_2015_datasets}
+
+```{python}
+#| label: tbl-kdd_2015_log_train
+#| tbl-cap: First 10 rows of log_train.csv
+Markdown(interactions.head(10).to_markdown(index=False))
+```
+
+```{python}
+#| label: tbl-kdd_2015_enrollment_train
+#| tbl-cap: First 10 rows of enrollment_tain.csv
+Markdown(enrollments.head(10).to_markdown(index=False))
+```
+
+```{python}
+#| label: tbl-kdd_2015_truth_train
+#| tbl-cap: First 10 rows of truth_train.csv
+Markdown(dropouts.head(10).to_markdown(index=False))
+```
+
+```{python}
+#| label: tbl-kdd_2015_object
+#| tbl-cap: First 10 rows of object.csv
+Markdown(objects.head(10).to_markdown(index=False))
+```
+
+#### Preprocessing
+
+After merging(left join) the log_train dataframe(@tbl-kdd_2015_log_train) containing the interactions with the object dataframe(@tbl-kdd_2015_object), the `event` field(coming from log_train) as well as the `category` field(coming from object) hold information about the type of the object a {{< meta constants.user >}} interacted with. The frequencies of the individual values of those fields occurring in the merged dataframe are listed in @tbl-kdd_2015_interaction_event_frequencies and @tbl-kdd_2015_interaction_category_frequencies. In contrast, the unmerged object dataframe contains more levels of the category field(@tbl-kdd_2015_object_category_frequencies), meaning that those objects do not occur in the log_train dataframe(@tbl-kdd_2015_log_train).
+
+::: callout-note
+# Preprocessing Step
+
+Because `problem` and `video` values most closely resemble learning objects and because they are the only values which occur in the event as well as in the category field, the interactions of {{< meta constants.user >}}s will be limited to those types.
+:::
+
+```{python}
+#| label: tbl-kdd_2015_interaction_event_frequencies
+#| tbl-cap: Event Frequencies in Merged Dataframe (log_train, object)
+Markdown(interactions_merged.groupby('event', dropna=False).size().reset_index().rename(columns={0: 'Count'}).sort_values(by='Count', ascending=False).to_markdown(index=False))
+```
+
+```{python}
+#| label: tbl-kdd_2015_interaction_category_frequencies
+#| tbl-cap: Category Frequencies in Merged Dataframe (log_train, object)
+Markdown(interactions_merged.groupby('category', dropna=False).size().reset_index().rename(columns={0: 'Count'}).sort_values(by='Count', ascending=False).to_markdown(index=False))
+```
+
+```{python}
+#| label: tbl-kdd_2015_object_category_frequencies
+#| tbl-cap: Category Frequencies in Object Dataframe 
+Markdown(objects.groupby('category', dropna=False).size().reset_index().rename(columns={0: 'Count'}).sort_values(by='Count', ascending=False).to_markdown(index=False))
+```
+
+### {{< meta constants.ou >}} {#sec-open_university}
