@@ -35,7 +35,7 @@ class HtmlTables():
     score_maximum_data_str = 'Score Maximum in Data'
 
     # summary statistics class vars
-    n_interactions_str = f'# of {INTERACTIONS_NAME_STR}'
+    n_rows_str = f'# of {ROWS_NAME_STR}'
     n_unique_users_str = f'# of Unique {USER_FIELD_NAME_STR}s'
     n_unique_learning_activities_str = f'# of Unique {LEARNING_ACTIVITY_FIELD_NAME_STR}s'
     n_unique_groups_str = f'# of Unique {GROUP_FIELD_NAME_STR}s'
@@ -58,7 +58,7 @@ class HtmlTables():
         # calculated upon initialization
         self.available_fields_df = self._gen_available_fields_df()
         self.score_is_correct_rel_df = self._gen_score_is_correct_rel_df()
-        self.summary_statistics_df = self._gen_summray_statistics_df()
+        self.summary_statistics_df = self._gen_summary_statistics_df()
 
         # set interactions to None in order to reduce object size
         self.interactions = None
@@ -147,7 +147,7 @@ class HtmlTables():
 
         return score_is_correct_rel_df
 
-    def _gen_summray_statistics_df(self):
+    def _gen_summary_statistics_df(self):
         """Returns a dataframe which contains summary statistics of the input interactions dataframe.
 
         Returns
@@ -156,7 +156,7 @@ class HtmlTables():
             A dataframe containing summary statistics of the input interactions dataframe
         """        
         
-        n_interactions = int(self.interactions.shape[0])
+        n_rows = int(self.interactions.shape[0])
         n_unique_users = int(self.interactions[USER_FIELD_NAME_STR].nunique())
         n_unique_learning_activities = int(self.interactions[LEARNING_ACTIVITY_FIELD_NAME_STR].nunique())
 
@@ -186,7 +186,7 @@ class HtmlTables():
                                                            2)
             sparsity_user_group_matrix = None
 
-        idx = [HtmlTables.n_interactions_str, 
+        idx = [HtmlTables.n_rows_str, 
                HtmlTables.n_unique_users_str, 
                HtmlTables.n_unique_groups_str, 
                HtmlTables.n_unique_learning_activities_str, 
@@ -194,7 +194,7 @@ class HtmlTables():
                HtmlTables.n_unique_sequences_str, 
                HtmlTables.sparsity_user_learning_activity_matrix_str, 
                HtmlTables.sparsity_user_group_matrix_str]
-        data = [n_interactions, 
+        data = [n_rows, 
                 n_unique_users, 
                 n_unique_groups, 
                 n_unique_learning_activities, 
@@ -246,7 +246,7 @@ class HtmlTables():
         # typecast fields to int
         summary_statistics_df = self.summary_statistics_df.transpose()
 
-        idx = [HtmlTables.n_interactions_str, 
+        idx = [HtmlTables.n_rows_str, 
                HtmlTables.n_unique_users_str, 
                HtmlTables.n_unique_groups_str, 
                HtmlTables.n_unique_learning_activities_str, 

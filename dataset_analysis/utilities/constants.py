@@ -28,13 +28,15 @@ SEQUENCE_ID_FIELD_NAME_STR = 'Sequence ID'
 # strings used for the mapping dataframe
 FIELD_MAPPING_DATAFRAME_NAME_STR = '_field_mapping_dataframe'
 VALUE_MAPPING_DATAFRAME_NAME_STR = '_value_mapping_dataframe'
-NEW_FIELDNAME_FIELD_NAME_STR = 'New Fieldname'
-ORIGINAL_FIELDNAME_FIELD_NAME_STR = 'Original Fieldname'
+NEW_FIELDNAME_FIELD_NAME_STR = 'Fieldname New'
+ORIGINAL_FIELDNAME_FIELD_NAME_STR = 'Fieldname Original'
 NEW_VALUE_STR = 'Value New'
 ORIGINAL_VALUE_STR = 'Value Original'
 
 # interactions string
 INTERACTIONS_NAME_STR = 'Interactions'
+# rows string
+ROWS_NAME_STR = 'Rows'
 ###################################################################################################
 # name of evaluation fields
 
@@ -230,8 +232,8 @@ EVALUATION_COURSE_ALL_GROUPS_MEAN_FIELD_LIST = [EVALUATION_COURSE_SCORE_ALL_GROU
 
 # strings used in the analysis
 # summary statistics
-NUMBER_OF_INTERACTIONS_FIELD_NAME_STR = f'Number of {INTERACTIONS_NAME_STR}'
-NUMBER_OF_INTERACTIONS_PER_USER_STR = f'Number of {INTERACTIONS_NAME_STR} per {USER_FIELD_NAME_STR}'
+NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR = f'Number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s'
+NUMBER_OF_LEARNING_ACTIVITIES_PER_USER_STR = f'Number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {USER_FIELD_NAME_STR}'
 NUMBER_UNIQUE_GROUPS_PER_USER_STR = f'Number of Unique {GROUP_FIELD_NAME_STR}s per {USER_FIELD_NAME_STR}'
 NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_USER_STR = f'Number of Unique {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {USER_FIELD_NAME_STR}'
 NUMBER_UNIQUE_USERS_PER_GROUP_STR = f'Number of Unique {USER_FIELD_NAME_STR}s per {GROUP_FIELD_NAME_STR}'

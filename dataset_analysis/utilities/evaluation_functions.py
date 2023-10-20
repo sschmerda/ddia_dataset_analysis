@@ -1,6 +1,6 @@
 from .standard_import import *
 from .constants import *
-from .functions import keep_last_repeated_learning_activities, keep_last_repeated_learning_activities_no_group
+from .functions import keep_last_repeated_learning_activities
 
 def return_and_plot_evaluation_score_range(interactions: pd.DataFrame,
                                            learning_activity_field: str,
@@ -987,17 +987,11 @@ def add_evaluation_fields(interactions: pd.DataFrame,
                                                            **kwargs)
 
     # eliminate repeated learning activities -> information of repeated learning activity is extracted in method add_evaluation_fields_learning_activity
-    if group_field:
-        interactions = keep_last_repeated_learning_activities(interactions, 
-                                                              group_field, 
-                                                              user_field, 
-                                                              learning_activity_field, 
-                                                              timestamp_field)
-    else:
-        interactions = keep_last_repeated_learning_activities_no_group(interactions, 
-                                                                       user_field, 
-                                                                       learning_activity_field, 
-                                                                       timestamp_field)
+    interactions = keep_last_repeated_learning_activities(interactions, 
+                                                          group_field, 
+                                                          user_field, 
+                                                          learning_activity_field, 
+                                                          timestamp_field)
 
     # group level learning activity average
     if group_field:

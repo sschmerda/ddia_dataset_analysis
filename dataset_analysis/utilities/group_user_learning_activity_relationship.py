@@ -21,8 +21,10 @@ def avg_seq_len(series: pd.Series, avg_fun):
     vc = series.value_counts()
     return avg_fun(vc)
 
-def print_and_return_interactions_per_user(interactions: pd.DataFrame, user_field: str, user_field_name: str):
-    """Print and return interactions stats per user
+def print_and_return_learning_activities_per_user(interactions: pd.DataFrame, 
+                                                  user_field: str, 
+                                                  user_field_name: str):
+    """Print and return learning activities stats per user
 
     Parameters
     ----------
@@ -36,18 +38,18 @@ def print_and_return_interactions_per_user(interactions: pd.DataFrame, user_fiel
     Returns
     -------
     pd.DataFrame
-        A dataframe containing the number of interactions per user
+        A dataframe containing the number of learning activities per user
     """    
-    interactions_per_user = interactions.groupby(user_field).size().reset_index().rename(columns={0: NUMBER_OF_INTERACTIONS_FIELD_NAME_STR})
+    learning_activities_per_user = interactions.groupby(user_field).size().reset_index().rename(columns={0: NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR})
 
-    print(f'mean: number of interactions per {user_field_name}: {interactions_per_user[NUMBER_OF_INTERACTIONS_FIELD_NAME_STR].mean()}')
-    print(f'median: number of interactions per {user_field_name}: {interactions_per_user[NUMBER_OF_INTERACTIONS_FIELD_NAME_STR].median()}')
-    print(f'max: number of interactions per {user_field_name}: {interactions_per_user[NUMBER_OF_INTERACTIONS_FIELD_NAME_STR].max()}')
-    print(f'min: number of interactions per {user_field_name}: {interactions_per_user[NUMBER_OF_INTERACTIONS_FIELD_NAME_STR].min()}')
-    print(f'std: number of interactions per {user_field_name}: {interactions_per_user[NUMBER_OF_INTERACTIONS_FIELD_NAME_STR].std()}')
-    print(f'iqr: number of interactions per {user_field_name}: {iqr(interactions_per_user[NUMBER_OF_INTERACTIONS_FIELD_NAME_STR])}')
+    print(f'mean: number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {user_field_name}: {learning_activities_per_user[NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR].mean()}')
+    print(f'median: number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {user_field_name}: {learning_activities_per_user[NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR].median()}')
+    print(f'max: number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {user_field_name}: {learning_activities_per_user[NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR].max()}')
+    print(f'min: number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {user_field_name}: {learning_activities_per_user[NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR].min()}')
+    print(f'std: number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {user_field_name}: {learning_activities_per_user[NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR].std()}')
+    print(f'iqr: number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {user_field_name}: {iqr(learning_activities_per_user[NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR])}')
 
-    return interactions_per_user
+    return learning_activities_per_user
 
 def print_and_return_unique_col2_per_col1(interactions: pd.DataFrame, col1_field: str, col2_field: str, number_unique_col2_per_col1_name: str):
     """Print and return unique col2 vals per col1 val 
@@ -130,7 +132,7 @@ def print_and_return_avg_num_unique_col3_over_col2_for_col1(interactions: pd.Dat
     Parameters
     ----------
     interactions : pd.DataFrame
-        The interactins dataframe
+        The interactions dataframe
     col1_field : str
         The col1 field column
     col2_field : str
@@ -177,21 +179,21 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
     if not group_field:
         interactions[GROUP_FIELD_NAME_STR] = '0'
 
-    # interactions per user
+    # learning_activities per user
     print('*'*100)
     print('*'*100)
     print(' ')
     print('-'*100)
-    print(f'Interactions per {USER_FIELD_NAME_STR}:')
+    print(f'Number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {USER_FIELD_NAME_STR}:')
     print('-'*100)
-    interactions_per_user = print_and_return_interactions_per_user(interactions, 
-                                                                   USER_FIELD_NAME_STR, 
-                                                                   USER_FIELD_NAME_STR)
+    learning_activities_per_user = print_and_return_learning_activities_per_user(interactions, 
+                                                                          USER_FIELD_NAME_STR, 
+                                                                          USER_FIELD_NAME_STR)
     print('\n')
     print('Plots:')
-    plot_distribution(interactions_per_user,
-                      NUMBER_OF_INTERACTIONS_FIELD_NAME_STR,
-                      NUMBER_OF_INTERACTIONS_PER_USER_STR,
+    plot_distribution(learning_activities_per_user,
+                      NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR,
+                      NUMBER_OF_LEARNING_ACTIVITIES_PER_USER_STR,
                       log_scale)
     print('*'*100)
     print('*'*100)

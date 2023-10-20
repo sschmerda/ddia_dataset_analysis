@@ -18,7 +18,7 @@ def get_nas_in_data(interactions: pd.DataFrame):
     pct_na = interactions.isna().sum() / len(interactions) * 100
     pct_na = pct_na.apply(str) + ' %'
 
-    return pct_na
+    print(pct_na)
 
 def map_new_to_old_values(interactions: pd.DataFrame,
                           group_field: str,
@@ -42,16 +42,17 @@ def map_new_to_old_values(interactions: pd.DataFrame,
     Returns
     -------
     tuple
-        A tuple containing the input interactions dataframe with mapped values in the specified categorical varible fields and a remapping dataframe which can be used in remapping the new to the original values.
+        A tuple containing the input interactions dataframe with mapped values in the specified categorical variable fields and a remapping dataframe which can be used in remapping the new to the original values.
     """
-    field_dict = {group_field: GROUP_FIELD_NAME_STR, user_field: USER_FIELD_NAME_STR, learning_activity_field: LEARNING_ACTIVITY_FIELD_NAME_STR}
-    field_dict = {k:v for k,v in field_dict.items() if k} 
+    field_dict = {user_field: USER_FIELD_NAME_STR, group_field: GROUP_FIELD_NAME_STR, learning_activity_field: LEARNING_ACTIVITY_FIELD_NAME_STR}
     mapping_dict_all_fields = {} 
 
     for field in field_dict.keys():
-        values = enumerate(interactions[field].dropna().unique())
-        mapping_dict = {v: str(n) for n,v in values}
-        interactions[field] = interactions[field].map(mapping_dict)
+        mapping_dict = {}
+        if field:
+            values = enumerate(interactions[field].dropna().unique())
+            mapping_dict = {v: str(n) for n,v in values}
+            interactions[field] = interactions[field].map(mapping_dict)
         mapping_dict_all_fields[field] = mapping_dict
 
     for k,v in field_dict.items():
@@ -59,15 +60,15 @@ def map_new_to_old_values(interactions: pd.DataFrame,
 
     old_new_mapping_dict = {}
     for k, v in mapping_dict_all_fields.items():
-        old_new_mapping_dict[f'{k} {NEW_VALUE_STR}'] = pd.Series(v.values()) 
-        old_new_mapping_dict[f'{k} {ORIGINAL_VALUE_STR}'] = pd.Series(v.keys()) 
+        old_new_mapping_dict[f'{k} {NEW_VALUE_STR}'] = pd.Series(v.values(), dtype='object') 
+        old_new_mapping_dict[f'{k} {ORIGINAL_VALUE_STR}'] = pd.Series(v.keys(), dtype='object') 
 
     value_mapping_df = pd.DataFrame(old_new_mapping_dict)
 
     return interactions, value_mapping_df
 
 def drop_na_by_fields(interactions: pd.DataFrame, field_list=[]):
-    """Drops rows of the interactins dataframe that havn NAs in any of the fields specified in field_list
+    """Drops rows of the interactions dataframe that have NAs in any of the fields specified in field_list
 
     Parameters
     ----------
@@ -79,7 +80,7 @@ def drop_na_by_fields(interactions: pd.DataFrame, field_list=[]):
     Returns
     -------
     pd.DataFrame
-        The dataframe with rows removed which habe NAs in any of the fields specified in field_list 
+        The dataframe with rows removed which have NAs in any of the fields specified in field_list 
     """    
     field_list = [i for i in field_list if i]
     input_len = interactions.shape[0]
@@ -89,7 +90,7 @@ def drop_na_by_fields(interactions: pd.DataFrame, field_list=[]):
     pct_removed = int(round((input_len - output_len) / input_len * 100))
 
     print(f'Input length: {input_len}')
-    print(f'Outpunt length: {output_len}')
+    print(f'Output length: {output_len}')
     print(f'Number of rows removed: {n_removed}')
     print(f'Percentage of rows removed: {pct_removed}%')
 
@@ -107,7 +108,7 @@ def drop_learning_activity_sequence_if_contains_na_in_field(interactions: pd.Dat
     interactions : pd.DataFrame
         The interactions dataframe
     group_field : str
-        The group field column
+        The group field column.
         Can be set to None if the interactions dataframe does not have a group_field
     user_field : str
         The user field column
@@ -187,30 +188,12 @@ def drop_learning_activity_sequence_if_contains_na_in_field(interactions: pd.Dat
 
     return interactions, na_indices_list
 
-def sort_by_timestamp(interactions: pd.DataFrame, timestamp_field: str, higher_level_sort_list=[]):
-    """Sorts the input dataframe by fields in higher_level_sort_list and the timestamp field
-
-    Parameters
-    ----------
-    interactions : pd.DataFrame
-        The interactions dataframe
-    timestamp_field : str
-        The timestamp field column
-    higher_level_sort_list : list, optional
-        A list containing fields of the interactions dataframe used for sorting before timestamp is taken in consideration, by default []
-
-    Returns
-    -------
-    pd.DataFrame
-        The sorted interactions dataframe
-    """
-    higher_level_sort_list.append(timestamp_field)
-    interactions = interactions.sort_values(by=higher_level_sort_list)
-    
-    return interactions
-
-def keep_last_repeated_learning_activities(interactions: pd.DataFrame, group_field: str, user_field: str, learning_activity_field: str, timestamp_field: str):
-    """Filters out all but the last of repeated learnig activities in the interactions dataframe per user-group sequence
+def sort_by_timestamp(interactions: pd.DataFrame,
+                      group_field: str,
+                      user_field: str,
+                      timestamp_field: str,
+                      order_field: str):
+    """Sorts the input dataframe by fields 
 
     Parameters
     ----------
@@ -218,111 +201,33 @@ def keep_last_repeated_learning_activities(interactions: pd.DataFrame, group_fie
         The interactions dataframe
     group_field : str
         The group field column
+        Can be set to None if the interactions dataframe does not have a group_field
     user_field : str
         The user field column
-    learning_activity_field : str
-        The learning_activity field column
     timestamp_field : str
         The timestamp field column
+    timestamp_field : str
+        The timestamp field column
+    order_field : str
+        The order field column
 
     Returns
     -------
     pd.DataFrame
-        The filtered dataframe
+        The sorted interactions dataframe
     """
-    interactions = interactions.reset_index(drop=True)
-    interactions = interactions.sort_values(by=[group_field, user_field, timestamp_field])
-    initial_len = interactions.shape[0]
-
-    keep_index_list = []
-
-    for _, df in tqdm(interactions.groupby([group_field, user_field])):
-
-        la_prev = None
-        
-        for index, learning_activity in df[learning_activity_field].iloc[::-1].items():
-
-            if learning_activity == la_prev:
-                continue
-            else:
-                keep_index_list.append(index)
-            
-            la_prev = learning_activity
-        
-    interactions = interactions.loc[keep_index_list]
-    interactions = interactions.sort_values(by=[group_field, user_field, timestamp_field])
-
-    final_len = interactions.shape[0]
-    n_removed_interactions = initial_len - final_len
-    n_removed_interactions_pct = (initial_len - final_len) / initial_len * 100
-
-    print('= Repeated Interactions Removal =')
-    print(f'Initial number of interactions: {initial_len}')
-    print(f'Final number of interactions: {final_len}')
-    print(f'Removed number of interactions: {n_removed_interactions}')
-    print(f'Removed percentage of interactions: {n_removed_interactions_pct}%')
-
+    sort_list = [group_field, user_field, timestamp_field, order_field]
+    sort_list = [i for i in sort_list if i]
+    interactions = interactions.sort_values(by=sort_list)
+    
     return interactions
 
-def keep_last_repeated_learning_activities_no_group(interactions: pd.DataFrame, user_field: str, learning_activity_field: str, timestamp_field: str):
-    """Filters out all but the last of repeated learnig activities in the interactions dataframe per user sequence
-
-    Parameters
-    ----------
-    interactions : pd.DataFrame
-        The interactions dataframe
-    user_field : str
-        The user field column
-    learning_activity_field : str
-        The learning_activity field column
-    timestamp_field : str
-        The timestamp field column
-
-    Returns
-    -------
-    pd.DataFrame
-        The filtered dataframe
-    """
-    interactions = interactions.reset_index(drop=True)
-    interactions = interactions.sort_values(by=[user_field, timestamp_field])
-    initial_len = interactions.shape[0]
-
-    keep_index_list = []
-
-    for _, df in tqdm(interactions.groupby([user_field])):
-
-        la_prev = None
-        
-        for index, learning_activity in df[learning_activity_field].iloc[::-1].items():
-
-            if learning_activity == la_prev:
-                continue
-            else:
-                keep_index_list.append(index)
-            
-            la_prev = learning_activity
-        
-    interactions = interactions.loc[keep_index_list]
-    interactions = interactions.sort_values(by=[user_field, timestamp_field])
-    final_len = interactions.shape[0]
-
-    n_removed_interactions = initial_len - final_len
-    n_removed_interactions_pct = (initial_len - final_len) / initial_len * 100
-
-    print('= Repeated Interactions Removal =')
-    print(f'Initial number of interactions: {initial_len}')
-    print(f'Final number of interactions: {final_len}')
-    print(f'Removed number of interactions: {n_removed_interactions}')
-    print(f'Removed percentage of interactions: {n_removed_interactions_pct}%')
-
-    return interactions
-
-def add_sequence_id_field(interactions: pd.DataFrame,
-                          group_field: str,
-                          user_field: str,
-                          learning_activity_field: str):
-    """Adds a sequence_id field to the interactions dataframe. An unique id is mapped to each unique sequence of learning
-    activities, indicating to which sequence a (group,user,learning_activity) entry belongs to.
+def keep_last_repeated_learning_activities(interactions: pd.DataFrame, 
+                                           group_field: str, 
+                                           user_field: str, 
+                                           learning_activity_field: str, 
+                                           timestamp_field: str):
+    """Filters out all but the last of repeated learning activities in the interactions dataframe per user-group sequence
 
     Parameters
     ----------
@@ -335,23 +240,84 @@ def add_sequence_id_field(interactions: pd.DataFrame,
         The user field column
     learning_activity_field : str
         The learning_activity field column
+    timestamp_field : str
+        The timestamp field column
+
+    Returns
+    -------
+    pd.DataFrame
+        The filtered dataframe
+    """
+    sort_list = [group_field, user_field, timestamp_field]
+    sort_list = [i for i in sort_list if i]
+    interactions = interactions.reset_index(drop=True)
+    interactions = interactions.sort_values(by=sort_list)
+    initial_len = interactions.shape[0]
+
+    keep_index_list = []
+
+    if group_field:
+        group_list = [group_field, user_field]
+    else:
+        group_list = user_field
+
+    for _, df in tqdm(interactions.groupby(group_list)):
+
+        la_prev = None
+        
+        for index, learning_activity in df[learning_activity_field].iloc[::-1].items():
+
+            if learning_activity == la_prev:
+                continue
+            else:
+                keep_index_list.append(index)
+            
+            la_prev = learning_activity
+        
+    interactions = interactions.loc[keep_index_list]
+    interactions = interactions.sort_values(by=sort_list)
+
+    final_len = interactions.shape[0]
+    n_removed_interactions = initial_len - final_len
+    n_removed_interactions_pct = (initial_len - final_len) / initial_len * 100
+
+    print(f'= Repeated Consecutive Learning Activity Removal =')
+    print(f'Initial number of {ROWS_NAME_STR.lower()}: {initial_len}')
+    print(f'Final number of {ROWS_NAME_STR.lower()}: {final_len}')
+    print(f'Removed number of {ROWS_NAME_STR.lower()}: {n_removed_interactions}')
+    print(f'Removed percentage of {ROWS_NAME_STR.lower()}: {n_removed_interactions_pct}%')
+
+    return interactions
+
+def add_sequence_id_field(interactions: pd.DataFrame,
+                          group_field: str):
+    """Adds a sequence_id field to the interactions dataframe. An unique id is mapped to each unique sequence of learning
+    activities, indicating to which sequence a (group,user,learning_activity) entry belongs to.
+
+    Parameters
+    ----------
+    interactions : pd.DataFrame
+        The interactions dataframe
+    group_field : str
+        The group field column
+        Can be set to None if the interactions dataframe does not have a group_field
 
     Returns
     -------
     pd.DataFrame
         The interactions dataframe with added sequence_id field
     """     
-    grouping_list = [group_field, user_field]
+    grouping_list = [group_field, USER_FIELD_NAME_STR]
     grouping_list = [i for i in grouping_list if i]
 
-    unique_sequences = interactions.groupby(grouping_list)[learning_activity_field].agg(tuple).rename(SEQUENCE_ID_FIELD_NAME_STR)
+    unique_sequences = interactions.groupby(grouping_list)[LEARNING_ACTIVITY_FIELD_NAME_STR].agg(tuple).rename(SEQUENCE_ID_FIELD_NAME_STR)
 
     sequence_id_mapping_dict = {seq:str(seq_id) for seq_id, seq in enumerate(unique_sequences.unique())}
     unique_sequences = unique_sequences.apply(lambda x: sequence_id_mapping_dict[x]).reset_index()
 
     interactions = interactions.merge(unique_sequences, how='inner', on=grouping_list)
 
-    sequence_id_column_index_positions = list(interactions.columns).index(learning_activity_field) + 1
+    sequence_id_column_index_positions = list(interactions.columns).index(LEARNING_ACTIVITY_FIELD_NAME_STR) + 1
     sequence_id_column = interactions.pop(SEQUENCE_ID_FIELD_NAME_STR)
     interactions.insert(sequence_id_column_index_positions, SEQUENCE_ID_FIELD_NAME_STR, sequence_id_column)
     
@@ -430,23 +396,23 @@ def typecast_fields(interactions: pd.DataFrame,
         The interactions dataframe
     timestamp_field : str
         The timestamp field column
-        Can be ommited if the interactions dataframe does not have a timestamp field
+        Can be set to None if the interactions dataframe does not have a timestamp field
     group_field : str
         The group field column
-        Can be ommited if the interactions dataframe does not have a group_field
+        Can be set to None if the interactions dataframe does not have a group_field
     user_field : str
         The user field column
-        Can be ommited if the interactions dataframe does not have a user_field
+        Can be set to None if the interactions dataframe does not have a user_field
     learning_activity_field : str
         The learning_activity field column
-        Can be ommited if the interactions dataframe does not have a learning_activity_field
+        Can be set to None if the interactions dataframe does not have a learning_activity_field
 
     Returns
     -------
     pd.DataFrame
         The interactions dataframe with typecast fields
     """
-    # typecast catergorical variable as strings
+    # typecast categorical variable as strings
     cat_field_list = [group_field, user_field, learning_activity_field]
     cat_typecast_dict = {i: 'str' for i in cat_field_list if i}
     interactions = interactions.astype(cat_typecast_dict)
@@ -462,7 +428,7 @@ def save_interaction_and_mapping_df(interactions: pd.DataFrame,
                                     value_mapping_dataframe: pd.DataFrame,
                                     path_to_dataset_folder: str,
                                     dataset_name: str):
-    """Saves the interactions and fields_mapping dataframes
+    """Saves the interactions and fields_mapping dataframes. Transforms headers to snake case.
 
     Parameters
     ----------
@@ -475,15 +441,22 @@ def save_interaction_and_mapping_df(interactions: pd.DataFrame,
     dataset_name : str
         The name used for saving the interactions dataset
     """
-    # interactions datafram
+    # interactions dataframe
+    field_name_list = interactions.columns
+    snake_case_field_name_list = [fn.replace(' ', '_').lower() for fn in field_name_list]
     interactions = interactions.reset_index(drop=True)
-    interactions.to_csv(path_to_dataset_folder + dataset_name + '.csv', index=False)
+    interactions.to_csv(path_to_dataset_folder + dataset_name + '.csv', index=False, header=snake_case_field_name_list)
 
     # field mapping dataframe
-    field_mapping_dataframe.to_csv(path_to_dataset_folder + dataset_name + FIELD_MAPPING_DATAFRAME_NAME_STR + '.csv', index=False)
+    field_mapping_dataframe[NEW_FIELDNAME_FIELD_NAME_STR] = field_mapping_dataframe[NEW_FIELDNAME_FIELD_NAME_STR].map(lambda x: x.replace(' ', '_').lower() if x else x)
+    field_name_list = field_mapping_dataframe.columns
+    snake_case_field_name_list = [fn.replace(' ', '_').lower() for fn in field_name_list]
+    field_mapping_dataframe.to_csv(path_to_dataset_folder + dataset_name + FIELD_MAPPING_DATAFRAME_NAME_STR + '.csv', index=False, header=snake_case_field_name_list)
 
     # value mapping dataframe
-    value_mapping_dataframe.to_csv(path_to_dataset_folder + dataset_name + VALUE_MAPPING_DATAFRAME_NAME_STR + '.csv', index=False)
+    field_name_list = value_mapping_dataframe.columns
+    snake_case_field_name_list = [fn.replace(' ', '_').lower() for fn in field_name_list]
+    value_mapping_dataframe.to_csv(path_to_dataset_folder + dataset_name + VALUE_MAPPING_DATAFRAME_NAME_STR + '.csv', index=False, header=snake_case_field_name_list)
 
 def pickle_write(object_to_pickle,
                  path_within_pickle_directory: str,
@@ -668,15 +641,15 @@ def return_learning_activity_sequence_stats_over_user_per_group(interactions: pd
     # helper functions
     def calc_n_repeated(seq_tuple):
         length = len(seq_tuple) 
-        n_uniuqe_elements = len(set(seq_tuple))
-        number_repeated_elements = length - n_uniuqe_elements
+        n_unique_elements = len(set(seq_tuple))
+        number_repeated_elements = length - n_unique_elements
 
         return number_repeated_elements
 
     def calc_pct_repeated(seq_tuple):
         length = len(seq_tuple) 
-        n_uniuqe_elements = len(set(seq_tuple))
-        number_repeated_elements = length - n_uniuqe_elements
+        n_unique_elements = len(set(seq_tuple))
+        number_repeated_elements = length - n_unique_elements
         percentage_repeated_elements = number_repeated_elements / length * 100
 
         return percentage_repeated_elements
@@ -1176,7 +1149,6 @@ def plot_sequence_stats(learning_activity_sequence_stats_per_group: pd.DataFrame
     g.set_title(LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_VS_FREQUENCY_TITLE_NAME_STR, 
                 fontsize=20)
     plt.show(g)
-
 
 def plot_distribution(data: pd.DataFrame,
                       x_var: str,
