@@ -67,7 +67,8 @@ def map_new_to_old_values(interactions: pd.DataFrame,
 
     return interactions, value_mapping_df
 
-def drop_na_by_fields(interactions: pd.DataFrame, field_list=[]):
+def drop_na_by_fields(interactions: pd.DataFrame, 
+                      field_list=[]):
     """Drops rows of the interactions dataframe that have NAs in any of the fields specified in field_list
 
     Parameters
