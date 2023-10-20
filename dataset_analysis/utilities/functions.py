@@ -206,8 +206,6 @@ def sort_by_timestamp(interactions: pd.DataFrame,
         The user field column
     timestamp_field : str
         The timestamp field column
-    timestamp_field : str
-        The timestamp field column
     order_field : str
         The order field column
 
