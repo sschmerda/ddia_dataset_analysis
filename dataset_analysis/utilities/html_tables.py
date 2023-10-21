@@ -39,10 +39,16 @@ class HtmlTables():
     n_unique_users_str = f'# of Unique {USER_FIELD_NAME_STR}s'
     n_unique_learning_activities_str = f'# of Unique {LEARNING_ACTIVITY_FIELD_NAME_STR}s'
     n_unique_groups_str = f'# of Unique {GROUP_FIELD_NAME_STR}s'
-    n_sequences_str = f'# of {SEQUENCE_STR}s'
-    n_unique_sequences_str = f'# of Unique {SEQUENCE_STR}s'
     sparsity_user_learning_activity_matrix_str = f'Sparsity {USER_FIELD_NAME_STR}-{LEARNING_ACTIVITY_FIELD_NAME_STR} Matrix %'
     sparsity_user_group_matrix_str = f'Sparsity {USER_FIELD_NAME_STR}-{GROUP_FIELD_NAME_STR} Matrix %'
+
+    # sequence statistics
+    n_sequences_str = f'# of {SEQUENCE_STR}s'
+    n_unique_sequences_str = f'# of Unique {SEQUENCE_STR}s'
+    mean_sequence_length_str = f'Mean {SEQUENCE_STR} Length'
+    median_sequence_length_str = f'Median {SEQUENCE_STR} Length'
+    std_sequence_length_str = f'Standard Deviation {SEQUENCE_STR} Length'
+    iqr_sequence_length_str = f'IQR {SEQUENCE_STR} Length'
 
     def __init__(self, 
                  dataset_name, 
@@ -59,6 +65,7 @@ class HtmlTables():
         self.available_fields_df = self._gen_available_fields_df()
         self.score_is_correct_rel_df = self._gen_score_is_correct_rel_df()
         self.summary_statistics_df = self._gen_summary_statistics_df()
+        self.sequence_statistics_df = self._gen_sequence_statistics_df()
 
         # set interactions to None in order to reduce object size
         self.interactions = None
@@ -162,11 +169,6 @@ class HtmlTables():
 
         if self.html_tables_data_list[1][0]:
             n_unique_groups = int(self.interactions[GROUP_FIELD_NAME_STR].nunique())
-            n_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR]).ngroups)
-            n_unique_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])\
-                                                      [LEARNING_ACTIVITY_FIELD_NAME_STR]\
-                                                       .agg(lambda x: tuple(x.to_list())).nunique())
-
             sparsity_user_learning_activity_matrix = round(calculate_sparsity(self.interactions[USER_FIELD_NAME_STR],
                                                                               self.interactions[LEARNING_ACTIVITY_FIELD_NAME_STR]), 
                                                            2)
@@ -176,11 +178,6 @@ class HtmlTables():
 
         else:
             n_unique_groups = None
-            n_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR]).ngroups)
-            n_unique_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR])\
-                                                      [LEARNING_ACTIVITY_FIELD_NAME_STR]\
-                                                      .agg(lambda x: tuple(x.to_list())).nunique())
-
             sparsity_user_learning_activity_matrix = round(calculate_sparsity(self.interactions[USER_FIELD_NAME_STR],
                                                                               self.interactions[LEARNING_ACTIVITY_FIELD_NAME_STR]),
                                                            2)
@@ -190,22 +187,79 @@ class HtmlTables():
                HtmlTables.n_unique_users_str, 
                HtmlTables.n_unique_groups_str, 
                HtmlTables.n_unique_learning_activities_str, 
-               HtmlTables.n_sequences_str, 
-               HtmlTables.n_unique_sequences_str, 
                HtmlTables.sparsity_user_learning_activity_matrix_str, 
                HtmlTables.sparsity_user_group_matrix_str]
         data = [n_rows, 
                 n_unique_users, 
                 n_unique_groups, 
                 n_unique_learning_activities, 
-                n_sequences, 
-                n_unique_sequences, 
                 sparsity_user_learning_activity_matrix, 
                 sparsity_user_group_matrix]
         data_dict = {self.dataset_name: data}
         summary_statistics_df = pd.DataFrame(data_dict, index=idx)
 
         return summary_statistics_df
+
+    def _gen_sequence_statistics_df(self):
+        """Returns a dataframe which contains sequence statistics of the input interactions dataframe.
+
+        Returns
+        -------
+        pd.DataFrame
+            A dataframe containing sequence statistics of the input interactions dataframe
+        """        
+
+        if self.html_tables_data_list[1][0]:
+            n_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR]).ngroups)
+            n_unique_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])\
+                                                      [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                       .agg(lambda x: tuple(x.to_list())).nunique())
+            mean_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).mean(), 2)
+            median_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).median(), 2)
+            std_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).std(), 2)
+            iqr_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).quantile(0.5), 2)
+
+        else:
+            n_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR]).ngroups)
+            n_unique_sequences = int(self.interactions.groupby([USER_FIELD_NAME_STR])\
+                                                      [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                      .agg(lambda x: tuple(x.to_list())).nunique())
+            mean_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).mean(), 2)
+            median_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).median(), 2)
+            std_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).std(), 2)
+            iqr_sequence_length = round(self.interactions.groupby([USER_FIELD_NAME_STR])\
+                                                    [LEARNING_ACTIVITY_FIELD_NAME_STR]\
+                                                    .agg(lambda x: len(x)).quantile(0.5), 2)
+        idx = [HtmlTables.n_sequences_str, 
+               HtmlTables.n_unique_sequences_str, 
+               HtmlTables.mean_sequence_length_str,
+               HtmlTables.median_sequence_length_str,
+               HtmlTables.std_sequence_length_str,
+               HtmlTables.iqr_sequence_length_str]
+        data = [n_sequences, 
+                n_unique_sequences, 
+                mean_sequence_length,
+                median_sequence_length,
+                std_sequence_length,
+                iqr_sequence_length]
+        data_dict = {self.dataset_name: data}
+        sequence_statistics_df = pd.DataFrame(data_dict, index=idx)
+
+        return sequence_statistics_df
 
     def display_available_fields(self):
         """Displays the available fields html table.
@@ -249,9 +303,7 @@ class HtmlTables():
         idx = [HtmlTables.n_rows_str, 
                HtmlTables.n_unique_users_str, 
                HtmlTables.n_unique_groups_str, 
-               HtmlTables.n_unique_learning_activities_str, 
-               HtmlTables.n_sequences_str, 
-               HtmlTables.n_unique_sequences_str]
+               HtmlTables.n_unique_learning_activities_str]
 
         typecast_dict = {i: 'int' for i in idx if summary_statistics_df[i].notna()[0]}
         summary_statistics_df = summary_statistics_df.astype(typecast_dict)
@@ -263,3 +315,23 @@ class HtmlTables():
         summary_statistics_df = summary_statistics_df.replace(f'NaN', f'-')
 
         display(Markdown(summary_statistics_df))
+
+    def display_sequence_statistics(self):
+        """Displays the sequence statistics html table.
+        """
+        # typecast fields to int
+        sequence_statistics_df = self.sequence_statistics_df.transpose()
+
+        idx = [HtmlTables.n_sequences_str, 
+               HtmlTables.n_unique_sequences_str]
+
+        typecast_dict = {i: 'int' for i in idx if sequence_statistics_df[i].notna()[0]}
+        sequence_statistics_df = sequence_statistics_df.astype(typecast_dict)
+
+        sequence_statistics_df = sequence_statistics_df.to_html(notebook=False, index=True, sparsify=True)
+        sequence_statistics_df = sequence_statistics_df.replace('<th>', '<th style = "background-color: royalblue; color: white; text-align:center">')
+        sequence_statistics_df = sequence_statistics_df.replace('<td>', '<td style = "background-color: rgb(0, 0, 204); color: white; text-align:center">')
+        sequence_statistics_df = sequence_statistics_df.replace(f'<th style = "background-color: royalblue; color: white; text-align:center">{self.dataset_name}</th>', f'<th style = "background-color: rgb(80, 80, 80); color: white; text-align:center">{self.dataset_name}</th>')
+        sequence_statistics_df = sequence_statistics_df.replace(f'NaN', f'-')
+
+        display(Markdown(sequence_statistics_df))
