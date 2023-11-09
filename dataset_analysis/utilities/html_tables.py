@@ -19,36 +19,36 @@ class HtmlTables():
         A list containing data about evaluation fields at the learning activity, group and course level.
     """    
     # available fields class vars
-    is_available_str = 'Is Available'
-    field_str = 'Field'
+    is_available_str = IS_AVAILABLE_STR
+    field_str = FIELD_STR
 
     # score is_correct relationship class vars
-    has_field_str = 'Has Field'
-    has_score_field_str = 'Has Score Field'
-    has_is_correct_field_str = 'Has Is_Correct Field'
-    chosen_score_correct_threshold_str = 'Chosen Score Is_Correct Threshold'
-    score_minimum_docu_str = 'Score Minimum In Documentation'
-    score_maximum_docu_str = 'Score Maximum In Documentation'
-    are_equal_all_score_minima_str = 'Score Minimum in Data Identical Over Evaluation Elements' 
-    are_equal_all_score_maxima_str = 'Score Maximum in Data Identical Over Evaluation Elements' 
-    score_minimum_data_str = 'Score Minimum in Data'
-    score_maximum_data_str = 'Score Maximum in Data'
+    has_field_str = HAS_FIELD_STR
+    has_score_field_str = HAS_SCORE_FIELD_STR
+    has_is_correct_field_str = HAS_IS_CORRECT_FIELD_STR
+    chosen_score_correct_threshold_str = CHOSEN_SCORE_CORRECT_THRESHOLD_STR
+    score_minimum_docu_str = SCORE_MINIMUM_DOCU_STR
+    score_maximum_docu_str = SCORE_MAXIMUM_DOCU_STR
+    are_equal_all_score_minima_str = ARE_EQUAL_ALL_SCORE_MINIMA_STR 
+    are_equal_all_score_maxima_str = ARE_EQUAL_ALL_SCORE_MAXIMA_STR 
+    score_minimum_data_str = SCORE_MINIMUM_DATA_STR
+    score_maximum_data_str = SCORE_MAXIMUM_DATA_STR
 
     # summary statistics class vars
-    n_rows_str = f'# of {ROWS_NAME_STR}'
-    n_unique_users_str = f'# of Unique {USER_FIELD_NAME_STR}s'
-    n_unique_learning_activities_str = f'# of Unique {LEARNING_ACTIVITY_FIELD_NAME_STR}s'
-    n_unique_groups_str = f'# of Unique {GROUP_FIELD_NAME_STR}s'
-    sparsity_user_learning_activity_matrix_str = f'Sparsity {USER_FIELD_NAME_STR}-{LEARNING_ACTIVITY_FIELD_NAME_STR} Matrix %'
-    sparsity_user_group_matrix_str = f'Sparsity {USER_FIELD_NAME_STR}-{GROUP_FIELD_NAME_STR} Matrix %'
+    n_rows_str = N_ROWS_STR
+    n_unique_users_str = N_UNIQUE_USERS_STR
+    n_unique_learning_activities_str = N_UNIQUE_LEARNING_ACTIVITIES_STR
+    n_unique_groups_str = N_UNIQUE_GROUPS_STR
+    sparsity_user_learning_activity_matrix_str = SPARSITY_USER_LEARNING_ACTIVITY_MATRIX_STR
+    sparsity_user_group_matrix_str = SPARSITY_USER_GROUP_MATRIX_STR
 
     # sequence statistics
-    n_sequences_str = f'# of {SEQUENCE_STR}s'
-    n_unique_sequences_str = f'# of Unique {SEQUENCE_STR}s'
-    mean_sequence_length_str = f'Mean {SEQUENCE_STR} Length'
-    median_sequence_length_str = f'Median {SEQUENCE_STR} Length'
-    std_sequence_length_str = f'Standard Deviation {SEQUENCE_STR} Length'
-    iqr_sequence_length_str = f'IQR {SEQUENCE_STR} Length'
+    n_sequences_str = N_SEQUENCES_STR
+    n_unique_sequences_str = N_UNIQUE_SEQUENCES_STR
+    mean_sequence_length_str = MEAN_SEQUENCE_LENGTH_STR
+    median_sequence_length_str = MEDIAN_SEQUENCE_LENGTH_STR
+    std_sequence_length_str = STD_SEQUENCE_LENGTH_STR
+    iqr_sequence_length_str = IQR_SEQUENCE_LENGTH_STR
 
     def __init__(self, 
                  dataset_name, 
@@ -71,7 +71,7 @@ class HtmlTables():
         self.interactions = None
 
     def _gen_available_fields_df(self):
-        """Returns a dataframe which contains information about what fields are available in the input interactins dataframe.
+        """Returns a dataframe which contains information about what fields are available in the input interactions dataframe.
 
         Returns
         -------
@@ -149,7 +149,7 @@ class HtmlTables():
                HtmlTables.are_equal_all_score_maxima_str, 
                HtmlTables.score_minimum_data_str, 
                HtmlTables.score_maximum_data_str]
-        score_is_correct_rel_df = pd.DataFrame(data_dict, index=idx)
+        score_is_correct_rel_df = pd.DataFrame(data_dict, index=idx).fillna(np.nan)
         score_is_correct_rel_df.columns = pd.MultiIndex.from_product([[self.dataset_name], score_is_correct_rel_df.columns])
 
         return score_is_correct_rel_df
@@ -268,8 +268,8 @@ class HtmlTables():
         for i in self.available_fields_df.iloc[:, 0]:
             available_fields_df = available_fields_df.replace(f'<td>{i}</td>', f'<td style = "background-color: rgb(80, 80, 80); color: white">{i}</td>')
 
-        available_fields_df = available_fields_df.replace(f'<th>{HtmlTables.field_str}</th>', '<th> </th>')
-        available_fields_df = available_fields_df.replace('<th></th>', f'<th>{HtmlTables.field_str}</th>')
+        # available_fields_df = available_fields_df.replace(f'<th>{HtmlTables.field_str}</th>', '<th> </th>')
+        # available_fields_df = available_fields_df.replace('<th></th>', f'<th>{HtmlTables.field_str}</th>')
         available_fields_df = available_fields_df.replace('<th>', '<th style = "background-color: royalblue; color: white; text-align:center">')
         available_fields_df = available_fields_df.replace('<td>True</td>', '<td style = "background-color: green; color: white; text-align:center">True</td>')
         available_fields_df = available_fields_df.replace('<td>False</td>', '<td style = "background-color: red; color: white; text-align:center">False</td>')
@@ -285,12 +285,12 @@ class HtmlTables():
         score_is_correct_rel_df = score_is_correct_rel_df.replace(f'<th rowspan="3" valign="top">{self.dataset_name}</th>', f'<th rowspan="3" valign="top" style = "background-color: rgb(80, 80, 80); color: white">{self.dataset_name}</th>')
         score_is_correct_rel_df = score_is_correct_rel_df.replace('<td>True</td>', '<td style = "background-color: green; color: white; text-align:center">True</td>')
         score_is_correct_rel_df = score_is_correct_rel_df.replace('<td>False</td>', '<td style = "background-color: red; color: white; text-align:center">False</td>')
+        score_is_correct_rel_df = score_is_correct_rel_df.replace(f'<td>NaN</td>', '<td style = "text-align:center">-</td>')
         score_is_correct_rel_df = score_is_correct_rel_df.replace('<td>', '<td style = "background-color: rgb(0, 0, 204); color: white; text-align:center">')
-        score_is_correct_rel_df = score_is_correct_rel_df.replace('<td style = "background-color: rgb(0, 0, 204); color: white; text-align:center">None</td>', '<td>None</td>')
+        score_is_correct_rel_df = score_is_correct_rel_df.replace(f'<td style = "background-color: rgb(0, 0, 204); color: white; text-align:center">{np.nan}</td>', f'<td>{np.nan}</td>')
         score_is_correct_rel_df = score_is_correct_rel_df.replace(f'<th style = "background-color: royalblue; color: white; text-align:center">{LEARNING_ACTIVITY_FIELD_NAME_STR}</th>', f'<th style = "background-color: rgb(80, 80, 80); color: white; text-align:center">{LEARNING_ACTIVITY_FIELD_NAME_STR}</th>')
         score_is_correct_rel_df = score_is_correct_rel_df.replace(f'<th style = "background-color: royalblue; color: white; text-align:center">{GROUP_FIELD_NAME_STR}</th>', f'<th style = "background-color: rgb(80, 80, 80); color: white; text-align:center">{GROUP_FIELD_NAME_STR}</th>')
         score_is_correct_rel_df = score_is_correct_rel_df.replace(f'<th style = "background-color: royalblue; color: white; text-align:center">{COURSE_FIELD_NAME_STR}</th>', f'<th style = "background-color: rgb(80, 80, 80); color: white; text-align:center">{COURSE_FIELD_NAME_STR}</th>')
-        score_is_correct_rel_df = score_is_correct_rel_df.replace('<td>None</td>', '<td style = "text-align:center">-</td>')
 
         display(Markdown(score_is_correct_rel_df))
     
