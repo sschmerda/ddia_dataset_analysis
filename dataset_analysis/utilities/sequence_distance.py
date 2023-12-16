@@ -1,5 +1,7 @@
 from .standard_import import *
+from .functions import *
 from .constants import *
+from .io_functions import *
 
 class SeqDist:
     """
@@ -17,10 +19,12 @@ class SeqDist:
         Then name of the learning activity field.
     sequence_id_field: str
         Then name of the sequence id field.
+    has_groups: str
+        A flag indicating whether the learning activity sequences in data are separated into different groups.
 
     Methods
     -------
-    get_user_sequence_distances_per_group(distance function,\
+    calc_user_sequence_distances_per_group(distance function,\
                                           min_number_of_users_per_group=None,\
                                           min_number_avg_seq_len=None,\
                                           top_n_groups_by_user_number=None,\
@@ -38,28 +42,37 @@ class SeqDist:
     LEARNING_ACTIVITY_CHAR_COL_INDEX = 4
 
     def __init__(self,
+                 dataset_name: str,
                  data: pd.DataFrame,
                  user_field: str,
                  group_field: str,
                  learning_activity_field: str,
-                 sequence_id_field: str):
+                 sequence_id_field: str,
+                 has_groups: bool):
 
-        self.data = data
+        self.dataset_name = dataset_name
+        self.data = data.copy()
         self.user_field = user_field
         self.group_field = group_field
         self.learning_activity_field = learning_activity_field
         self.sequence_id_field = sequence_id_field
+
+        if not has_groups:
+            self.data[self.group_field] = '0'
         
-        #Initial data transformation
+        # initial data transformation
         self._select_fields_and_transform_to_numpy()
         self._transform_to_char()
 
         self.group_array = np.unique(self.data[:, SeqDist.GROUP_COL_INDEX])
         self.user_array = np.unique(self.data[:, SeqDist.USER_COL_INDEX])
 
+        # directory where sequence distance pickle files will be written to
+        self.result_directory = [PATH_TO_SEQUENCE_DISTANCES_PICKLE_FOLDER, self.dataset_name]
+
     def _select_fields_and_transform_to_numpy(self):
 
-        self.data = self.data[[self.group_field, self.user_field, self.learning_activity_field, self.sequence_id_field, self.learning_activity_field]].astype('string').values
+        self.data = self.data[[self.group_field, self.user_field, self.learning_activity_field, self.sequence_id_field, self.learning_activity_field]].astype('str').values
 
     def _transform_to_char(self):
         """Maps unique characters to learning activities and returns the transformed series (tokenization)
@@ -86,7 +99,7 @@ class SeqDist:
             except:
                 break
         
-        # pandas cannot distinguish between some unicode charactes -> reduce chars to the ones
+        # pandas cannot distinguish between some unicode characters -> reduce chars to the ones
         # readable by pandas
         chars = pd.Series(chars).unique()
 
@@ -99,24 +112,135 @@ class SeqDist:
         char_array = [lr_mapping[i] for i in self.data[:, SeqDist.LEARNING_ACTIVITY_COL_INDEX]]
 
         self.data[:, SeqDist.LEARNING_ACTIVITY_CHAR_COL_INDEX] = char_array
-        
-    @staticmethod
-    def _generate_char_string(learning_activities: np.ndarray):
-        """Concatenates the elements of an array into a single string
 
-        Parameters
-        ----------
-        learning_activity : ndarray
-            An numpy array 
+    def _filter_data_by_group(self,
+                              data: np.ndarray,
+                              group: str) -> np.ndarray:
 
-        Returns
-        -------
-        str
-            the concatenated string
-        """
-        char_string = "".join(learning_activities)
+        data = data[data[:, self.GROUP_COL_INDEX] == group, :].copy()
+
+        return data
+
+    def _calculate_sequence_distances(self,
+                                      group, 
+                                      group_data, 
+                                      distance_function,
+                                      *args,
+                                      **kwargs) -> None:
+
+        user_array, idx = np.unique(group_data[:, self.USER_COL_INDEX], return_index=True)
+        user_sequence_id_array = group_data[:, self.SEQUENCE_ID_COL_INDEX][idx]
+        user_sequence_id_mapping_dict = dict(zip(user_array, user_sequence_id_array))
+            
+        users = group_data[:, self.USER_COL_INDEX]
+        learning_activities_char = group_data[:, self.LEARNING_ACTIVITY_CHAR_COL_INDEX]
+        learning_activities = group_data[:, self.LEARNING_ACTIVITY_COL_INDEX]
+
+        # generate a user - sequence mapping + user sequence length/ user sequence array(learning activity ids)
+        user_learning_activity_df = pd.DataFrame({USER_FIELD_NAME_STR: users,
+                                                  LEARNING_ACTIVITY_SEQUENCE_CHARACTERS_NAME_STR: learning_activities_char,
+                                                  LEARNING_ACTIVITY_FIELD_NAME_STR: learning_activities})
+        user_char_string_mapping_dict = (user_learning_activity_df.groupby(USER_FIELD_NAME_STR)
+                                                                          [LEARNING_ACTIVITY_SEQUENCE_CHARACTERS_NAME_STR]
+                                                                  .sum()
+                                                                  .to_dict())
+        len_seq_df = user_learning_activity_df.groupby(USER_FIELD_NAME_STR)[LEARNING_ACTIVITY_FIELD_NAME_STR].agg([len, tuple])
+        user_sequence_length = len_seq_df['len'].to_list()
+        user_sequence_array = len_seq_df['tuple'].to_list()
+
+        # generate a sequence_combination - sequence_distance/max_sequence_length mapping 
+        sequence_id_char_string_mapping_dict = {seq_id: user_char_string_mapping_dict[user] for user, seq_id in user_sequence_id_mapping_dict.items()}
+        sequence_id_array = list(sequence_id_char_string_mapping_dict.keys())
+        sequence_len_array = [len(char_string) for char_string in sequence_id_char_string_mapping_dict.values()] 
+
+        sequence_combinations_with_replacement = [tuple(sorted(i, key=int)) for i in list(combinations_with_replacement(sequence_id_array, 2))]
+        sequence_combinations = [tuple(sorted(i, key=int)) for i in list(combinations(sequence_id_array, 2))]
+
+        sequence_distance_dict={}
+        for sequence_combination in sequence_combinations_with_replacement:
+
+            char_sequence_1 = sequence_id_char_string_mapping_dict[sequence_combination[0]]
+            char_sequence_2 = sequence_id_char_string_mapping_dict[sequence_combination[1]]
+            sequence_distance = distance_function(char_sequence_1, char_sequence_2, *args, **kwargs)
+            max_sequence_length = max(len(char_sequence_1), len(char_sequence_2))
+
+            sequence_distance_dict[sequence_combination] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: sequence_distance,
+                                                            LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_sequence_length}
+        # generate the sequence_distances_per_group dictionary   
+        user_combinations = [tuple(sorted(i, key=int)) for i in combinations(user_array, 2)] 
+
+        sequence_distance_list = []
+        max_sequence_length_list = []
+        user_a_list = []
+        user_b_list = []
+        sequence_id_a_list = []
+        sequence_id_b_list = []
+        for user_combination in user_combinations:
+
+            sequence_1 = user_sequence_id_mapping_dict[user_combination[0]]
+            sequence_2 = user_sequence_id_mapping_dict[user_combination[1]]
+
+            sequence_tuple = tuple(sorted((sequence_1, sequence_2), key=int))
+
+            sequence_distance = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
+            max_sequence_length = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
+            sequence_id_combination = tuple(sorted((sequence_1, sequence_2), key=int))
+                
+            sequence_distance_list.append(sequence_distance)
+            max_sequence_length_list.append(max_sequence_length)
+            user_a_list.append(user_combination[0])
+            user_b_list.append(user_combination[1])
+            sequence_id_a_list.append(sequence_id_combination[0])
+            sequence_id_b_list.append(sequence_id_combination[1])
+
+        sequence_distances = {DATASET_NAME_STR: self.dataset_name,
+                              GROUP_FIELD_NAME_STR: int(group),
+                              LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: sequence_distance_list,
+                              LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_sequence_length_list,
+                              LEARNING_ACTIVITY_SEQUENCE_USER_COMBINATION_USER_A_NAME_STR: user_a_list,
+                              LEARNING_ACTIVITY_SEQUENCE_USER_COMBINATION_USER_B_NAME_STR: user_b_list,
+                              LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_A_NAME_STR: sequence_id_a_list,
+                              LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_B_NAME_STR: sequence_id_b_list,
+                              LEARNING_ACTIVITY_SEQUENCE_USER_NAME_STR: user_array,
+                              LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: user_sequence_id_array,
+                              LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: user_sequence_length,
+                              LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR: user_sequence_array}
+            
+        # generate the unique_sequence_distances_per_group dictionary   
+        unique_sequence_distance_list = []
+        max_unique_sequence_length_list = []
+        unique_sequence_id_a_list = []
+        unique_sequence_id_b_list = []
+
+        for sequence_combination in sequence_combinations:
+
+            unique_sequence_distance = sequence_distance_dict[sequence_combination][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
+            max_unique_sequence_length = sequence_distance_dict[sequence_combination][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
+
+            unique_sequence_distance_list.append(unique_sequence_distance)
+            max_unique_sequence_length_list.append(max_unique_sequence_length)
+            unique_sequence_id_a_list.append(sequence_combination[0])
+            unique_sequence_id_b_list.append(sequence_combination[1])
+            
+        unique_sequence_distances = {DATASET_NAME_STR: self.dataset_name,
+                                     GROUP_FIELD_NAME_STR: int(group),
+                                     LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: unique_sequence_distance_list,
+                                     LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_unique_sequence_length_list,
+                                     LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_A_NAME_STR: unique_sequence_id_a_list,
+                                     LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_B_NAME_STR: unique_sequence_id_b_list,
+                                     LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: sequence_id_array,
+                                     LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: sequence_len_array}
+
+        sequence_distances_dict = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_USER_COMBINATIONS_NAME_STR: sequence_distances,
+                                   LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_SEQUENCE_COMBINATIONS_NAME_STR: unique_sequence_distances}
+
+        # write dictionary to disk
+        filename = f'{self.dataset_name}{SEQUENCE_DISTANCE_DICT_PICKLE_NAME}{GROUP_FIELD_NAME_STR}_{group}'
+        pickle_write(sequence_distances_dict,
+                     self.result_directory,
+                     filename)
         
-        return char_string
+        return None
 
 
     def _get_col1_by_min_number_col2(self,
@@ -380,23 +504,32 @@ class SeqDist:
 
         return col1_array
 
-    def get_user_sequence_distances_per_group(self,
-                                              distance_function,
-                                              min_number_of_users_per_group=None,
-                                              min_number_avg_seq_len=None,
-                                              top_n_groups_by_user_number=None,
-                                              is_pct_top_n_groups_by_user_number=False,
-                                              top_n_groups_by_median_seq_len=None,
-                                              is_pct_top_n_groups_by_median_seq_len=False,
-                                              sample_pct=None,
-                                              sample_pct_user=None) -> dict:
+    def calc_user_sequence_distances_per_group(self,
+                                               parallelize_computation: bool,
+                                               distance_function,
+                                               *args,
+                                               min_number_of_users_per_group=None,
+                                               min_number_avg_seq_len=None,
+                                               top_n_groups_by_user_number=None,
+                                               is_pct_top_n_groups_by_user_number=False,
+                                               top_n_groups_by_median_seq_len=None,
+                                               is_pct_top_n_groups_by_median_seq_len=False,
+                                               sample_pct=None,
+                                               sample_pct_user=None,
+                                               **kwargs) -> None:
         """For each group calculates the (learning activity-) sequence distances between each possible user\
-           combination(seq_distances) and sequence combination(unique_seq_distances) pair.
+           combination(seq_distances) and sequence combination(unique_seq_distances) pair. The result,\
+           a dictionary containing sequence distances between user combinations and sequence combinations,\
+           will be saved as pickle file for each group. 
 
         Parameters
         ----------
+         parallelize_computation : 
+            A flag indicating whether the sequence distance calculations should be done in parallel
         distance_function : 
-            A sequence distance function from the textdistance library.
+            A sequence distance function taking 2 strings as the first two positional arguments as input.
+        *args :
+            Positional arguments for the respective distance function.
         min_number_of_users_per_group : int, optional
             The minimum number of users a group is allowed to have., by default None
         min_number_avg_seq_len : int, optional
@@ -414,25 +547,17 @@ class SeqDist:
         sample_pct_user : int, optional
             The percentage of users to be sampled. This takes place after all group filter. Must be between 1 and 100.,\
             by default None
+        **kwargs :
+            Keyword arguments for the respective distance function.
 
         Returns
         -------
-        dict
-            A dictionary consisting of:\
-
-            A dictionary containing for every group a ndarray of sequence distances between user combinations, 
-            a ndarray of lengths of the longer of two compared sequences, a ndarray of users id combinations used\
-            for sequence distance calculation, a ndarray of sequence id combinations, a ndarray of user ids per group,\
-            a ndarray of sequence lengths for every user per group, a ndarray of sequence ids and a ndarray of tuples\
-            containing the sequence of learning activities the sequence ids map to.\
-
-            A dictionary containing for every group a ndarray of sequence distances between sequence combinations,\
-            a ndarray of lengths of the longer of two compared sequence and a ndarray of sequence id combinations.
+        None
         """        
         # aLgorithm start
         start_time = time.time()
 
-        group_array = self.group_array
+        group_array = self.group_array.copy()
         print(50*'-')
         print(f'Total number of {GROUP_FIELD_NAME_STR}: {group_array.size}')
         print(50*'-')
@@ -478,7 +603,7 @@ class SeqDist:
                                             f'{GROUP_FIELD_NAME_STR}s')
         
         # filter original dataframe by sampled groups
-        data = self.data[np.isin(self.data[:, self.GROUP_COL_INDEX], group_array), :]
+        data = self.data[np.isin(self.data[:, self.GROUP_COL_INDEX], group_array), :].copy()
         user_after_group_filter = np.unique(data[:, self.USER_COL_INDEX])
 
         # filter original dataframe by sampled users
@@ -498,103 +623,24 @@ class SeqDist:
         print(f'Final number of {ROWS_NAME_STR}: {interactions_left}')
         print(50*'-')
 
-        sequence_distances_per_group = {}
-        unique_sequence_distances_per_group = {}
-
-        for group in tqdm(group_array):
-            
-            group_data = data[data[:, self.GROUP_COL_INDEX]==group, :]
-            user_array = np.unique(group_data[:, self.USER_COL_INDEX])
-            user_sequence_id_array = [group_data[group_data[:, self.USER_COL_INDEX]==i, self.SEQUENCE_ID_COL_INDEX][0] for i in user_array]
-            user_sequence_id_mapping_dict = dict(zip(user_array, user_sequence_id_array))
-            
-            users = group_data[:, self.USER_COL_INDEX]
-            learning_activities_char = group_data[:, self.LEARNING_ACTIVITY_CHAR_COL_INDEX]
-            learning_activities = group_data[:, self.LEARNING_ACTIVITY_COL_INDEX]
-
-
-            # generate a user - sequence mapping
-            user_char_string_mapping_dict = {}
-            user_sequence_length = []
-            user_sequence_array = []
-            for user in user_array:
-                user_learning_activities_char = learning_activities_char[users==user]
-                user_learning_activities = tuple(learning_activities[users==user])
-                char_string = self._generate_char_string(user_learning_activities_char)
-                user_char_string_mapping_dict[user] = char_string 
-                user_sequence_length.append(len(char_string))
-                user_sequence_array.append(user_learning_activities)
-
-            # generate a sequence_combination - sequence_distance/max_sequence_length mapping 
-            sequence_id_char_string_mapping_dict = {seq_id: user_char_string_mapping_dict[user] for user, seq_id in user_sequence_id_mapping_dict.items()}
-            sequence_id_array = list(sequence_id_char_string_mapping_dict.keys())
-
-            sequence_combinations_with_replacement = [tuple(sorted(i, key=int)) for i in list(combinations_with_replacement(sequence_id_array, 2))]
-            sequence_combinations = [tuple(sorted(i, key=int)) for i in list(combinations(sequence_id_array, 2))]
-
-            sequence_distance_dict={}
-            for sequence_combination in sequence_combinations_with_replacement:
-
-                char_sequence_1 = sequence_id_char_string_mapping_dict[sequence_combination[0]]
-                char_sequence_2 = sequence_id_char_string_mapping_dict[sequence_combination[1]]
-                sequence_distance = distance_function(char_sequence_1, char_sequence_2)
-                max_sequence_length = max(len(char_sequence_1), len(char_sequence_2))
-
-                sequence_distance_dict[sequence_combination] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: sequence_distance,
-                                                                LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_sequence_length}
-            # generate the sequence_distances_per_group dictionary   
-            user_combinations = [tuple(sorted(i, key=int)) for i in combinations(user_array, 2)] 
-            sequence_distance_list = []
-            max_sequence_length_list = []
-            user_combination_list = []
-            sequence_id_combination_list = []
-            for user_combination in user_combinations:
-
-                sequence_1 = user_sequence_id_mapping_dict[user_combination[0]]
-                sequence_2 = user_sequence_id_mapping_dict[user_combination[1]]
-
-                sequence_tuple = tuple(sorted((sequence_1, sequence_2), key=int))
-
-                sequence_distance = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
-                max_sequence_length = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
-                sequence_id_combination = tuple(sorted((sequence_1, sequence_2), key=int))
-                
-                sequence_distance_list.append(sequence_distance)
-                max_sequence_length_list.append(max_sequence_length)
-                user_combination_list.append(user_combination)
-                sequence_id_combination_list.append(sequence_id_combination)
-
-            sequence_distances_per_group[group] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: np.array(sequence_distance_list),
-                                                   LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: np.array(max_sequence_length_list),
-                                                   LEARNING_ACTIVITY_SEQUENCE_USER_COMBINATION_NAME_STR: user_combination_list,
-                                                   LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_NAME_STR: sequence_id_combination_list,
-                                                   LEARNING_ACTIVITY_SEQUENCE_USER_NAME_STR: user_array,
-                                                   LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: np.array(user_sequence_length),
-                                                   LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: np.array(user_sequence_id_array),
-                                                   LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR: np.array(user_sequence_array)}
-            
-            # generate the unique_sequence_distances_per_group dictionary   
-            unique_sequence_distance_list = []
-            max_unique_sequence_length_list = []
-            unique_sequence_id_combination_list = []
-
-            for sequence_combination in sequence_combinations:
-
-                unique_sequence_distance = sequence_distance_dict[sequence_combination][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
-                max_unique_sequence_length = sequence_distance_dict[sequence_combination][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
-                unique_sequence_combination = sequence_combination
-
-                unique_sequence_distance_list.append(unique_sequence_distance)
-                max_unique_sequence_length_list.append(max_unique_sequence_length)
-                unique_sequence_id_combination_list.append(unique_sequence_combination)
-            
-            unique_sequence_distances_per_group[group] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: np.array(unique_sequence_distance_list),
-                                                          LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: np.array(max_unique_sequence_length_list),
-                                                          LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_NAME_STR: unique_sequence_id_combination_list,
-                                                          LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: np.array(sequence_id_array)}
-
-            sequence_distances_dict = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_USER_COMBINATIONS_NAME_STR: sequence_distances_per_group,
-                                       LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_SEQUENCE_COMBINATIONS_NAME_STR: unique_sequence_distances_per_group}
+        # delete old pickle files to prevent keeping results of groups which are not part of current calculation anymore
+        delete_all_pickle_files_within_directory(self.result_directory)
+        
+        # calculate sequence distances for each group and write result to disk
+        if parallelize_computation:
+            results = (Parallel(n_jobs=NUMBER_OF_CORES)
+                               (delayed(self._calculate_sequence_distances)
+                               (group,
+                                self._filter_data_by_group(data, group),
+                                distance_function,
+                                *args,
+                                **kwargs) for group in tqdm(group_array)))
+        else:
+            results = [self._calculate_sequence_distances(group,
+                                                          self._filter_data_by_group(data, group),
+                                                          distance_function,
+                                                          *args,
+                                                          **kwargs) for group in tqdm(group_array)]
 
         # algorithm end
         end_time = time.time()
@@ -603,25 +649,34 @@ class SeqDist:
         print(f'Duration in seconds: {duration}')
         print(50*'-')
 
-        return sequence_distances_dict
+        return None
 
-    def get_user_sequence_distances(self,
-                                    distance_function,
-                                    min_number_of_groups_per_user=None,
-                                    min_number_avg_seq_len=None,
-                                    top_n_users_by_group_number=None,
-                                    is_pct_top_n_users_by_group_number=False,
-                                    top_n_users_by_median_seq_len=None,
-                                    is_pct_top_n_users_by_median_seq_len=False,
-                                    sample_pct=None) -> dict:
+    def calc_user_sequence_distances(self,
+                                     parallelize_computation: bool,
+                                     distance_function,
+                                    *args,
+                                     min_number_of_groups_per_user=None,
+                                     min_number_avg_seq_len=None,
+                                     top_n_users_by_group_number=None,
+                                     is_pct_top_n_users_by_group_number=False,
+                                     top_n_users_by_median_seq_len=None,
+                                     is_pct_top_n_users_by_median_seq_len=False,
+                                     sample_pct=None,
+                                     **kwargs) -> None:
         """For group '0' calculates the (learning activity-) sequence distances between each possible user\
-           combination(seq_distances) and sequence combination(unique_seq_distances) pair.
-           The sequence distance results will be treated as if they belong to a single group(group '0') ranging over the entire length of the interactions dataframe.
+           combination(seq_distances) and sequence combination(unique_seq_distances) pair. The result,\
+           a dictionary containing sequence distances between user combinations and sequence combinations,\
+           will be saved as pickle file. The sequence distance results will be treated as if they belong to\
+           a single group(group '0') ranging over the entire length of the interactions dataframe.
 
         Parameters
         ----------
+         parallelize_computation : 
+            A flag indicating whether the sequence distance calculations should be done in parallel
         distance_function : 
-            A sequence distance function from the textdistance library.
+            A sequence distance function taking 2 strings as the first two positional arguments as input.
+        *args :
+            Positional arguments for the respective distance function.
         min_number_of_groups_per_user : int, optional
             The minimum number of groups a user is allowed to have., by default None
         min_number_avg_seq_len : int, optional
@@ -636,25 +691,17 @@ class SeqDist:
             A flag indicating whether top_n_users_by_median_seq_len represents a percentage number.
         sample_pct : int, optional
             The percentage of users to be sampled. Must be between 1 and 100., by default None
+        **kwargs :
+            Keyword arguments for the respective distance function.
 
         Returns
         -------
-        dict
-            A dictionary consisting of:\
-
-            A dictionary containing for group '0' a ndarray of sequence distances between user combinations, 
-            a ndarray of lengths of the longer of two compared sequences, a ndarray of users id combinations used\
-            for sequence distance calculation, a ndarray of sequence id combinations, a ndarray of user ids per group,\
-            a ndarray of sequence lengths for every user per group, a ndarray of sequence ids and a ndarray of tuples\
-            containing the sequence of learning activities the sequence ids map to.\
-
-            A dictionary containing for group '0' a ndarray of sequence distances between sequence combinations,\
-            a ndarray of lengths of the longer of two compared sequence and a ndarray of sequence id combinations.
+        None
         """        
         # aLgorithm start
         start_time = time.time()
 
-        user_array = self.user_array
+        user_array = self.user_array.copy()
         print(50*'-')
         print(f'Total number of {USER_FIELD_NAME_STR}s: {user_array.size}')
         print(50*'-')
@@ -698,9 +745,7 @@ class SeqDist:
         if sample_pct:
             user_array = self._sample_col1(user_array, sample_pct, 'users')
 
-        data = self.data[np.isin(self.data[:, self.USER_COL_INDEX], user_array), :]
-        user_sequence_id_array = [data[data[:, self.USER_COL_INDEX]==i, self.SEQUENCE_ID_COL_INDEX][0] for i in user_array]
-        user_sequence_id_mapping_dict = dict(zip(user_array, user_sequence_id_array))
+        data = self.data[np.isin(self.data[:, self.USER_COL_INDEX], user_array), :].copy()
 
         groups_left = len(np.unique(data[:, self.GROUP_COL_INDEX]))
         users_left = len(np.unique(data[:, self.USER_COL_INDEX]))
@@ -712,104 +757,97 @@ class SeqDist:
         print(f'Final number of interactions: {interactions_left}')
         print(50*'-')
 
-        users = data[:, self.USER_COL_INDEX]
-        learning_activities_char = data[:, self.LEARNING_ACTIVITY_CHAR_COL_INDEX]
-        learning_activities = data[:, self.LEARNING_ACTIVITY_COL_INDEX]
+        # create dummy group
+        data[:, self.GROUP_COL_INDEX] = '0'
+        group_array = np.array(['0'])
 
-        # generate a user - sequence mapping
-        user_char_string_mapping_dict = {}
-        user_sequence_length = []
-        user_sequence_array = []
-        for user in user_array:
-            user_learning_activities_char = learning_activities_char[users==user]
-            user_learning_activities = tuple(learning_activities[users==user])
-            char_string = self._generate_char_string(user_learning_activities_char)
-            user_char_string_mapping_dict[user] = char_string 
-            user_sequence_length.append(len(char_string))
-            user_sequence_array.append(user_learning_activities)
+        # delete old pickle files to prevent keeping results of groups which are not part of current calculation anymore
+        delete_all_pickle_files_within_directory(self.result_directory)
+        
+        # calculate sequence distances for each group and write result to disk
+        if parallelize_computation:
+            results = (Parallel(n_jobs=NUMBER_OF_CORES)
+                               (delayed(self._calculate_sequence_distances)
+                               (group,
+                                data,
+                                distance_function,
+                                *args,
+                                **kwargs) for group in tqdm(group_array)))
+        else:
+            results = [self._calculate_sequence_distances(group,
+                                                          data,
+                                                          distance_function,
+                                                          *args,
+                                                          **kwargs) for group in tqdm(group_array)]
 
-        # generate a sequence_combination - sequence_distance/max_sequence_length mapping 
-        sequence_id_char_string_mapping_dict = {seq_id: user_char_string_mapping_dict[user] for user, seq_id in user_sequence_id_mapping_dict.items()}
-        sequence_id_array = list(sequence_id_char_string_mapping_dict.keys())
-
-        sequence_combinations_with_replacement = [tuple(sorted(i, key=int)) for i in list(combinations_with_replacement(sequence_id_array, 2))]
-        sequence_combinations = [tuple(sorted(i, key=int)) for i in list(combinations(sequence_id_array, 2))]
-
-        sequence_distance_dict={}
-        for sequence_combination in sequence_combinations_with_replacement:
-
-            char_sequence_1 = sequence_id_char_string_mapping_dict[sequence_combination[0]]
-            char_sequence_2 = sequence_id_char_string_mapping_dict[sequence_combination[1]]
-            sequence_distance = distance_function(char_sequence_1, char_sequence_2)
-            max_sequence_length = max(len(char_sequence_1), len(char_sequence_2))
-
-            sequence_distance_dict[sequence_combination] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: sequence_distance,
-                                                            LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_sequence_length}
-        # generate the sequence_distances dictionary   
-        user_combinations = [tuple(sorted(i, key=int)) for i in combinations(user_array, 2)] 
-        sequence_distance_list = []
-        max_sequence_length_list = []
-        user_combination_list = []
-        sequence_id_combination_list = []
-        for user_combination in user_combinations:
-
-            sequence_1 = user_sequence_id_mapping_dict[user_combination[0]]
-            sequence_2 = user_sequence_id_mapping_dict[user_combination[1]]
-
-            sequence_tuple = tuple(sorted((sequence_1, sequence_2), key=int))
-
-            sequence_distance = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
-            max_sequence_length = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
-            sequence_id_combination = sorted((sequence_1, sequence_2), key=int)
-                
-            sequence_distance_list.append(sequence_distance)
-            max_sequence_length_list.append(max_sequence_length)
-            user_combination_list.append(user_combination)
-            sequence_id_combination_list.append(sequence_id_combination)
-
-        # use a dummy group name for non-group df calculation. 
-        # this allows consistent usage of the cluster_evaluation module,
-        # which takes a sequence_distances dictionary with keys representing groups as input
-        sequence_distances = {}
-        sequence_distances[DUMMY_GROUP_NAME_FOR_NO_GROUP_DF] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: np.array(sequence_distance_list),
-                                                                LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: np.array(max_sequence_length_list),
-                                                                LEARNING_ACTIVITY_SEQUENCE_USER_COMBINATION_NAME_STR: user_combination_list,
-                                                                LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_NAME_STR: sequence_id_combination_list,
-                                                                LEARNING_ACTIVITY_SEQUENCE_USER_NAME_STR: user_array,
-                                                                LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: np.array(user_sequence_length),
-                                                                LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: np.array(user_sequence_id_array),
-                                                                LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR: np.array(user_sequence_array)}
-
-        # generate the unique_sequence_distances dictionary   
-        unique_sequence_distances = {}
-
-        unique_sequence_distance_list = []
-        max_unique_sequence_length_list = []
-        unique_sequence_id_combination_list = []
-
-        for sequence_combination in sequence_combinations:
-
-            unique_sequence_distance = sequence_distance_dict[sequence_combination][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
-            max_unique_sequence_length = sequence_distance_dict[sequence_combination][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
-            unique_sequence_combination = sequence_combination
-
-            unique_sequence_distance_list.append(unique_sequence_distance)
-            max_unique_sequence_length_list.append(max_unique_sequence_length)
-            unique_sequence_id_combination_list.append(unique_sequence_combination)
-            
-        unique_sequence_distances[DUMMY_GROUP_NAME_FOR_NO_GROUP_DF] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: np.array(unique_sequence_distance_list),
-                                                                       LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: np.array(max_unique_sequence_length_list),
-                                                                       LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_NAME_STR: unique_sequence_id_combination_list,
-                                                                       LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: np.array(sequence_id_array)}
-
-        sequence_distances_dict = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_USER_COMBINATIONS_NAME_STR: sequence_distances,
-                                   LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_SEQUENCE_COMBINATIONS_NAME_STR: unique_sequence_distances}
-
-        # aLgorithm end
+        # algorithm end
         end_time = time.time()
         duration = end_time - start_time
         print(50*'-')
         print(f'Duration in seconds: {duration}')
         print(50*'-')
 
-        return sequence_distances_dict
+        return None
+
+def calculate_sequence_distances(dataset_name: str,
+                                 interactions: pd.DataFrame,
+                                 group_field: str,
+                                 ignore_groups: bool) -> None:
+    """For each group calculates the (learning activity-) sequence distances between each possible user\
+    combination(seq_distances) and sequence combination(unique_seq_distances) pair.\
+    If an interactions dataframe does not contain a grouping field, the sequence distance results will be treated as if\
+    they belong to a single group(group '0') ranging over the entire length of a users learning activities in the\
+    interactions dataframe.
+
+
+    Parameters
+    ----------
+    dataset_name: str,
+        The name of the dataset
+    interactions : pd.DataFrame
+        The interactions dataframe
+    group_field : str
+        The group field column
+        This argument should be set to None if the interactions dataframe does not have a group_field
+    ignore_groups: bool
+        A boolean indicating whether the group field should be ignored (even when the datasets has groups)\
+        and sequence distances be calculated over the entire length of a users learning activities in the\
+        interactions dataframe.
+
+    Returns
+    -------
+    None
+    """
+    if group_field:
+        if ignore_groups:
+            print('-'*50)
+            print(f'{GROUP_FIELD_NAME_STR}-Field Available But Will Be Ignored:')
+            print(f'Calculate {SEQUENCE_STR} Distances')
+            print('-'*50)
+        else:
+            print('-'*50)
+            print(f'{GROUP_FIELD_NAME_STR}-Field Available:')
+            print(f'Calculate {SEQUENCE_STR} Distances for each {GROUP_FIELD_NAME_STR}')
+            print('-'*50)
+    else:
+        print('-'*50)
+        print(f'{GROUP_FIELD_NAME_STR}-Field NOT Available:')
+        print(f'Calculate {SEQUENCE_STR} Distances')
+        print('-'*50)
+    seq_sim = SeqDist(dataset_name,
+                        interactions, 
+                        USER_FIELD_NAME_STR, 
+                        GROUP_FIELD_NAME_STR, 
+                        LEARNING_ACTIVITY_FIELD_NAME_STR, 
+                        SEQUENCE_ID_FIELD_NAME_STR,
+                        group_field)
+    if ignore_groups:
+        _ = seq_sim.calc_user_sequence_distances(PARALLELIZE_COMPUTATIONS,
+                                                 distance,
+                                                 *SEQUENCE_DISTANCE_FUNCTION_ARGS,
+                                                 **SEQUENCE_DISTANCE_FUNCTION_KWARGS)
+    else:
+        _ = seq_sim.calc_user_sequence_distances_per_group(PARALLELIZE_COMPUTATIONS,
+                                                           distance,
+                                                           *SEQUENCE_DISTANCE_FUNCTION_ARGS,
+                                                           **SEQUENCE_DISTANCE_FUNCTION_KWARGS)
