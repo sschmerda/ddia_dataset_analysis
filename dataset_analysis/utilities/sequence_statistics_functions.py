@@ -255,7 +255,8 @@ class SequenceStatistics():
                                                                               .agg([sum, len])
                                                                               .reset_index()
                                                                               .rename({'sum': LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR,
-                                                                                      'len': LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_NAME_STR}))
+                                                                                      'len': LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_NAME_STR},
+                                                                                      axis=1))
 
         seq_count_df.insert(0, 
                             DATASET_NAME_FIELD_NAME_STR,
