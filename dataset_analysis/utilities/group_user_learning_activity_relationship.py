@@ -1,7 +1,8 @@
 from .standard_import import *
 from .constants import *
 from .config import *
-from .functions import *
+from .preprocessing_functions import *
+from .plotting_functions import *
 
 def avg_seq_len(series: pd.Series, avg_fun):
     """Calculates the average of the value counts of a pandas series.
@@ -114,7 +115,7 @@ def print_and_return_avg_num_interactions_over_col2_for_col1(interactions: pd.Da
     print(f'iqr of {mean_number_interactions_over_col2_for_col1_name}: {iqr(mean_n_interactions_per_col2[mean_number_interactions_over_col2_for_col1_name])}')
 
     print('')
-    print('_'*100)
+    print(DASH_STRING)
     print('')
 
     print(f'mean of {median_number_interactions_over_col2_for_col1_name}: {median_n_interactions_per_col2[median_number_interactions_over_col2_for_col1_name].mean()}')
@@ -160,7 +161,7 @@ def print_and_return_avg_num_unique_col3_over_col2_for_col1(interactions: pd.Dat
 
 
     print('')
-    print('_'*100)
+    print(DASH_STRING)
     print('')
 
 
@@ -175,28 +176,29 @@ def print_and_return_avg_num_unique_col3_over_col2_for_col1(interactions: pd.Dat
 def print_and_plot_group_user_learning_activity_relationship(interactions: pd.DataFrame,
                                                              group_field: str,
                                                              log_scale: bool):
+    interactions = interactions.copy()    
 
     if not group_field:
         interactions[GROUP_FIELD_NAME_STR] = '0'
 
     # learning_activities per user
-    print('*'*100)
-    print('*'*100)
-    print(' ')
-    print('-'*100)
-    print(f'Number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {USER_FIELD_NAME_STR}:')
-    print('-'*100)
+    print(STAR_STRING)
+    print(STAR_STRING)
+    print('\n')
+    print(DASH_STRING)
+    print(f'Number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s per {USER_FIELD_NAME_STR} ({ROWS_NAME_STR} per {USER_FIELD_NAME_STR}):')
+    print(DASH_STRING)
     learning_activities_per_user = print_and_return_learning_activities_per_user(interactions, 
-                                                                          USER_FIELD_NAME_STR, 
-                                                                          USER_FIELD_NAME_STR)
+                                                                                 USER_FIELD_NAME_STR, 
+                                                                                 USER_FIELD_NAME_STR)
     print('\n')
     print('Plots:')
     plot_distribution(learning_activities_per_user,
                       NUMBER_OF_LEARNING_ACTIVITIES_FIELD_NAME_STR,
                       NUMBER_OF_LEARNING_ACTIVITIES_PER_USER_STR,
                       log_scale)
-    print('*'*100)
-    print('*'*100)
+    print(STAR_STRING)
+    print(STAR_STRING)
 
     # group_user_learning_activity_relationship
     parameter_list = [(GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, NUMBER_UNIQUE_GROUPS_PER_USER_STR),
@@ -208,9 +210,9 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
 
     for var, grouper, label in parameter_list: 
 
-        print('-'*100)
+        print(DASH_STRING)
         print(f'Number of Unique {var}s per {grouper}:')
-        print('-'*100)
+        print(DASH_STRING)
         n_unique_var_per_group = print_and_return_unique_col2_per_col1(interactions, 
                                                                        grouper, 
                                                                        var, 
@@ -221,21 +223,21 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
                           label,
                           label,
                           log_scale)
-        print('*'*100)
-        print('*'*100)
-        print(' ')
+        print(STAR_STRING)
+        print(STAR_STRING)
+        print('\n')
         
-    # avg number interactions
+    # avg number learning activities
     # 1. per group for user
     # 2. per user for group
-    parameter_list = [(GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, MEAN_NUMBER_INTERACTIONS_PER_GROUP_FOR_USER_STR, MEDIAN_NUMBER_INTERACTIONS_PER_GROUP_FOR_USER_STR),
-                      (USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, MEAN_NUMBER_INTERACTIONS_PER_USER_FOR_GROUP_STR, MEDIAN_NUMBER_INTERACTIONS_PER_USER_FOR_GROUP_STR)]
+    parameter_list = [(GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, MEAN_NUMBER_LEARNING_ACTIVITIES_PER_GROUP_FOR_USER_STR, MEDIAN_NUMBER_LEARNING_ACTIVITIES_PER_GROUP_FOR_USER_STR),
+                      (USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, MEAN_NUMBER_LEARNING_ACTIVITIES_PER_USER_FOR_GROUP_STR, MEDIAN_NUMBER_LEARNING_ACTIVITIES_PER_USER_FOR_GROUP_STR)]
 
     for var, grouper, label_mean, label_median in parameter_list:
 
-        print('-'*100)
-        print(f'Mean/Median Number of Interactions per {var} for a {grouper}:')
-        print('-'*100)
+        print(DASH_STRING)
+        print(f'Mean/Median Number of {LEARNING_ACTIVITY_FIELD_NAME_STR}s ({ROWS_NAME_STR}) per {var} for a {grouper}:')
+        print(DASH_STRING)
         mean_n_interactions_per_var_for_group,\
         median_n_interactions_per_var_for_group = print_and_return_avg_num_interactions_over_col2_for_col1(interactions, 
                                                                                                            grouper, 
@@ -256,11 +258,11 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
                           label_median,
                           label_median,
                           log_scale)
-        print('*'*100)
-        print('*'*100)
-        print(' ')
+        print(STAR_STRING)
+        print(STAR_STRING)
+        print('\n')
 
-    # avg number learning activities
+    # avg number unique learning activities
     # 1. per group for user
     # 2. per user for group
     parameter_list = [(GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, LEARNING_ACTIVITY_FIELD_NAME_STR, MEAN_NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_FOR_USER_STR, MEDIAN_NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_FOR_USER_STR),
@@ -268,9 +270,9 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
 
     for var, grouper, val, label_mean, label_median in parameter_list:
 
-        print('-'*100)
+        print(DASH_STRING)
         print(f'Mean/Median Number of Unique {val}s per {var} for a {grouper}:')
-        print('-'*100)
+        print(DASH_STRING)
         mean_n_unique_vals_per_var_for_group,\
         median_n_unique_vals_per_var_for_group = print_and_return_avg_num_unique_col3_over_col2_for_col1(interactions, 
                                                                                                          grouper, 
@@ -292,6 +294,6 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
                           label_median,
                           label_median,
                           log_scale)
-        print('*'*100)
-        print('*'*100)
-        print(' ')
+        print(STAR_STRING)
+        print(STAR_STRING)
+        print('\n')
