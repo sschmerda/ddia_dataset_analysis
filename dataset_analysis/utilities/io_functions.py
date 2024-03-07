@@ -74,7 +74,7 @@ def pickle_write(object_to_pickle,
     path_to_file = os.path.join(path_to_directory, filename)
     
     if delete_old_files:
-        delete_all_pickle_files_within_directory(path_to_directory)
+        delete_all_pickle_files_within_directory(path_within_pickle_directory_list)
 
     with open(path_to_file, 'wb') as f:
         pickle.dump(object_to_pickle, f, pickle.HIGHEST_PROTOCOL)
@@ -130,3 +130,28 @@ def return_pickled_files_list(path_within_pickle_directory_list: list[str],
     pickle_files_list = sorted(pickle_files_list, key=sort_function)
 
     return pickle_files_list
+
+def return_pickle_path_list_and_name(dataset_name: str,
+                                     pickle_subdirectory: str,
+                                     pickle_name: str) -> tuple:
+    """Returns the pathlist and name for a pickle file
+
+    Parameters
+    ----------
+    dataset_name : str
+        The name of the dataset
+    pickle_subdirectory : str
+        The subdirectory where the pickle file will be saved
+    pickle_name : str
+        The name of the pickle file
+
+    Returns
+    -------
+    tuple
+        A tuple consisting of the pathlist and name of a pickle file 
+    """        
+
+    path_list = [pickle_subdirectory, dataset_name]
+    name = dataset_name + pickle_name
+
+    return path_list, name
