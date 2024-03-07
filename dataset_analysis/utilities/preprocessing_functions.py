@@ -2,6 +2,147 @@ from .standard_import import *
 from .constants import *
 from .config import *
 from .sequence_statistics_functions import *
+from .plotting_functions import *
+
+class ImportInteractions(ABC):
+    """Imports the interaction dataframe and filters it by interactions of a specified type. 
+
+    Attributes
+    ----------
+    interactions : pd.DataFrame
+        The interactions dataframe
+    interaction_types_df : pd.DataFrame
+        A dataframe counting the occurrences of all interactions types
+    """    
+     
+    def __init__(self,
+                 dataset_name: str,
+                 interactions_type_field: Union[str, None],
+                 interaction_types_to_keep: Union[list[str], None],
+                 result_tables: Type[Any]) -> None:
+        """ 
+        Parameters
+        ----------
+        dataset_name : str
+            The name of the dataset
+        interactions_type_field : str
+            The name of interaction type field
+        interaction_types_to_keep : list[str]
+            A list containing the interaction type values to keep
+        result_tables : Type[Any]
+            The ResultTables object
+        """    
+
+        self.dataset_name = dataset_name
+        self.interactions_type_field = interactions_type_field
+        self.interaction_types_to_keep = interaction_types_to_keep
+        self.interactions = self._create_interactions_df()
+        self._interactions_n_rows_before_filter = self.interactions.shape[0]
+    
+        if interactions_type_field and interaction_types_to_keep:
+            self.interaction_types_df = self._create_interaction_type_df()
+            self.interactions = self._filter_by_interaction_type()
+        else:
+            self.interaction_types_df = self._create_empty_interaction_type_df()
+
+        self._interactions_n_rows_after_filter = self.interactions.shape[0]
+    
+        # add data to results_table
+        result_tables.interaction_types = self.interaction_types_df.copy()
+        
+    def print_filter_results(self) -> None:
+        """Prints the interaction type filter results. 
+        """    
+
+        n_removed = self._interactions_n_rows_before_filter - self._interactions_n_rows_after_filter
+        pct_removed = int(round((n_removed) / self._interactions_n_rows_before_filter * 100))
+
+        print(STAR_STRING)
+        print('\n')
+        print(f'== {INTERACTIONS_TYPE_FILTER_PRINT_OUTPUT_NAME_STR} ==')
+        print('\n')
+        print(f'{INTERACTIONS_TYPE_NAME_STR}s: ')
+        print(DASH_STRING)
+        if self.interactions_type_field:
+            print(self.interaction_types_df)
+        else:
+            print(f'{INTERACTIONS_TYPE_FILTER_NOT_AVAILABLE_NAME_STR}')
+        print(DASH_STRING)
+        print('\n')
+        print(LEARNING_ACTIVITY_SEQUENCE_FILTER_INTERACTIONS_DATAFRAME_NAME_STR)
+        print(DASH_STRING)
+        print(f'Input length: {self._interactions_n_rows_before_filter}')
+        print(f'Output length: {self._interactions_n_rows_after_filter}')
+        print(f'Number of rows removed: {n_removed}')
+        print(f'Percentage of rows removed: {pct_removed}%')
+        print(DASH_STRING)
+        print('\n')
+        print(STAR_STRING)
+    
+    def _create_interactions_df(self) -> pd.DataFrame:
+
+        interactions = pd.DataFrame()    
+
+        return interactions
+    
+    def _create_interaction_type_df(self) -> pd.DataFrame:
+
+        interaction_types_df = (self.interactions[self.interactions_type_field]
+                                .value_counts()
+                                .reset_index(name=INTERACTIONS_COUNT_NAME_STR)
+                                .rename(columns={'index': INTERACTIONS_TYPE_NAME_STR}))
+
+        interaction_types_df[INTERACTIONS_TYPE_USED_NAME_STR] = (interaction_types_df[INTERACTIONS_TYPE_NAME_STR]
+                                                                .isin(self.interaction_types_to_keep))
+
+        interaction_types_df = (interaction_types_df
+                                .sort_values(by=[INTERACTIONS_TYPE_USED_NAME_STR, INTERACTIONS_COUNT_NAME_STR], ascending=False)
+                                .reset_index(drop=True))
+        
+        interaction_types_df.insert(0, DATASET_NAME_STR, self.dataset_name)
+    
+        return interaction_types_df
+
+    def _create_empty_interaction_type_df(self) -> pd.DataFrame:
+
+        interaction_types_df = pd.DataFrame({DATASET_NAME_STR: self.dataset_name,
+                                            INTERACTIONS_TYPE_NAME_STR: None,
+                                            INTERACTIONS_COUNT_NAME_STR: None,
+                                            INTERACTIONS_TYPE_USED_NAME_STR: None},
+                                            index=[0])
+
+        return interaction_types_df
+    
+    def _filter_by_interaction_type(self) -> pd.DataFrame:
+
+        interactions_filtered = self.interactions.loc[self.interactions[self.interactions_type_field].isin(self.interaction_types_to_keep), :]
+        
+        return interactions_filtered
+
+class TransformInteractions(ABC):
+    """Transforms the interaction dataframe. 
+
+    Attributes
+    ----------
+    interactions : pd.DataFrame
+        The interactions dataframe
+    """    
+     
+    def __init__(self,
+                 interactions: pd.DataFrame):
+        """ 
+        Parameters
+        ----------
+        interactions : pd.DataFrame
+            The interactions dataframe
+        """    
+
+        self.interactions = self._transform_interactions_df(interactions)  
+    
+    def _transform_interactions_df(self,
+                                   interactions: pd.DataFrame) -> pd.DataFrame:
+
+        return interactions
 
 def get_nas_in_data(interactions: pd.DataFrame):
     """Calculate the number of NAs in a dataframe
@@ -97,10 +238,13 @@ def drop_na_by_fields(interactions: pd.DataFrame,
 
     print(STAR_STRING)
     print('\n')
+    print(LEARNING_ACTIVITY_SEQUENCE_FILTER_INTERACTIONS_DATAFRAME_NAME_STR)
+    print(DASH_STRING)
     print(f'Input length: {input_len}')
     print(f'Output length: {output_len}')
     print(f'Number of rows removed: {n_removed}')
     print(f'Percentage of rows removed: {pct_removed}%')
+    print(DASH_STRING)
     print('\n')
     print(STAR_STRING)
 
@@ -186,6 +330,8 @@ def drop_learning_activity_sequence_if_contains_na_in_field(interactions: pd.Dat
     pct_sequences_removed = float(round(n_sequences_removed / total_number_of_sequences * 100, 4))
 
 
+    print(LEARNING_ACTIVITY_SEQUENCE_FILTER_INTERACTIONS_DATAFRAME_NAME_STR)
+    print(DASH_STRING)
     print(f'Input length: {input_len}')
     print(f'Outpunt length: {output_len}')
     print(f'Number of rows removed: {n_removed}')
@@ -195,6 +341,7 @@ def drop_learning_activity_sequence_if_contains_na_in_field(interactions: pd.Dat
     print(f'Output number of sequences: {total_number_of_sequences - n_sequences_removed}')
     print(f'Number of sequences removed: {n_sequences_removed}')
     print(f'Percentage of sequences removed: {pct_sequences_removed}%')
+    print(DASH_STRING)
     print('\n')
     print(STAR_STRING)
 
@@ -274,7 +421,7 @@ def rename_fields(interactions: pd.DataFrame,
                   group_field: str,
                   user_field: str,
                   learning_activity_field: str,
-                  timestamp_field: str):
+                  timestamp_field: str) -> tuple[pd.DataFrame]:
     """Renames the fields of the interactions dataframe according to the preset field name strings and generates a remapping dataframe containing a mapping between new and old field names.
        If a field argument is set to None(in the case it is missing in the interactions dataframe), a column with the corresponding name containing None entries will be created.  
 
@@ -302,10 +449,7 @@ def rename_fields(interactions: pd.DataFrame,
     new_field_names = [TIMESTAMP_FIELD_NAME_STR, USER_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, LEARNING_ACTIVITY_FIELD_NAME_STR]
     evaluation_field_names = [i for i in chain(EVALUATION_LEARNING_ACTIVITY_FIELD_LIST,
                                                EVALUATION_GROUP_FIELD_LIST,
-                                               EVALUATION_GROUP_ALL_LEARNING_ACTIVITIES_MEAN_FIELD_LIST,
-                                               EVALUATION_COURSE_FIELD_LIST,
-                                               EVALUATION_COURSE_ALL_LEARNING_ACTIVITIES_MEAN_FIELD_LIST,
-                                               EVALUATION_COURSE_ALL_GROUPS_MEAN_FIELD_LIST)]
+                                               EVALUATION_COURSE_FIELD_LIST)]
     old_new_mapping = list(zip(old_field_names, new_field_names))
     rename_dict = {k:v for k,v in old_new_mapping if k in interactions_column_names}
 
@@ -320,7 +464,6 @@ def rename_fields(interactions: pd.DataFrame,
     # keep necessary columns
     interactions = interactions[new_field_names + evaluation_field_names]
     interactions = interactions.reset_index(drop=True)
-
 
     # mapping dataframe
     fields_mapping_df = pd.DataFrame({NEW_FIELDNAME_FIELD_NAME_STR: new_field_names, 
@@ -370,6 +513,34 @@ def typecast_fields(interactions: pd.DataFrame,
 
     return interactions
 
+def change_data_type(dataframe: pd.DataFrame,
+                     data_type_mapping_dict: dict[str, str]) -> pd.DataFrame:
+    """Changes the datatypes of the fields of a dataframe according to a mapping dictionary
+
+    Parameters
+    ----------
+    dataframe : pd.DataFrame
+        A pandas DataFrame
+    data_type_mapping_dict : dict[str, str]
+        A dictionary containing mapping old datatypes to new ones
+
+    Returns
+    -------
+    pd.DataFrame
+        A new dataframe with changed datatypes
+    """
+    col_data_type_dict_list = []
+    for old_dt, new_dt in data_type_mapping_dict.items():
+        dataframe_cols = dataframe.select_dtypes(include=old_dt).columns
+        n_cols = len(dataframe_cols)
+        col_data_type_dict = dict(zip(dataframe_cols, [new_dt]*n_cols))
+        col_data_type_dict_list.append(col_data_type_dict)
+
+    col_data_type_remapping_dict = {k: v for dictionary in col_data_type_dict_list for k, v in dictionary.items()}
+    dataframe = dataframe.astype(col_data_type_remapping_dict)
+    
+    return dataframe 
+
 def return_adjusted_boxplot_outlier_threshold(data: np.array) -> tuple[float]:
     """Returns the lower and upper outlier thresholds using the adjusted boxplot algorithm proposed in
     (Hubert M. and Vandervieren E. 2008 - An adjusted boxplot for skewed distributions) which accounts for
@@ -401,6 +572,31 @@ def return_adjusted_boxplot_outlier_threshold(data: np.array) -> tuple[float]:
 
 
 class SequenceFilter():
+    """A class used to filter out sequences and groups which do not conform to criteria specified in the parameters 
+
+    Attributes
+    ----------
+    interactions : pd.DataFrame
+        The filtered interaction dataframe
+    unique_learning_activity_sequence_stats_per_group : pd.DataFrame
+        A dataframe containing statistics for unique sequences per group 
+    learning_activity_sequence_stats_per_group : pd.DataFrame
+        A dataframe containing statistics for all sequences per group 
+    sequence_count_per_group : pd.DataFrame
+        A dataframe containing sequence counts and unique sequence counts per group for each preprocessing step
+    group_count : pd.DataFrame
+        A dataframe containing group counts for each preprocessing step
+    seq_filter_parameters : pd.DataFrame
+        A dataframe containing the parameter values used for filtering sequences and groups
+    result_tables : Type[Any]
+        The ResultTables object
+
+    Methods
+    -------
+    filter_sequences
+        Filters sequences and groups according to the specified parameters and plots thresholds and sequence/group counts
+        for the respective preprocessing steps
+    """
 
     def __init__(self,
                  dataset_name: str, 
@@ -409,7 +605,8 @@ class SequenceFilter():
                  min_pct_unique_learning_activities_per_group_in_seq_threshold: int,
                  max_pct_repeated_learning_activities_in_seq_threshold: int,
                  min_sequence_number_per_group_threshold: int,
-                 min_unique_sequence_number_per_group_threshold: int):
+                 min_unique_sequence_number_per_group_threshold: int,
+                 result_tables: Type[Any]):
 
         self.dataset_name = dataset_name
         self.interactions = interactions
@@ -418,20 +615,24 @@ class SequenceFilter():
         self.max_pct_repeated_learning_activities_in_seq = max_pct_repeated_learning_activities_in_seq_threshold
         self.min_sequence_number_per_group_threshold = min_sequence_number_per_group_threshold
         self.min_unique_sequence_number_per_group_threshold = min_unique_sequence_number_per_group_threshold
+        self.result_tables = result_tables
 
         # initial calculations
+        # TODO: adapt for datasets without groups
         self.interactions[GROUP_FIELD_NAME_STR] = self.interactions[GROUP_FIELD_NAME_STR].astype(int)
 
-        self.unique_learning_activity_sequence_stats_per_group = return_unique_learning_activity_sequence_stats_per_group(self.interactions,
-                                                                                                                          self.dataset_name,
-                                                                                                                          self.group_field)
-        self.learning_activity_sequence_stats_per_group = return_learning_activity_sequence_stats_per_group(self.unique_learning_activity_sequence_stats_per_group)
+        self.unique_learning_activity_sequence_stats_per_group = SequenceStatistics.return_unique_learning_activity_sequence_stats_per_group(self.interactions,
+                                                                                                                                             self.dataset_name,
+                                                                                                                                             self.group_field)
+        self.learning_activity_sequence_stats_per_group = SequenceStatistics.return_learning_activity_sequence_stats_per_group(self.unique_learning_activity_sequence_stats_per_group)
         
         self.sequence_count_per_group = self._return_seq_count_per_group(self.unique_learning_activity_sequence_stats_per_group,
                                                                          LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_ORIGINAL_NAME_STR)
 
         self.group_count = self._return_group_count(self.unique_learning_activity_sequence_stats_per_group,
                                                     LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_ORIGINAL_NAME_STR)
+        
+        self.seq_filter_parameters = self._create_parameter_df()
 
     def filter_sequences(self):
 
@@ -442,58 +643,88 @@ class SequenceFilter():
         self._filter_groups_by_sequence_count()
         self._plot_group_count_change(self.group_count)
 
+        # add data to results_table
+        self.result_tables.seq_filter_parameters = self.seq_filter_parameters.copy()
+        self.result_tables.seq_filter_sequence_count_per_group = self.sequence_count_per_group.copy()
+        self.result_tables.seq_filter_group_count = self.group_count.copy()
+
     @staticmethod
     def _plot_sequence_filter_thresholds(learning_activity_sequence_stats_per_group: pd.DataFrame,
                                          sequence_statistic: str,
+                                         sequence_statistic_label: str,
                                          threshold: Union[int, list[tuple[float]]]) -> None:
         if isinstance(threshold, int):
             title_str = f'{sequence_statistic}{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_FILTER_TITLE_STR}{threshold}%'
             share_x_axis = True
+            axis_xlim = return_axis_limits(learning_activity_sequence_stats_per_group[sequence_statistic],
+                                          True)
         elif isinstance(threshold, list):
             title_str = f'{sequence_statistic}{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_LENGTH_OUTLIER_TITLE_STR}'
-            share_x_axis = False
+            share_x_axis = True
+            axis_xlim = None
         else:
             raise TypeError('threshold needs to be int or list!')
+        
+        n_cols = set_facet_grid_column_number(learning_activity_sequence_stats_per_group,
+                                              GROUP_FIELD_NAME_STR,
+                                              SEABORN_SEQUENCE_FILTER_FACET_GRID_N_COLUMNS)
 
-        g = sns.FacetGrid(learning_activity_sequence_stats_per_group, 
-                        col=GROUP_FIELD_NAME_STR, 
-                        col_wrap=6, 
-                        sharex=share_x_axis, 
-                        sharey=False);
-        g.map_dataframe(sns.histplot, 
-                        x=sequence_statistic,
-                        stat='count')
+        g=sns.displot(learning_activity_sequence_stats_per_group,
+                      x=sequence_statistic,
+                      col=GROUP_FIELD_NAME_STR,
+                      kind='hist',
+                      stat='count',
+                      col_wrap=n_cols,
+                      height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET,
+                      aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
+                      bins=SEABORN_HISTOGRAM_BIN_CALC_METHOD,
+                      alpha=SEABORN_PLOT_OBJECT_ALPHA,
+                      facet_kws=dict(sharex=share_x_axis,
+                                     sharey=False,
+                                     xlim=axis_xlim))
+        g.map_dataframe(sns.rugplot,
+                        sequence_statistic,
+                        height=SEABORN_RUG_PLOT_HEIGHT_PROPORTION_FACET,
+                        color=SEABORN_RUG_PLOT_COLOR,
+                        expand_margins=True,
+                        alpha=SEABORN_RUG_PLOT_ALPHA_FACET)
+
         # vertical line
-        axes = g.fig.axes
+        axes = g.figure.axes
         if isinstance(threshold, int):
             for ax in axes:
                 ax.axvline(x=threshold, 
-                        ymin=0, 
-                        ymax=1, 
-                        color='red', 
-                        linewidth=3);
+                           ymin=0, 
+                           ymax=1, 
+                           color=SEABORN_LINE_COLOR_RED, 
+                           linewidth=SEABORN_LINE_WIDTH_FACET);
         elif isinstance(threshold, list):
             for ax, threshold_tuple in zip(axes, threshold):
-                ax.axvline(x=threshold_tuple[0], 
-                        ymin=0, 
-                        ymax=1, 
-                        color='red', 
-                        linewidth=3);
-                ax.axvline(x=threshold_tuple[1], 
-                        ymin=0, 
-                        ymax=1, 
-                        color='red', 
-                        linewidth=3);
+                if threshold_tuple[0] >= 0 or threshold_tuple[1] >= 0: 
+                    ax.axvline(x=threshold_tuple[0], 
+                               ymin=0, 
+                               ymax=1, 
+                               color=SEABORN_LINE_COLOR_RED, 
+                               linewidth=SEABORN_LINE_WIDTH_FACET);
+                    ax.axvline(x=threshold_tuple[1], 
+                               ymin=0, 
+                               ymax=1, 
+                               color=SEABORN_LINE_COLOR_RED, 
+                               linewidth=SEABORN_LINE_WIDTH_FACET);
+                else:
+                    continue
         else:
             raise TypeError('threshold needs to be int or list!')
 
-        g.set(xlabel='')
+        g.set(xlabel=sequence_statistic_label)
         for ax in g.axes.flatten():
             ax.tick_params(labelbottom=True)
-        g.fig.subplots_adjust(top=0.95)
-        g.fig.suptitle(title_str, 
-                       fontsize=20)
-        g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
+
+        y_loc = calculate_suptitle_position(g,
+                                            SEABORN_SUPTITLE_HEIGHT_CM)
+        g.figure.suptitle(title_str, 
+                          fontsize=SEABORN_TITLE_FONT_SIZE,
+                          y=y_loc)
         plt.show(g)
 
     @staticmethod
@@ -506,22 +737,32 @@ class SequenceFilter():
                                            var_name=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR,
                                            value_name=LEARNING_ACTIVITY_SEQUENCE_COUNT_VALUE_NAME_STR)
 
-        g = sns.FacetGrid(seq_count_change_df_long, 
-                          col=GROUP_FIELD_NAME_STR, 
-                          col_wrap=6, 
-                          sharex=True, 
-                          sharey=True)
-        g.map_dataframe(sns.pointplot, 
-                        x=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR, 
-                        y=LEARNING_ACTIVITY_SEQUENCE_COUNT_VALUE_NAME_STR,
-                        hue=LEARNING_ACTIVITY_SEQUENCE_COUNT_TYPE_NAME_STR)
+        n_cols = set_facet_grid_column_number(seq_count_df,
+                                              GROUP_FIELD_NAME_STR,
+                                              SEABORN_SEQUENCE_FILTER_FACET_GRID_N_COLUMNS)
+
+        g=sns.catplot(seq_count_change_df_long,
+                      x=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR,
+                      y=LEARNING_ACTIVITY_SEQUENCE_COUNT_VALUE_NAME_STR,
+                      hue=LEARNING_ACTIVITY_SEQUENCE_COUNT_TYPE_NAME_STR,
+                      col=GROUP_FIELD_NAME_STR,
+                      kind='point',
+                      col_wrap=n_cols,
+                      height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET,
+                      aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,         
+                      sharex=True, 
+                      sharey=True)
+
+        g._legend.set_frame_on(True)
+
         for ax in g.axes.flatten():
             ax.tick_params(labelbottom=True)
-        g.fig.subplots_adjust(top=0.95)
-        g.fig.suptitle(LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_COUNT_CHANGE_TITLE_NAME_STR, 
-                       fontsize=20)
-        g.fig.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        g.add_legend()
+
+        y_loc = calculate_suptitle_position(g,
+                                            SEABORN_SUPTITLE_HEIGHT_CM)
+        g.figure.suptitle(LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_COUNT_CHANGE_TITLE_NAME_STR, 
+                          fontsize=SEABORN_TITLE_FONT_SIZE,
+                          y=y_loc)
         plt.show();
 
     @staticmethod
@@ -532,7 +773,8 @@ class SequenceFilter():
         count_df = unique_learning_activity_sequence_stats_per_group.groupby(GROUP_FIELD_NAME_STR).head(1)
 
         # all groups in one figure - unique seq count vs seq count scatter 
-        ylim = count_df[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR].max()
+        ylim = return_axis_limits(count_df[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR],
+                                  False)
         title_string_scatter = LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_UNIQUE_SEQUENCE_VS_SEQUENCE_COUNT_SCATTER_TITLE_NAME_STR
         seq_count_threshold_str = f'\n{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_COUNT_THRESHOLD_TITLE_NAME_STR}{min_sequence_number_per_group_threshold}'
         unique_seq_count_threshold_str = f'\n{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_UNIQUE_SEQUENCE_COUNT_THRESHOLD_TITLE_NAME_STR}{min_unique_sequence_number_per_group_threshold}'
@@ -542,47 +784,70 @@ class SequenceFilter():
         g = sns.jointplot(data=count_df,
                           x=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
                           y=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR,
-                          s=100,
-                          alpha=0.7,
-                          height=15)
-        g.plot_marginals(sns.rugplot, color="r", height=0.15)
-        g.ax_joint.set_ylim(ylim*-0.05, ylim)
-        g.ax_joint.set_xlim(ylim*-0.05, None)
-        g.fig.suptitle(title_string_scatter, 
-                       fontsize=20)
-        g.fig.tight_layout()
-        g.ax_joint.axline(xy1=(0,0), slope=1, color='orange', linewidth=3)
+                          height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_SINGLE,
+                          s=SEABORN_POINT_SIZE_JOINTPLOT,
+                          alpha=SEABORN_POINT_ALPHA_JOINTPLOT_PREPROCESSING,
+                          edgecolor=SEABORN_POINT_EDGECOLOR,
+                          linewidth=SEABORN_POINT_LINEWIDTH,
+                          marginal_kws={'alpha': SEABORN_PLOT_OBJECT_ALPHA,
+                                        'bins': SEABORN_HISTOGRAM_BIN_CALC_METHOD})
+
+        g.plot_marginals(sns.rugplot, 
+                         color=SEABORN_RUG_PLOT_COLOR, 
+                         height=SEABORN_RUG_PLOT_HEIGHT_PROPORTION_JOINTPLOT,
+                         alpha=SEABORN_RUG_PLOT_ALPHA_JOINTPLOT)
+        g.ax_joint.set_ylim(ylim)
+        g.ax_joint.set_xlim(ylim)
+
+        y_loc = calculate_suptitle_position(g,
+                                            SEABORN_SUPTITLE_HEIGHT_CM)
+        g.figure.suptitle(title_string_scatter, 
+                          fontsize=SEABORN_TITLE_FONT_SIZE,
+                          y=y_loc)
+
+        g.ax_joint.axline(xy1=(0,0), 
+                          slope=1, 
+                          color=SEABORN_LINE_COLOR_ORANGE, 
+                          linewidth=SEABORN_LINE_WIDTH_JOINTPLOT, 
+                          zorder=0)
         if min_sequence_number_per_group_threshold:
-            g.ax_joint.axvline(x=min_sequence_number_per_group_threshold, ymin=0, ymax=1, color='red', linewidth=3)
+            g.ax_joint.axvline(x=min_sequence_number_per_group_threshold, 
+                               ymin=0, 
+                               ymax=1, 
+                               color=SEABORN_LINE_COLOR_RED, 
+                               linewidth=SEABORN_LINE_WIDTH_JOINTPLOT)
         if min_unique_sequence_number_per_group_threshold:
-            g.ax_joint.axhline(y=min_unique_sequence_number_per_group_threshold, xmin=0, xmax=1, color='red', linewidth=3)
+            g.ax_joint.axhline(y=min_unique_sequence_number_per_group_threshold, 
+                               xmin=0, 
+                               xmax=1, 
+                               color=SEABORN_LINE_COLOR_RED, 
+                               linewidth=SEABORN_LINE_WIDTH_JOINTPLOT)
         plt.show(g);
 
     @staticmethod
     def _plot_group_count_change(group_count_df: pd.DataFrame) -> None:
 
-        g = sns.pointplot(data=group_count_df,
-                          x=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR,
-                          y=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_GROUP_COUNT_NAME_STR)
-        g.set_title(label=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_GROUP_COUNT_CHANGE_TITLE_NAME_STR, 
-                    fontsize=20)
-        plt.show();
+        group_count_df = pd.melt(group_count_df, 
+                                 id_vars=[DATASET_NAME_FIELD_NAME_STR],
+                                 var_name=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR,
+                                 value_name=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_GROUP_COUNT_NAME_STR)
 
-    @staticmethod
-    def _change_data_type(dataframe: pd.DataFrame,
-                          data_type_mappind_dict: dict[str, str]) -> pd.DataFrame:
+        g=sns.catplot(group_count_df,
+                      x=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR,
+                      y=LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_GROUP_COUNT_NAME_STR,
+                      kind='point',
+                      height=SEABORN_FIGURE_LEVEL_HEIGHT_WIDE_SINGLE,
+                      aspect=SEABORN_FIGURE_LEVEL_ASPECT_WIDE)
 
-        col_data_type_dict_list = []
-        for old_dt, new_dt in data_type_mappind_dict.items():
-            dataframe_cols = dataframe.select_dtypes(include=old_dt).columns
-            n_cols = len(dataframe_cols)
-            col_data_type_dict = dict(zip(dataframe_cols, [new_dt]*n_cols))
-            col_data_type_dict_list.append(col_data_type_dict)
+        for ax in g.axes.flatten():
+            ax.tick_params(labelbottom=True)
 
-        col_data_type_remapping_dict = {k: v for dictionary in col_data_type_dict_list for k, v in dictionary.items()}
-        dataframe = dataframe.astype(col_data_type_remapping_dict)
-    
-        return dataframe 
+        y_loc = calculate_suptitle_position(g,
+                                            SEABORN_SUPTITLE_HEIGHT_CM)
+        g.figure.suptitle(LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_GROUP_COUNT_CHANGE_TITLE_NAME_STR, 
+                          fontsize=SEABORN_TITLE_FONT_SIZE,
+                          y=y_loc)
+        plt.show(g);
 
     def _preprocessing_step_print_output(self,
                                          preprocessing_step_full_name: str,
@@ -615,10 +880,10 @@ class SequenceFilter():
         pct_rows_removed_after_filter = (n_rows_original - n_rows_after_filter) / n_rows_original * 100
 
         datatype_mapping_dict = {'int64': 'Int64', 'float64': 'Int64'}
-        sequence_count_per_group = self._change_data_type(self.sequence_count_per_group,
-                                                          datatype_mapping_dict)
-        group_count = self._change_data_type(self.group_count,
-                                             datatype_mapping_dict)
+        sequence_count_per_group = change_data_type(self.sequence_count_per_group,
+                                                    datatype_mapping_dict)
+        group_count = change_data_type(self.group_count,
+                                       datatype_mapping_dict)
 
         print('')
         print(f'== {LEARNING_ACTIVITY_SEQUENCE_FILTER_INTERACTIONS_DATAFRAME_NAME_STR} ==')
@@ -677,10 +942,10 @@ class SequenceFilter():
     def _return_group_count(self,
                             unique_learning_activity_sequence_stats_per_group: pd.DataFrame,
                             preprocessing_step: str) -> pd.DataFrame:
-         
+
         group_count = unique_learning_activity_sequence_stats_per_group[GROUP_FIELD_NAME_STR].nunique()
-        group_count_dict = {LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_STEP_NAME_STR: preprocessing_step,
-                            LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_GROUP_COUNT_NAME_STR: group_count}
+        group_count_dict = {DATASET_NAME_FIELD_NAME_STR: self.dataset_name,
+                            preprocessing_step: group_count}
 
         group_count_df = pd.DataFrame(group_count_dict, index=[0])
 
@@ -690,8 +955,9 @@ class SequenceFilter():
                                       df_1: pd.DataFrame,
                                       df_2: pd.DataFrame) -> pd.DataFrame:
 
-        group_count_df = pd.concat([df_1, df_2],
-                                   ignore_index=True)
+        group_count_df = pd.merge(df_1, 
+                                  df_2,
+                                  on=[DATASET_NAME_FIELD_NAME_STR])
         
         return group_count_df
 
@@ -731,10 +997,10 @@ class SequenceFilter():
         else:
             raise TypeError(f'filter_type needs to be either "{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_FILTER_TYPE_SEQUENCE_NAME_STR}" or "{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_FILTER_TYPE_GROUP_NAME_STR}"')
 
-        self.unique_learning_activity_sequence_stats_per_group = return_unique_learning_activity_sequence_stats_per_group(self.interactions,
+        self.unique_learning_activity_sequence_stats_per_group = SequenceStatistics.return_unique_learning_activity_sequence_stats_per_group(self.interactions,
                                                                                                                           self.dataset_name,
                                                                                                                           self.group_field)
-        self.learning_activity_sequence_stats_per_group = return_learning_activity_sequence_stats_per_group(self.unique_learning_activity_sequence_stats_per_group)
+        self.learning_activity_sequence_stats_per_group = SequenceStatistics.return_learning_activity_sequence_stats_per_group(self.unique_learning_activity_sequence_stats_per_group)
 
         sequence_count_per_group_new = self._return_seq_count_per_group(self.unique_learning_activity_sequence_stats_per_group,
                                                                         preprocessing_step)
@@ -762,9 +1028,11 @@ class SequenceFilter():
 
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
                                               LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                              LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
                                               self.min_pct_unique_learning_activities_per_group_in_seq)
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
                                               LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                              LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
                                               self.max_pct_repeated_learning_activities_in_seq)
 
         min_pct_unique_learning_activities_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR] >= self.min_pct_unique_learning_activities_per_group_in_seq
@@ -788,15 +1056,24 @@ class SequenceFilter():
         threshold_tuples_list = []
         for group, df in self.learning_activity_sequence_stats_per_group.groupby(GROUP_FIELD_NAME_STR):
 
-            min_threshold, max_threshold = return_adjusted_boxplot_outlier_threshold(df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR].values)
+            seq_len_values = df[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR].values
+            if len(seq_len_values) > 1:
+                min_threshold, max_threshold = return_adjusted_boxplot_outlier_threshold(seq_len_values)
+            else:
+                min_threshold, max_threshold = -1, -1
+                 
             threshold_tuples_list.append((min_threshold, max_threshold))
 
             min_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR] >= min_threshold
             max_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR] <= max_threshold
             row_filter = (min_filter & max_filter)
-            seq_to_keep_per_group_dict[group] = self.unique_learning_activity_sequence_stats_per_group[SEQUENCE_ID_FIELD_NAME_STR].loc[row_filter].values
+            if len(seq_len_values) > 1:
+                seq_to_keep_per_group_dict[group] = self.unique_learning_activity_sequence_stats_per_group[SEQUENCE_ID_FIELD_NAME_STR].loc[row_filter].values
+            else:
+                seq_to_keep_per_group_dict[group] = self.unique_learning_activity_sequence_stats_per_group[SEQUENCE_ID_FIELD_NAME_STR].values
 
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
+                                              LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
                                               LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
                                               threshold_tuples_list)
 
@@ -830,3 +1107,15 @@ class SequenceFilter():
         self._update_data_after_filtering(LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_FILTER_TYPE_GROUP_NAME_STR,
                                           groups_to_keep_array,
                                           LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_COUNT_PER_GROUP_NAME_STR)
+
+    def _create_parameter_df(self):
+        
+        parameter_df = pd.DataFrame({DATASET_NAME_STR: self.dataset_name,
+                                     LEARNING_ACTIVITY_SEQUENCE_FILTER_STEP_MIN_UNIQUE_NAME_STR.replace('"', '').replace('\n', ''): self.min_pct_unique_learning_activities_per_group_in_seq,
+                                     LEARNING_ACTIVITY_SEQUENCE_FILTER_STEP_MAX_REPEATED_NAME_STR.replace('"', '').replace('\n', ''): self.max_pct_repeated_learning_activities_in_seq,
+                                     LEARNING_ACTIVITY_MINIMUM_SEQUENCE_COUNT_PER_GROUP_NAME_STR: self.min_sequence_number_per_group_threshold,
+                                     LEARNING_ACTIVITY_MINIMUM_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR: self.min_unique_sequence_number_per_group_threshold},
+                                     index=[0])
+        
+        return parameter_df
+        
