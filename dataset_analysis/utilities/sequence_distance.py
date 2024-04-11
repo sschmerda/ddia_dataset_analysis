@@ -1,5 +1,5 @@
 from .standard_import import *
-from .functions import *
+from .preprocessing_functions import *
 from .constants import *
 from .io_functions import *
 
@@ -35,6 +35,7 @@ class SeqDist:
     For each group calculates the (learning activity-) sequence distances between each possible user\
     combination(seq_distances) and sequence combination(unique_seq_distances) pair.
     """
+
     GROUP_COL_INDEX = 0
     USER_COL_INDEX = 1
     LEARNING_ACTIVITY_COL_INDEX = 2
@@ -58,8 +59,8 @@ class SeqDist:
         self.sequence_id_field = sequence_id_field
 
         if not has_groups:
-            self.data[self.group_field] = '0'
-        
+            self.data[self.group_field] = 0
+
         # initial data transformation
         self._select_fields_and_transform_to_numpy()
         self._transform_to_char()
@@ -68,18 +69,21 @@ class SeqDist:
         self.user_array = np.unique(self.data[:, SeqDist.USER_COL_INDEX])
 
         # directory where sequence distance pickle files will be written to
-        self.result_directory = [PATH_TO_SEQUENCE_DISTANCES_PICKLE_FOLDER, self.dataset_name]
+        self.result_directory = [PATH_TO_SEQUENCE_DISTANCES_PICKLE_FOLDER,
+                                 self.dataset_name]
 
-    def _select_fields_and_transform_to_numpy(self):
+    def _select_fields_and_transform_to_numpy(self) -> None:
+        """Selects the fields from data used for sequence distance calculations
+        """
+        # data type of fields need to be transformed to string in order to hold characters for seq dist calculation in matrix
+        self.data = (self.data[[self.group_field,
+                                self.user_field,
+                                self.learning_activity_field,
+                                self.sequence_id_field,
+                                self.learning_activity_field]].astype('str').values)
 
-        self.data = self.data[[self.group_field, self.user_field, self.learning_activity_field, self.sequence_id_field, self.learning_activity_field]].astype('str').values
-
-    def _transform_to_char(self):
+    def _transform_to_char(self) -> None:
         """Maps unique characters to learning activities and returns the transformed series (tokenization)
-
-        Returns
-        ------
-        None
 
         Raises
         ------
@@ -89,16 +93,16 @@ class SeqDist:
         unique_lr = np.unique(self.data[:, SeqDist.LEARNING_ACTIVITY_COL_INDEX])
         lr_mapping = {}
         chars = []
-        
+
         i = 0
         while i >= 0:
             try:
                 char = chr(i)
                 chars.append(char)
-                i += 1 
+                i += 1
             except:
                 break
-        
+
         # pandas cannot distinguish between some unicode characters -> reduce chars to the ones
         # readable by pandas
         chars = pd.Series(chars).unique()
@@ -106,8 +110,8 @@ class SeqDist:
         if len(unique_lr) > len(chars):
             raise Exception(f'There are more unique {LEARNING_ACTIVITY_FIELD_NAME_STR}s than possible characters')
 
-        for n,i in enumerate(unique_lr):
-            lr_mapping[i] = chars[n] 
+        for n, i in enumerate(unique_lr):
+            lr_mapping[i] = chars[n]
 
         char_array = [lr_mapping[i] for i in self.data[:, SeqDist.LEARNING_ACTIVITY_COL_INDEX]]
 
@@ -116,22 +120,51 @@ class SeqDist:
     def _filter_data_by_group(self,
                               data: np.ndarray,
                               group: str) -> np.ndarray:
+        """Filters data by group
 
-        data = data[data[:, self.GROUP_COL_INDEX] == group, :].copy()
+        Parameters
+        ----------
+        data : np.ndarray
+            The data matrix
+        group : str
+            The group which is used for filtering data and char_array
 
-        return data
+        Returns
+        -------
+        np.ndarray
+            A np.ndarray containing the filtered data
+        """
+        data_copy = data.copy()
+        data_copy = data_copy[data_copy[:, self.GROUP_COL_INDEX] == group, :]
+
+        return data_copy
 
     def _calculate_sequence_distances(self,
-                                      group, 
-                                      group_data, 
-                                      distance_function,
-                                      *args,
+                                      group: str,
+                                      group_data: np.ndarray, 
+                                      distance_function: Any, 
+                                      *args, 
                                       **kwargs) -> None:
+        """Calculates sequence distances(base all sequences and base unique sequences) for a specified group and saves the
+        result dataframe to disk in the directory specified in self.result_directory.
 
+        Parameters
+        ----------
+        group : str
+            The group for which sequence distances will be calculated
+        group_data : np.ndarray
+            The data matrix for the specified group
+        distance_function : Any
+            A function for calculating the sequence distance
+
+        Returns
+        -------
+        None
+        """                                      
         user_array, idx = np.unique(group_data[:, self.USER_COL_INDEX], return_index=True)
         user_sequence_id_array = group_data[:, self.SEQUENCE_ID_COL_INDEX][idx]
         user_sequence_id_mapping_dict = dict(zip(user_array, user_sequence_id_array))
-            
+
         users = group_data[:, self.USER_COL_INDEX]
         learning_activities_char = group_data[:, self.LEARNING_ACTIVITY_CHAR_COL_INDEX]
         learning_activities = group_data[:, self.LEARNING_ACTIVITY_COL_INDEX]
@@ -140,23 +173,25 @@ class SeqDist:
         user_learning_activity_df = pd.DataFrame({USER_FIELD_NAME_STR: users,
                                                   LEARNING_ACTIVITY_SEQUENCE_CHARACTERS_NAME_STR: learning_activities_char,
                                                   LEARNING_ACTIVITY_FIELD_NAME_STR: learning_activities})
-        user_char_string_mapping_dict = (user_learning_activity_df.groupby(USER_FIELD_NAME_STR)
-                                                                          [LEARNING_ACTIVITY_SEQUENCE_CHARACTERS_NAME_STR]
+        user_char_string_mapping_dict = (user_learning_activity_df.groupby(USER_FIELD_NAME_STR)[LEARNING_ACTIVITY_SEQUENCE_CHARACTERS_NAME_STR]
                                                                   .sum()
                                                                   .to_dict())
         len_seq_df = user_learning_activity_df.groupby(USER_FIELD_NAME_STR)[LEARNING_ACTIVITY_FIELD_NAME_STR].agg([len, tuple])
+
         user_sequence_length = len_seq_df['len'].to_list()
         user_sequence_array = len_seq_df['tuple'].to_list()
+        user_sequence_array = [tuple(map(int, i)) for i in user_sequence_array]
 
-        # generate a sequence_combination - sequence_distance/max_sequence_length mapping 
-        sequence_id_char_string_mapping_dict = {seq_id: user_char_string_mapping_dict[user] for user, seq_id in user_sequence_id_mapping_dict.items()}
+        # generate a sequence_combination - sequence_distance/max_sequence_length mapping
+        sequence_id_char_string_mapping_dict = {seq_id: user_char_string_mapping_dict[user] 
+                                                for user, seq_id in user_sequence_id_mapping_dict.items()}
         sequence_id_array = list(sequence_id_char_string_mapping_dict.keys())
-        sequence_len_array = [len(char_string) for char_string in sequence_id_char_string_mapping_dict.values()] 
+        sequence_len_array = [len(char_string) for char_string in sequence_id_char_string_mapping_dict.values()]
 
         sequence_combinations_with_replacement = [tuple(sorted(i, key=int)) for i in list(combinations_with_replacement(sequence_id_array, 2))]
         sequence_combinations = [tuple(sorted(i, key=int)) for i in list(combinations(sequence_id_array, 2))]
 
-        sequence_distance_dict={}
+        sequence_distance_dict = {}
         for sequence_combination in sequence_combinations_with_replacement:
 
             char_sequence_1 = sequence_id_char_string_mapping_dict[sequence_combination[0]]
@@ -166,8 +201,8 @@ class SeqDist:
 
             sequence_distance_dict[sequence_combination] = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: sequence_distance,
                                                             LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_sequence_length}
-        # generate the sequence_distances_per_group dictionary   
-        user_combinations = [tuple(sorted(i, key=int)) for i in combinations(user_array, 2)] 
+        # generate the sequence_distances_per_group dictionary
+        user_combinations = [tuple(sorted(i, key=int)) for i in combinations(user_array, 2)]
 
         sequence_distance_list = []
         max_sequence_length_list = []
@@ -185,13 +220,13 @@ class SeqDist:
             sequence_distance = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR]
             max_sequence_length = sequence_distance_dict[sequence_tuple][LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR]
             sequence_id_combination = tuple(sorted((sequence_1, sequence_2), key=int))
-                
+
             sequence_distance_list.append(sequence_distance)
             max_sequence_length_list.append(max_sequence_length)
-            user_a_list.append(user_combination[0])
-            user_b_list.append(user_combination[1])
-            sequence_id_a_list.append(sequence_id_combination[0])
-            sequence_id_b_list.append(sequence_id_combination[1])
+            user_a_list.append(int(user_combination[0]))
+            user_b_list.append(int(user_combination[1]))
+            sequence_id_a_list.append(int(sequence_id_combination[0]))
+            sequence_id_b_list.append(int(sequence_id_combination[1]))
 
         sequence_distances = {DATASET_NAME_STR: self.dataset_name,
                               GROUP_FIELD_NAME_STR: int(group),
@@ -201,12 +236,12 @@ class SeqDist:
                               LEARNING_ACTIVITY_SEQUENCE_USER_COMBINATION_USER_B_NAME_STR: user_b_list,
                               LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_A_NAME_STR: sequence_id_a_list,
                               LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_B_NAME_STR: sequence_id_b_list,
-                              LEARNING_ACTIVITY_SEQUENCE_USER_NAME_STR: user_array,
-                              LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: user_sequence_id_array,
+                              LEARNING_ACTIVITY_SEQUENCE_USER_NAME_STR: list(map(int, user_array)),
+                              LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: list(map(int, user_sequence_id_array)),
                               LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: user_sequence_length,
                               LEARNING_ACTIVITY_SEQUENCE_ARRAY_NAME_STR: user_sequence_array}
-            
-        # generate the unique_sequence_distances_per_group dictionary   
+
+        # generate the unique_sequence_distances_per_group dictionary
         unique_sequence_distance_list = []
         max_unique_sequence_length_list = []
         unique_sequence_id_a_list = []
@@ -219,16 +254,16 @@ class SeqDist:
 
             unique_sequence_distance_list.append(unique_sequence_distance)
             max_unique_sequence_length_list.append(max_unique_sequence_length)
-            unique_sequence_id_a_list.append(sequence_combination[0])
-            unique_sequence_id_b_list.append(sequence_combination[1])
-            
+            unique_sequence_id_a_list.append(int(sequence_combination[0]))
+            unique_sequence_id_b_list.append(int(sequence_combination[1]))
+
         unique_sequence_distances = {DATASET_NAME_STR: self.dataset_name,
                                      GROUP_FIELD_NAME_STR: int(group),
                                      LEARNING_ACTIVITY_SEQUENCE_DISTANCE_NAME_STR: unique_sequence_distance_list,
                                      LEARNING_ACTIVITY_SEQUENCE_MAX_LENGTH_NAME_STR: max_unique_sequence_length_list,
                                      LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_A_NAME_STR: unique_sequence_id_a_list,
                                      LEARNING_ACTIVITY_SEQUENCE_SEQUENCE_ID_COMBINATION_SEQUENCE_B_NAME_STR: unique_sequence_id_b_list,
-                                     LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: sequence_id_array,
+                                     LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: list(map(int, sequence_id_array)),
                                      LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: sequence_len_array}
 
         sequence_distances_dict = {LEARNING_ACTIVITY_SEQUENCE_DISTANCE_BASED_ON_USER_COMBINATIONS_NAME_STR: sequence_distances,
@@ -236,12 +271,10 @@ class SeqDist:
 
         # write dictionary to disk
         filename = f'{self.dataset_name}{SEQUENCE_DISTANCE_DICT_PICKLE_NAME}{GROUP_FIELD_NAME_STR}_{group}'
-        pickle_write(sequence_distances_dict,
-                     self.result_directory,
-                     filename)
-        
-        return None
+        pickle_write(sequence_distances_dict, 
+                     self.result_directory, filename)
 
+        return None
 
     def _get_col1_by_min_number_col2(self,
                                      current_col1: np.ndarray,
@@ -249,7 +282,7 @@ class SeqDist:
                                      col_1_index: int,
                                      col_2_index: int,
                                      col_1_name: str,
-                                     col_2_name: str):
+                                     col_2_name: str) -> np.ndarray:
         """Filter col1 vals by the number of uniques col2 vals who interacted with it.
 
         Parameters
@@ -273,10 +306,10 @@ class SeqDist:
 
         n_kept_col1s = col1_array.size
 
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Filtering out {col_1_name} with less than {min_n_col2} {col_2_name}:')
         print(f'Total number of {col_1_name} left: {n_kept_col1s}')
-        print(50*'-')
+        print(DASH_STRING)
 
         return col1_array
 
@@ -286,7 +319,7 @@ class SeqDist:
                                                col_1_index: int,
                                                col_2_index: int,
                                                col_1_name: str,
-                                               col_2_name: str):
+                                               col_2_name: str) -> np.ndarray:
         """Filter col1 vals by a minimum median sequence length of col2 vals.
 
         Parameters
@@ -324,10 +357,10 @@ class SeqDist:
 
         n_kept_col1s = col1_array.size
 
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Filtering out {col_1_name} with a median sequence length of {col_2_name} of less than {min_median_seq_len}:')
         print(f'Total number of {col_1_name} left: {n_kept_col1s}')
-        print(50*'-')
+        print(DASH_STRING)
         
         return col1_array
 
@@ -338,7 +371,7 @@ class SeqDist:
                                 col_1_index: int,
                                 col_2_index: int,
                                 col_1_name: str,
-                                col_2_name: str):
+                                col_2_name: str) -> np.ndarray:
         """Returns the names of the top_n col1 vals by number of unique col2 vals.
 
         Parameters
@@ -379,15 +412,15 @@ class SeqDist:
         n_kept_col1 = col1_array.size
 
         if is_pct:
-            print(50*'-')
+            print(DASH_STRING)
             print(f'Keeping top {pct_kept}% of {col_1_name} by {col_2_name} size:')
             print(f'Total number of {col_1_name} left: {n_kept_col1}')
-            print(50*'-')
+            print(DASH_STRING)
         else:
-            print(50*'-')
+            print(DASH_STRING)
             print(f'Keeping top {top_n} {col_1_name} by {col_2_name} size:')
             print(f'Total number of groups left: {n_kept_col1}')
-            print(50*'-')
+            print(DASH_STRING)
 
         return col1_array
 
@@ -398,7 +431,7 @@ class SeqDist:
                                           col_1_index: int,
                                           col_2_index: int,
                                           col_1_name: str,
-                                          col_2_name: str):
+                                          col_2_name: str) -> np.ndarray:
         """Return the names of the top_n col1 vals by median sequence length of col2 vals.
 
         Parameters
@@ -452,15 +485,15 @@ class SeqDist:
         n_kept_col1 = col1_array.size
         
         if is_pct:
-            print(50*'-')
+            print(DASH_STRING)
             print(f'Keeping top {pct_kept}% of {col_1_name} by median sequence length of {col_2_name}:')
             print(f'Total number of {col_1_name} left: {n_kept_col1}')
-            print(50*'-')
+            print(DASH_STRING)
         else:
-            print(50*'-')
+            print(DASH_STRING)
             print(f'Keeping top {top_n} {col_1_name} by median sequence length of {col_2_name}:')
             print(f'Total number of groups left: {n_kept_col1}')
-            print(50*'-')
+            print(DASH_STRING)
 
         return col1_array
         
@@ -468,7 +501,7 @@ class SeqDist:
     @staticmethod
     def _sample_col1(current_col1: np.ndarray,
                         sample_pct: int,
-                        col_1_name: str):
+                        col_1_name: str) -> np.ndarray:
         """Returns the names of sampled col1 vals
 
         Parameters
@@ -497,10 +530,10 @@ class SeqDist:
 
         n_kept_col1 = col1_array.size
 
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Sampling {sample_pct} percent of {col_1_name}:')
         print(f'Total number of {col_1_name} left: {n_kept_col1}')
-        print(50*'-')
+        print(DASH_STRING)
 
         return col1_array
 
@@ -553,79 +586,75 @@ class SeqDist:
         Returns
         -------
         None
-        """        
+        """
         # aLgorithm start
         start_time = time.time()
 
         group_array = self.group_array.copy()
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Total number of {GROUP_FIELD_NAME_STR}: {group_array.size}')
-        print(50*'-')
+        print(DASH_STRING)
 
         # methods to reduce the number of groups used in the sequence distance calculations
         if min_number_of_users_per_group:
-            group_array = self._get_col1_by_min_number_col2(group_array, 
-                                                            min_number_of_users_per_group, 
-                                                            self.GROUP_COL_INDEX, 
-                                                            self.USER_COL_INDEX, 
-                                                            f'{GROUP_FIELD_NAME_STR}s', 
+            group_array = self._get_col1_by_min_number_col2(group_array,
+                                                            min_number_of_users_per_group,
+                                                            self.GROUP_COL_INDEX,
+                                                            self.USER_COL_INDEX,
+                                                            f'{GROUP_FIELD_NAME_STR}s',
                                                             f'{USER_FIELD_NAME_STR}s')
 
         if min_number_avg_seq_len:
-            group_array = self._get_col1_by_min_number_median_seq_len(group_array, 
-                                                                      min_number_avg_seq_len, 
-                                                                      self.GROUP_COL_INDEX, 
-                                                                      self.USER_COL_INDEX, 
-                                                                      f'{GROUP_FIELD_NAME_STR}s', 
+            group_array = self._get_col1_by_min_number_median_seq_len(group_array,
+                                                                      min_number_avg_seq_len,
+                                                                      self.GROUP_COL_INDEX,
+                                                                      self.USER_COL_INDEX,
+                                                                      f'{GROUP_FIELD_NAME_STR}s',
                                                                       f'{USER_FIELD_NAME_STR}s')
 
         if top_n_groups_by_user_number:
-            group_array = self._get_top_n_col1_by_col2(group_array, 
-                                                       top_n_groups_by_user_number, 
-                                                       is_pct_top_n_groups_by_user_number, 
-                                                       self.GROUP_COL_INDEX, 
-                                                       self.USER_COL_INDEX, 
-                                                       f'{GROUP_FIELD_NAME_STR}s', 
+            group_array = self._get_top_n_col1_by_col2(group_array,
+                                                       top_n_groups_by_user_number,
+                                                       is_pct_top_n_groups_by_user_number,
+                                                       self.GROUP_COL_INDEX,
+                                                       self.USER_COL_INDEX,
+                                                       f'{GROUP_FIELD_NAME_STR}s',
                                                        f'{USER_FIELD_NAME_STR}s')
 
         if top_n_groups_by_median_seq_len:
-            group_array = self._get_top_n_col1_by_median_seq_len(group_array, 
-                                                                 top_n_groups_by_median_seq_len, 
-                                                                 is_pct_top_n_groups_by_median_seq_len, 
-                                                                 self.GROUP_COL_INDEX, 
-                                                                 self.USER_COL_INDEX, 
-                                                                 f'{GROUP_FIELD_NAME_STR}s', 
+            group_array = self._get_top_n_col1_by_median_seq_len(group_array,
+                                                                 top_n_groups_by_median_seq_len,
+                                                                 is_pct_top_n_groups_by_median_seq_len,
+                                                                 self.GROUP_COL_INDEX,
+                                                                 self.USER_COL_INDEX,
+                                                                 f'{GROUP_FIELD_NAME_STR}s',
                                                                  f'{USER_FIELD_NAME_STR}s')
 
         if sample_pct:
-            group_array = self._sample_col1(group_array, 
-                                            sample_pct, 
-                                            f'{GROUP_FIELD_NAME_STR}s')
-        
+            group_array = self._sample_col1(group_array, sample_pct, f'{GROUP_FIELD_NAME_STR}s')
+
         # filter original dataframe by sampled groups
         data = self.data[np.isin(self.data[:, self.GROUP_COL_INDEX], group_array), :].copy()
         user_after_group_filter = np.unique(data[:, self.USER_COL_INDEX])
 
         # filter original dataframe by sampled users
         if sample_pct_user:
-            user_array = self._sample_col1(user_after_group_filter, 
-                                           sample_pct_user, 
-                                           f'{USER_FIELD_NAME_STR}s')
+            user_array = self._sample_col1(user_after_group_filter, sample_pct_user, f'{USER_FIELD_NAME_STR}s')
             data = data[np.isin(data[:, self.USER_COL_INDEX], user_array), :]
 
         groups_left = len(np.unique(data[:, self.GROUP_COL_INDEX]))
         users_left = len(np.unique(data[:, self.USER_COL_INDEX]))
         interactions_left = data.shape[0]
 
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Final number of {GROUP_FIELD_NAME_STR}s: {groups_left}')
         print(f'Final number of {USER_FIELD_NAME_STR}s: {users_left}')
         print(f'Final number of {ROWS_NAME_STR}: {interactions_left}')
-        print(50*'-')
+        print(DASH_STRING)
 
         # delete old pickle files to prevent keeping results of groups which are not part of current calculation anymore
         delete_all_pickle_files_within_directory(self.result_directory)
-        
+
         # calculate sequence distances for each group and write result to disk
         if parallelize_computation:
             results = (Parallel(n_jobs=NUMBER_OF_CORES)
@@ -645,16 +674,16 @@ class SeqDist:
         # algorithm end
         end_time = time.time()
         duration = end_time - start_time
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Duration in seconds: {duration}')
-        print(50*'-')
+        print(DASH_STRING)
 
         return None
 
     def calc_user_sequence_distances(self,
                                      parallelize_computation: bool,
                                      distance_function,
-                                    *args,
+                                     *args,
                                      min_number_of_groups_per_user=None,
                                      min_number_avg_seq_len=None,
                                      top_n_users_by_group_number=None,
@@ -697,48 +726,48 @@ class SeqDist:
         Returns
         -------
         None
-        """        
+        """
         # aLgorithm start
         start_time = time.time()
 
         user_array = self.user_array.copy()
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Total number of {USER_FIELD_NAME_STR}s: {user_array.size}')
-        print(50*'-')
+        print(DASH_STRING)
 
         # methods to reduce the number of users used in the sequence distance calculations
         if min_number_of_groups_per_user:
-            user_array = self._get_col1_by_min_number_col2(user_array, 
-                                                           min_number_of_groups_per_user, 
-                                                           self.USER_COL_INDEX, 
-                                                           self.GROUP_COL_INDEX, 
-                                                           f'{USER_FIELD_NAME_STR}s', 
+            user_array = self._get_col1_by_min_number_col2(user_array,
+                                                           min_number_of_groups_per_user,
+                                                           self.USER_COL_INDEX,
+                                                           self.GROUP_COL_INDEX,
+                                                           f'{USER_FIELD_NAME_STR}s',
                                                            f'{GROUP_FIELD_NAME_STR}s')
 
         if min_number_avg_seq_len:
-            user_array = self._get_col1_by_min_number_median_seq_len(user_array, 
-                                                                     min_number_avg_seq_len, 
-                                                                     self.USER_COL_INDEX, 
-                                                                     self.GROUP_COL_INDEX, 
-                                                                     f'{USER_FIELD_NAME_STR}s', 
+            user_array = self._get_col1_by_min_number_median_seq_len(user_array,
+                                                                     min_number_avg_seq_len,
+                                                                     self.USER_COL_INDEX,
+                                                                     self.GROUP_COL_INDEX,
+                                                                     f'{USER_FIELD_NAME_STR}s',
                                                                      f'{GROUP_FIELD_NAME_STR}s')
 
         if top_n_users_by_group_number:
-            user_array = self._get_top_n_col1_by_col2(user_array, 
-                                                      top_n_users_by_group_number, 
-                                                      is_pct_top_n_users_by_group_number, 
-                                                      self.USER_COL_INDEX, 
-                                                      self.GROUP_COL_INDEX, 
-                                                      f'{USER_FIELD_NAME_STR}s', 
+            user_array = self._get_top_n_col1_by_col2(user_array,
+                                                      top_n_users_by_group_number,
+                                                      is_pct_top_n_users_by_group_number,
+                                                      self.USER_COL_INDEX,
+                                                      self.GROUP_COL_INDEX,
+                                                      f'{USER_FIELD_NAME_STR}s',
                                                       f'{GROUP_FIELD_NAME_STR}s')
 
         if top_n_users_by_median_seq_len:
-            user_array = self._get_top_n_col1_by_median_seq_len(user_array, 
-                                                                top_n_users_by_median_seq_len, 
-                                                                is_pct_top_n_users_by_median_seq_len, 
-                                                                self.USER_COL_INDEX, 
-                                                                self.GROUP_COL_INDEX, 
-                                                                f'{USER_FIELD_NAME_STR}s', 
+            user_array = self._get_top_n_col1_by_median_seq_len(user_array,
+                                                                top_n_users_by_median_seq_len,
+                                                                is_pct_top_n_users_by_median_seq_len,
+                                                                self.USER_COL_INDEX,
+                                                                self.GROUP_COL_INDEX,
+                                                                f'{USER_FIELD_NAME_STR}s',
                                                                 f'{GROUP_FIELD_NAME_STR}s')
 
         # filter original dataframe by sampled users
@@ -751,11 +780,11 @@ class SeqDist:
         users_left = len(np.unique(data[:, self.USER_COL_INDEX]))
         interactions_left = data.shape[0]
 
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Final number of {GROUP_FIELD_NAME_STR}s: {groups_left}')
         print(f'Final number of {USER_FIELD_NAME_STR}s: {users_left}')
         print(f'Final number of interactions: {interactions_left}')
-        print(50*'-')
+        print(DASH_STRING)
 
         # create dummy group
         data[:, self.GROUP_COL_INDEX] = '0'
@@ -763,35 +792,36 @@ class SeqDist:
 
         # delete old pickle files to prevent keeping results of groups which are not part of current calculation anymore
         delete_all_pickle_files_within_directory(self.result_directory)
-        
+
         # calculate sequence distances for each group and write result to disk
         if parallelize_computation:
             results = (Parallel(n_jobs=NUMBER_OF_CORES)
                                (delayed(self._calculate_sequence_distances)
                                (group,
                                 data,
-                                distance_function,
-                                *args,
+                                distance_function, 
+                                *args, 
                                 **kwargs) for group in tqdm(group_array)))
         else:
             results = [self._calculate_sequence_distances(group,
-                                                          data,
-                                                          distance_function,
-                                                          *args,
+                                                          data, 
+                                                          distance_function, 
+                                                          *args, 
                                                           **kwargs) for group in tqdm(group_array)]
 
         # algorithm end
         end_time = time.time()
         duration = end_time - start_time
-        print(50*'-')
+        print(DASH_STRING)
         print(f'Duration in seconds: {duration}')
-        print(50*'-')
+        print(DASH_STRING)
 
         return None
 
-def calculate_sequence_distances(dataset_name: str,
-                                 interactions: pd.DataFrame,
-                                 group_field: str,
+
+def calculate_sequence_distances(dataset_name: str, 
+                                 interactions: pd.DataFrame, 
+                                 group_field: str, 
                                  ignore_groups: bool) -> None:
     """For each group calculates the (learning activity-) sequence distances between each possible user\
     combination(seq_distances) and sequence combination(unique_seq_distances) pair.\
@@ -811,7 +841,7 @@ def calculate_sequence_distances(dataset_name: str,
         This argument should be set to None if the interactions dataframe does not have a group_field
     ignore_groups: bool
         A boolean indicating whether the group field should be ignored (even when the datasets has groups)\
-        and sequence distances be calculated over the entire length of a users learning activities in the\
+        and sequence distances be calculated over the entire length of a user's learning activities in the\
         interactions dataframe.
 
     Returns
@@ -820,27 +850,27 @@ def calculate_sequence_distances(dataset_name: str,
     """
     if group_field:
         if ignore_groups:
-            print('-'*50)
+            print(DASH_STRING)
             print(f'{GROUP_FIELD_NAME_STR}-Field Available But Will Be Ignored:')
             print(f'Calculate {SEQUENCE_STR} Distances')
-            print('-'*50)
+            print(DASH_STRING)
         else:
-            print('-'*50)
+            print(DASH_STRING)
             print(f'{GROUP_FIELD_NAME_STR}-Field Available:')
             print(f'Calculate {SEQUENCE_STR} Distances for each {GROUP_FIELD_NAME_STR}')
-            print('-'*50)
+            print(DASH_STRING)
     else:
-        print('-'*50)
+        print(DASH_STRING)
         print(f'{GROUP_FIELD_NAME_STR}-Field NOT Available:')
         print(f'Calculate {SEQUENCE_STR} Distances')
-        print('-'*50)
+        print(DASH_STRING)
     seq_sim = SeqDist(dataset_name,
-                        interactions, 
-                        USER_FIELD_NAME_STR, 
-                        GROUP_FIELD_NAME_STR, 
-                        LEARNING_ACTIVITY_FIELD_NAME_STR, 
-                        SEQUENCE_ID_FIELD_NAME_STR,
-                        group_field)
+                      interactions,
+                      USER_FIELD_NAME_STR,
+                      GROUP_FIELD_NAME_STR,
+                      LEARNING_ACTIVITY_FIELD_NAME_STR,
+                      SEQUENCE_ID_FIELD_NAME_STR,
+                      group_field)
     if ignore_groups:
         _ = seq_sim.calc_user_sequence_distances(PARALLELIZE_COMPUTATIONS,
                                                  distance,
