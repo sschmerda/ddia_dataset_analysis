@@ -1,7 +1,7 @@
 from .standard_import import *
 from .constants import *
 from .config import *
-from .miscellaneous import *
+from .plotting_functions import *
 
 class SequenceStatistics():
     """A class used to calculate and plot sequence statistics
@@ -15,7 +15,7 @@ class SequenceStatistics():
     sequence_count_per_group : pd.DataFrame
         A dataframe containing sequence counts and unique sequence counts per group
 
-    Methods
+    MethodS
     -------
     return_unique_learning_activity_sequence_stats_per_group(interactions, dataset_name, group_field)
         Return a dataframe which contains statistics (frequencies and lengths) of unique learning_activity sequences over user entities grouped by group entities
@@ -32,9 +32,22 @@ class SequenceStatistics():
     def __init__(self, 
                  interactions: pd.DataFrame,
                  dataset_name: str,
-                 group_field: str):
+                 group_field: str,
+                 result_tables: Type[Any]) -> None:
+        """ 
+        Parameters
+        ----------
+        interactions : pd.DataFrame
+            The interactions dataframe
+        dataset_name : str
+            The name of the dataset
+        group_field : str
+            The group field name
+        result_tables : Type[Any]
+            The ResultTables object
+        """    
         
-        self.interactions = interactions
+        self.interactions = interactions.copy()
         self.dataset_name = dataset_name
         self.group_field = group_field
         self._n_groups = self.interactions[GROUP_FIELD_NAME_STR].nunique()
@@ -46,6 +59,9 @@ class SequenceStatistics():
         self.learning_activity_sequence_stats_per_group = self.return_learning_activity_sequence_stats_per_group(self.unique_learning_activity_sequence_stats_per_group)
 
         self.sequence_count_per_group = self._return_seq_count_per_group()
+
+        # add data to results_table
+        result_tables.seq_stats_sequence_count_per_group = self.sequence_count_per_group.copy()
 
     @classmethod
     def return_unique_learning_activity_sequence_stats_per_group(cls,
@@ -88,7 +104,7 @@ class SequenceStatistics():
             return percentage_repeated_elements
 
         if not group_field:
-            interactions[GROUP_FIELD_NAME_STR] = '0'
+            interactions[GROUP_FIELD_NAME_STR] = 0
         group_field = GROUP_FIELD_NAME_STR
 
         
@@ -97,6 +113,7 @@ class SequenceStatistics():
         unique_seq_count_per_group_data = []
         unique_seq_data = []
         unique_seq_id_data = []
+        user_data = []
         seq_freq_data = []
         seq_freq_pct_data = []
         seq_len_data = []
@@ -108,6 +125,7 @@ class SequenceStatistics():
         for n, (group, df_1) in enumerate(interactions.groupby(group_field)):
             learning_activity_seq_frequency_over_user_dict = defaultdict(int) 
             learning_activity_seq_id_remapping_dict = defaultdict(int)
+            learning_activity_seq_user_array_dict = defaultdict(list)
             df_1 = df_1.sort_values(by=[USER_FIELD_NAME_STR, TIMESTAMP_FIELD_NAME_STR])
             for user, df_2 in df_1.groupby(USER_FIELD_NAME_STR):
                 seq_col_3 = df_2[LEARNING_ACTIVITY_FIELD_NAME_STR].to_list()
@@ -116,12 +134,14 @@ class SequenceStatistics():
 
                 learning_activity_seq_frequency_over_user_dict[seq_col_3] += 1
                 learning_activity_seq_id_remapping_dict[seq_col_3] = sequence_id
+                learning_activity_seq_user_array_dict[seq_col_3].append(user)
             
             seq_count = sum(list(learning_activity_seq_frequency_over_user_dict.values()))
             unique_seq_count = len(list(learning_activity_seq_frequency_over_user_dict.keys()))
 
             unique_seq_list = list(learning_activity_seq_frequency_over_user_dict.keys())
             unique_seq_id_list = [learning_activity_seq_id_remapping_dict[i] for i in unique_seq_list]
+            user_list = [tuple(learning_activity_seq_user_array_dict[i]) for i in unique_seq_list]
             seq_freq_list = list(learning_activity_seq_frequency_over_user_dict.values())
             seq_freq_pct_list = [freq/seq_count*100 for freq in learning_activity_seq_frequency_over_user_dict.values()]
             seq_len_list = list(map(len, learning_activity_seq_frequency_over_user_dict.keys()))
@@ -136,6 +156,7 @@ class SequenceStatistics():
             unique_seq_count_per_group_data.extend([unique_seq_count] * len(unique_seq_list))
             unique_seq_data.extend(unique_seq_list)
             unique_seq_id_data.extend(unique_seq_id_list)
+            user_data.extend(user_list)
             seq_freq_data.extend(seq_freq_list)
             seq_freq_pct_data.extend(seq_freq_pct_list)
             seq_len_data.extend(seq_len_list)
@@ -152,6 +173,7 @@ class SequenceStatistics():
                           LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR: unique_seq_count_per_group_data,
                           LEARNING_ACTIVITY_SEQUENCE_NAME_STR: unique_seq_data,
                           LEARNING_ACTIVITY_SEQUENCE_ID_NAME_STR: unique_seq_id_data,
+                          LEARNING_ACTIVITY_SEQUENCE_USERS_NAME_STR: user_data,
                           LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR: seq_freq_data,
                           LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR: seq_freq_pct_data,
                           LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR: seq_len_data,
@@ -202,10 +224,10 @@ class SequenceStatistics():
 
         return learning_activity_seq_stats_per_group
 
-    def _return_aggregated_statistic_per_group(self,
-                                               sequence_stats_per_group: pd.DataFrame,
-                                               statistic: str,
-                                               sequence_type: str) -> pd.DataFrame:
+    @staticmethod
+    def return_aggregated_statistic_per_group(sequence_stats_per_group: pd.DataFrame,
+                                              statistic: str,
+                                              sequence_type: str) -> pd.DataFrame:
         """Aggregates a field, specified by the statistic parameter, in the input sequence stats dataframe and returns the\
         results as a dataframe in the long format
 
@@ -213,6 +235,10 @@ class SequenceStatistics():
         ----------
         sequence_stats_per_group : pd.DataFrame
             A dataframe containing statistics of learning_activity sequences over user entities grouped by group entities
+        statistic : str
+            The sequence statistic used in the long format df
+        sequence_type : str
+            A string indicating whether the input dataframe contains all or unique sequences
 
         Returns
         -------
@@ -236,11 +262,11 @@ class SequenceStatistics():
                                                               .reset_index())
         
         aggregated_stats_per_group_long = pd.melt(aggregated_stats_per_group[[GROUP_FIELD_NAME_STR, 
-                                                                            LEARNING_ACTIVITY_SEQUENCE_MIN_NAME_STR, 
-                                                                            LEARNING_ACTIVITY_SEQUENCE_FIRST_QUARTILE_NAME_STR,
-                                                                            LEARNING_ACTIVITY_SEQUENCE_MEDIAN_NAME_STR, 
-                                                                            LEARNING_ACTIVITY_SEQUENCE_THIRD_QUARTILE_NAME_STR,
-                                                                            LEARNING_ACTIVITY_SEQUENCE_MAX_NAME_STR]], 
+                                                                              LEARNING_ACTIVITY_SEQUENCE_MIN_NAME_STR, 
+                                                                              LEARNING_ACTIVITY_SEQUENCE_FIRST_QUARTILE_NAME_STR,
+                                                                              LEARNING_ACTIVITY_SEQUENCE_MEDIAN_NAME_STR, 
+                                                                              LEARNING_ACTIVITY_SEQUENCE_THIRD_QUARTILE_NAME_STR,
+                                                                              LEARNING_ACTIVITY_SEQUENCE_MAX_NAME_STR]], 
                                                   id_vars=GROUP_FIELD_NAME_STR,
                                                   var_name=LEARNING_ACTIVITY_SEQUENCE_DESCRIPTIVE_STATISTIC_NAME_STR,
                                                   value_name=statistic)
@@ -263,241 +289,6 @@ class SequenceStatistics():
                             self.dataset_name)
 
         return seq_count_df
-
-    def _plot_stat_plot(self,
-                        sequence_stats_per_group_df: pd.DataFrame,
-                        aggregated_statistics_df_long: pd.DataFrame,
-                        statistic: str,
-                        stat_is_pct: bool,
-                        boxplot_title: str,
-                        pointplot_title: str,
-                        ecdfplot_title: str) -> None:
-        """Plot a pointplot and ecdfplot of a sequence statistic over sequences per group. The plots are split by the
-        use of 1. all sequences and 2. only unique sequences within a group.
-
-        Parameters
-        ----------
-        sequence_stats_per_group_df : pd.DataFrame
-            A dataframe containing statistics of learning_activity sequences over user entities grouped by group entities
-        aggregated_statistics_df_long : pd.DataFrame
-            A dataframe in long format containing an aggregated statistic of learning_activity sequences
-        statistic : str
-            The sequence statistic to be plotted
-        stat_is_pct : bool
-            A flag indicating whether the sequence statistic is a percentage
-        boxplot_title : str
-            The title for the respective boxplot
-        pointplot_title : str
-            The title for the respective pointplot
-        ecdfplot_title : str
-            The title for the respective ecdfplot
-        """
-        if stat_is_pct:
-            axis_lim = (-5, 105)
-        else:
-            axis_lim = return_axis_limits(sequence_stats_per_group_df[statistic])
-
-        # boxplot
-        g = sns.FacetGrid(data=sequence_stats_per_group_df,
-                          col=LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR,
-                          col_wrap=2, 
-                          sharex=False, 
-                          sharey=True,
-                          height=9,
-                          xlim=axis_lim)
-        g.map_dataframe(sns.boxplot,
-                        x=statistic,
-                        y=GROUP_FIELD_NAME_STR,
-                        orient='h',
-                        showmeans=True, 
-                        meanprops=marker_config,
-                        palette=sns.color_palette("husl", n_colors=self._n_groups))
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
-        g.figure.subplots_adjust(top=0.95)
-        g.figure.suptitle(boxplot_title, 
-                          fontsize=20)
-        g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        g.add_legend()
-        plt.show(g);
-
-        # pointplot
-        g = sns.FacetGrid(data=aggregated_statistics_df_long,
-                          col=LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR,
-                          col_wrap=2, 
-                          sharex=False, 
-                          sharey=True,
-                          height=9,
-                          ylim=axis_lim)
-        g.map_dataframe(sns.pointplot,
-                        x=LEARNING_ACTIVITY_SEQUENCE_DESCRIPTIVE_STATISTIC_NAME_STR, 
-                        y=statistic, 
-                        hue=GROUP_FIELD_NAME_STR,
-                        palette=sns.color_palette("husl", n_colors=self._n_groups))
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
-        g.figure.subplots_adjust(top=0.95)
-        g.figure.suptitle(pointplot_title, 
-                          fontsize=20)
-        g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        g.add_legend()
-        plt.show(g);
-
-        # ecdf plot
-        g = sns.FacetGrid(data=sequence_stats_per_group_df,
-                          col=LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR,
-                          col_wrap=2, 
-                          sharex=False, 
-                          sharey=True,
-                          height=9,
-                          xlim=axis_lim)
-        g.map_dataframe(sns.ecdfplot,
-                        x=statistic,
-                        hue=GROUP_FIELD_NAME_STR,
-                        palette=sns.color_palette("husl", n_colors=self._n_groups))
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
-        g.figure.subplots_adjust(top=0.95)
-        g.figure.suptitle(ecdfplot_title, 
-                          fontsize=20)
-        g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        g.add_legend()
-        plt.show(g);
-
-    def _plot_stat_vs_freq_plot_per_group(self,
-                                          statistic: str,
-                                          statistic_label: str,
-                                          stat_is_pct: bool,
-                                          title_list: list[str],
-                                          share_x: bool,
-                                          share_y: bool) -> None:
-        """Plot a scatterplot of a sequence statistic against the respective sequence frequency of a unique sequence
-        per group.
-
-        Parameters
-        ----------
-        statistic : str
-            The sequence statistic to be plotted
-        statistic_label : str
-            The label used for the respective statistic
-        stat_is_pct : bool
-            A flag indicating whether the sequence statistic is a percentage
-        title_list : list[str]
-            A list containing the titles of sequence frequency % and sequence frequency plots
-        share_x : bool
-            A flag indicating whether the x axis should be shared across subplot
-        share_y : bool
-            A flag indicating whether the y axis should be shared across subplot
-        """
-        xlim_pct_plot = (-5, 105)  
-        xlim_plot = return_axis_limits(self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR])
-
-        ylim_pct = (-5, 105)
-        ylim = return_axis_limits(self.unique_learning_activity_sequence_stats_per_group[statistic])
-
-        if stat_is_pct:
-            ylim_plot = ylim_pct
-        else:
-            ylim_plot = ylim
-
-        # sequence frequency %
-        g = sns.FacetGrid(self.unique_learning_activity_sequence_stats_per_group, 
-                          col=GROUP_FIELD_NAME_STR, 
-                          col_wrap=6, 
-                          sharex=share_x, 
-                          sharey=share_y)
-        g.map_dataframe(sns.scatterplot, 
-                        x=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR, 
-                        y=statistic, 
-                        s=100, 
-                        alpha=0.4)
-        g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR, 
-              ylabel=statistic_label, 
-              xlim=xlim_pct_plot, 
-              ylim=ylim_plot)
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
-        g.figure.subplots_adjust(top=0.95)
-        g.figure.suptitle(title_list[0], 
-                    fontsize=20)
-        g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        plt.show(g)
-
-        # absolute sequence frequency
-        g = sns.FacetGrid(self.unique_learning_activity_sequence_stats_per_group, 
-                          col=GROUP_FIELD_NAME_STR, 
-                          col_wrap=6, 
-                          sharex=True, 
-                          sharey=True)
-        g.map_dataframe(sns.scatterplot, 
-                        x=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR, 
-                        y=statistic, 
-                        s=100, 
-                        alpha=0.4)
-        g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR, 
-              ylabel=statistic_label, 
-              xlim=xlim_plot, 
-              ylim=ylim_plot)
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
-        g.figure.subplots_adjust(top=0.95)
-        g.figure.suptitle(title_list[1], 
-                          fontsize=20)
-        g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        plt.show(g)
-    
-    def _plot_stat_hist_plot_per_group(self,
-                                       sequence_stats_per_group_df: pd.DataFrame,
-                                       statistic: str,
-                                       stat_is_pct: bool,
-                                       statistic_label: str,
-                                       share_x: bool,
-                                       share_y: bool) -> None:
-        """Plot a histogram of a sequence statistic per group. The plots are split by the
-        use of 1. all sequences and 2. only unique sequences within a group.
-
-        Parameters
-        ----------
-        sequence_stats_per_group_df : pd.DataFrame
-            A dataframe containing the merged unique learning activity sequence stats and all learning activity sequence
-            stats dataframes 
-        statistic : str
-            The sequence statistic to be plotted
-        stat_is_pct : bool
-            A flag indicating whether the sequence statistic is a percentage
-        statistic_label : str
-            The label used for the respective statistic
-        title_list : list[str]
-            A list containing the titles of sequence frequency % and sequence frequency plots
-        share_x : bool
-            A flag indicating whether the x axis should be shared across subplot
-        share_y : bool
-            A flag indicating whether the y axis should be shared across subplot
-        """
-        if stat_is_pct:
-            xlim_plot = (-5, 105)
-        else:
-            xlim_plot = return_axis_limits(sequence_stats_per_group_df[statistic])
-
-        title = LEARNING_ACTIVITY_SEQUENCE_HISTOGRAM_TITLE_NAME_STR + statistic
-        g = sns.FacetGrid(sequence_stats_per_group_df,
-                          col=LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR,
-                          row=GROUP_FIELD_NAME_STR, 
-                          sharex=share_x, 
-                          sharey=share_y,
-                          height=6)
-        g.map_dataframe(sns.histplot, 
-                        x=statistic, 
-                        stat='count')
-        g.set(xlabel=statistic_label,
-              xlim=xlim_plot)
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
-        g.figure.subplots_adjust(top=0.95)
-        g.figure.suptitle(title, 
-                          fontsize=20)
-        g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-        plt.show(g)
 
     def plot_sequence_stats(self) -> None:
         """Plot unique sequence statistics
@@ -600,40 +391,40 @@ class SequenceStatistics():
                                                              axis=0)
 
         # seq frequency
-        unique_sequence_frequency_stats_per_group_long = self._return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
-                                                                                                     LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
-                                                                                                     LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
+        unique_sequence_frequency_stats_per_group_long = self.return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                                                                                    LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                                                                                    LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
 
         # seq length
-        sequence_length_stats_per_group_long = self._return_aggregated_statistic_per_group(self.learning_activity_sequence_stats_per_group,
-                                                                                           LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                                                                           LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR)
-        unique_sequence_length_stats_per_group_long = self._return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
-                                                                                                  LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                                                                                  LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
+        sequence_length_stats_per_group_long = self.return_aggregated_statistic_per_group(self.learning_activity_sequence_stats_per_group,
+                                                                                          LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                                                                          LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR)
+        unique_sequence_length_stats_per_group_long = self.return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                                                                                 LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                                                                                 LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
         sequence_length_stats_per_group_long_merged = pd.concat([sequence_length_stats_per_group_long,
                                                                  unique_sequence_length_stats_per_group_long], 
                                                                  axis=0)
 
 
         # seq % repeated learning activities
-        sequences_repeated_learning_activities_stats_per_group_long = self._return_aggregated_statistic_per_group(self.learning_activity_sequence_stats_per_group,
-                                                                                                                  LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
-                                                                                                                  LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR)
-        unique_sequences_repeated_learning_activities_stats_per_group_long = self._return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
-                                                                                                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
-                                                                                                                         LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
+        sequences_repeated_learning_activities_stats_per_group_long = self.return_aggregated_statistic_per_group(self.learning_activity_sequence_stats_per_group,
+                                                                                                                 LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                                                                                                 LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR)
+        unique_sequences_repeated_learning_activities_stats_per_group_long = self.return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                                                                                                        LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                                                                                                        LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
         sequences_repeated_learning_activities_stats_per_group_long_merged = pd.concat([sequences_repeated_learning_activities_stats_per_group_long,
                                                                                         unique_sequences_repeated_learning_activities_stats_per_group_long], 
                                                                                         axis=0)
 
         # seq % unique learning activities
-        sequence_pct_learning_activities_per_group_stats_per_group_long = self._return_aggregated_statistic_per_group(self.learning_activity_sequence_stats_per_group,
-                                                                                                                      LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
-                                                                                                                      LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR)
-        unique_sequence_pct_learning_activities_per_group_stats_per_group_long = self._return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
-                                                                                                                             LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
-                                                                                                                             LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
+        sequence_pct_learning_activities_per_group_stats_per_group_long = self.return_aggregated_statistic_per_group(self.learning_activity_sequence_stats_per_group,
+                                                                                                                     LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                                                                                                     LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR)
+        unique_sequence_pct_learning_activities_per_group_stats_per_group_long = self.return_aggregated_statistic_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                                                                                                            LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                                                                                                            LEARNING_ACTIVITY_SEQUENCE_TYPE_UNIQUE_SEQ_VALUE_STR)
         sequence_pct_learning_activities_per_group_stats_per_group_long_merged = pd.concat([sequence_pct_learning_activities_per_group_stats_per_group_long,
                                                                                             unique_sequence_pct_learning_activities_per_group_stats_per_group_long], 
                                                                                             axis=0)
@@ -648,23 +439,46 @@ class SequenceStatistics():
         print(f'{LEARNING_ACTIVITY_UNIQUE_VS_TOTAL_NUMBER_OF_SEQUENCES_PER_GROUP_TITLE_NAME_STR}')
         print(' ')
         count_df = self.unique_learning_activity_sequence_stats_per_group.groupby(GROUP_FIELD_NAME_STR).head(1)
-        limits = return_axis_limits(count_df[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR])
-        g = sns.scatterplot(data=count_df,
-                            x=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
-                            y=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
-                            hue=GROUP_FIELD_NAME_STR, 
-                            s=100,
-                            alpha=0.9,
-                            palette=sns.color_palette("husl", n_colors=self._n_groups))
-        g.set(xlabel=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
-              ylabel=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR,
-              xlim=(limits[0], limits[1]),
-              ylim=(limits[0], limits[1]))
-        g.set_title(LEARNING_ACTIVITY_UNIQUE_VS_TOTAL_NUMBER_OF_SEQUENCES_PER_GROUP_TITLE_NAME_STR, 
-                    fontsize=20)
-        g.axline(xy1=(0,0), slope=1, color='r', linewidth=3);
-        g.legend(loc='center left', bbox_to_anchor=(1.02, 0.5))
-        plt.show(g)
+        limits = return_axis_limits(count_df[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR],
+                                    False)
+        g = sns.jointplot(data=count_df,
+                          x=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
+                          y=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR,
+                          hue=GROUP_FIELD_NAME_STR, 
+                          height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_SINGLE,
+                          s=SEABORN_POINT_SIZE_JOINTPLOT,
+                          alpha=SEABORN_POINT_ALPHA_JOINTPLOT_SEQ_STAT,
+                          edgecolor=SEABORN_POINT_EDGECOLOR,
+                          linewidth=SEABORN_POINT_LINEWIDTH,
+                          palette=return_color_palette(n_colors=self._n_groups),
+                          marginal_kws={'alpha': SEABORN_PLOT_OBJECT_ALPHA,
+                                        'bins': SEABORN_HISTOGRAM_BIN_CALC_METHOD})
+        
+        sns.histplot(data=count_df, x=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, ax=g.ax_marg_x, color=SEABORN_DEFAULT_RGB_TUPLE, alpha=SEABORN_PLOT_OBJECT_ALPHA, kde=False)
+        sns.histplot(data=count_df, y=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR, ax=g.ax_marg_y, color=SEABORN_DEFAULT_RGB_TUPLE, alpha=SEABORN_PLOT_OBJECT_ALPHA, kde=False, orientation="horizontal")
+
+        g.plot_marginals(sns.rugplot, 
+                         color=SEABORN_RUG_PLOT_COLOR, 
+                         height=SEABORN_RUG_PLOT_HEIGHT_PROPORTION_JOINTPLOT,
+                         alpha=SEABORN_RUG_PLOT_ALPHA_JOINTPLOT,
+                         linewidth=SEABORN_RUG_PLOT_LINEWIDTH_JOINTPLOT)
+        g.ax_joint.set_ylim(limits)
+        g.ax_joint.set_xlim(limits)
+        plt.tight_layout()
+        y_loc = calculate_suptitle_position(g,
+                                            SEABORN_SUPTITLE_HEIGHT_CM)
+        g.figure.suptitle(LEARNING_ACTIVITY_UNIQUE_VS_TOTAL_NUMBER_OF_SEQUENCES_PER_GROUP_TITLE_NAME_STR, 
+                          fontsize=SEABORN_TITLE_FONT_SIZE,
+                          y=y_loc)
+        g.set_axis_labels(xlabel=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
+                          ylabel=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR)
+        g.ax_joint.axline(xy1=(0,0), 
+                          slope=1, 
+                          color=SEABORN_LINE_COLOR_ORANGE, 
+                          linewidth=SEABORN_LINE_WIDTH_JOINTPLOT, 
+                          zorder=0)
+        g.ax_joint.legend(loc='center left', bbox_to_anchor=(1.25, 0.5))
+        plt.show(g);
 
         # all groups in one figure - seq freq stats
         print(' ')
@@ -673,16 +487,18 @@ class SequenceStatistics():
         print(' ')
         print(f'{LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_TITLE_NAME_STR}')
         print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
         print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
         print(' ')
 
-        self._plot_stat_plot(self.unique_learning_activity_sequence_stats_per_group,
-                             unique_sequence_frequency_stats_per_group_long,
-                             LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
-                             True,
-                             LEARNING_ACTIVITY_UNIQUE_SEQUENCE_BOXPLOT_FREQUENCY_PCT_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_UNIQUE_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_FREQUENCY_PCT_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_UNIQUE_SEQUENCE_ECDF_FREQUENCY_PCT_TITLE_NAME_STR)
+        plot_stat_plot(self.unique_learning_activity_sequence_stats_per_group,
+                       unique_sequence_frequency_stats_per_group_long,
+                       LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                       True,
+                       False,
+                       LEARNING_ACTIVITY_UNIQUE_SEQUENCE_BOXPLOT_FREQUENCY_PCT_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_UNIQUE_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_FREQUENCY_PCT_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_UNIQUE_SEQUENCE_ECDF_FREQUENCY_PCT_TITLE_NAME_STR)
 
         # all groups in one figure - seq len stats
         print(' ')
@@ -691,39 +507,20 @@ class SequenceStatistics():
         print(' ')
         print(f'{LEARNING_ACTIVITY_SEQUENCE_LENGTH_TITLE_NAME_STR}')
         print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
         print(LEARNING_ACTIVITY_STATS_SEQUENCE_NAME_STR)
         print('VS')
         print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
         print(' ')
 
-        self._plot_stat_plot(learning_activity_sequence_stats_merged,
-                             sequence_length_stats_per_group_long_merged,
-                             LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                             False,
-                             LEARNING_ACTIVITY_SEQUENCE_BOXPLOT_LENGTH_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_LENGTH_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_SEQUENCE_ECDF_LENGTH_TITLE_NAME_STR)
-
-        # all groups in one figure - repeated learning activities stats
-        print(' ')
-        print(STAR_STRING)
-        print(STAR_STRING)
-        print(' ')
-        print(f'{LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_TITLE_NAME_STR}')
-        print(' ')
-        print(LEARNING_ACTIVITY_STATS_SEQUENCE_NAME_STR)
-        print('VS')
-        print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
-        print(' ')
-
-        self._plot_stat_plot(learning_activity_sequence_stats_merged,
-                             sequences_repeated_learning_activities_stats_per_group_long_merged,
-                             LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
-                             True,
-                             LEARNING_ACTIVITY_SEQUENCE_BOXPLOT_REPEATED_LEARNING_ACTIVITIES_PCT_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_REPEATED_LEARNING_ACTIVITIES_PCT_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_SEQUENCE_ECDF_REPEATED_LEARNING_ACTIVITIES_PCT_TITLE_NAME_STR)
-
+        plot_stat_plot(learning_activity_sequence_stats_merged,
+                       sequence_length_stats_per_group_long_merged,
+                       LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                       False,
+                       False,
+                       LEARNING_ACTIVITY_SEQUENCE_BOXPLOT_LENGTH_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_LENGTH_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_SEQUENCE_ECDF_LENGTH_TITLE_NAME_STR)
 
         # all groups in one figure - pct of unique learning activities per group in seq stats
         print(' ')
@@ -732,55 +529,42 @@ class SequenceStatistics():
         print(' ')
         print(f'{LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR} in {SEQUENCE_STR}')
         print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
         print(LEARNING_ACTIVITY_STATS_SEQUENCE_NAME_STR)
         print('VS')
         print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
         print(' ')
 
-        self._plot_stat_plot(learning_activity_sequence_stats_merged,
-                             sequence_pct_learning_activities_per_group_stats_per_group_long_merged,
-                             LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
-                             True,
-                             LEARNING_ACTIVITY_SEQUENCE_BOXPLOT_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR,
-                             LEARNING_ACTIVITY_SEQUENCE_ECDF_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR)
+        plot_stat_plot(learning_activity_sequence_stats_merged,
+                       sequence_pct_learning_activities_per_group_stats_per_group_long_merged,
+                       LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                       True,
+                       False,
+                       LEARNING_ACTIVITY_SEQUENCE_BOXPLOT_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_SEQUENCE_ECDF_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR)
 
-
-        ####################################################################################################################
-
-        # unique sequences per group figures - statistic vs frequency
+        # all groups in one figure - repeated learning activities stats
         print(' ')
         print(STAR_STRING)
         print(STAR_STRING)
         print(' ')
-        print(f'{LEARNING_ACTIVITY_UNIQUE_SEQUENCES_STAT_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR}')
+        print(f'{LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_TITLE_NAME_STR}')
         print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
+        print(LEARNING_ACTIVITY_STATS_SEQUENCE_NAME_STR)
+        print('VS')
         print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
         print(' ')
 
-        self._plot_stat_vs_freq_plot_per_group(LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                               LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                               False,
-                                               [LEARNING_ACTIVITY_SEQUENCE_LENGTH_VS_FREQUENCY_PCT_PER_GROUP_TITLE_NAME_STR,
-                                                LEARNING_ACTIVITY_SEQUENCE_LENGTH_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR],
-                                               True,
-                                               True)
-
-        self._plot_stat_vs_freq_plot_per_group(LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
-                                               LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
-                                               True,
-                                               [LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_VS_FREQUENCY_PCT_PER_GROUP_TITLE_NAME_STR,
-                                                   LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR],
-                                               True,
-                                               True)
-
-        self._plot_stat_vs_freq_plot_per_group(LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
-                                               LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
-                                               True,
-                                               [LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_VS_FREQUENCY_PCT_PER_GROUP_TITLE_NAME_STR,
-                                                   LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR],
-                                               True,
-                                               True)
+        plot_stat_plot(learning_activity_sequence_stats_merged,
+                       sequences_repeated_learning_activities_stats_per_group_long_merged,
+                       LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                       True,
+                       False,
+                       LEARNING_ACTIVITY_SEQUENCE_BOXPLOT_REPEATED_LEARNING_ACTIVITIES_PCT_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_SEQUENCE_MIN_VS_MEDIAN_VS_MAX_REPEATED_LEARNING_ACTIVITIES_PCT_TITLE_NAME_STR,
+                       LEARNING_ACTIVITY_SEQUENCE_ECDF_REPEATED_LEARNING_ACTIVITIES_PCT_TITLE_NAME_STR)
 
         ####################################################################################################################
 
@@ -791,31 +575,178 @@ class SequenceStatistics():
         print(' ')
         print(f'{LEARNING_ACTIVITY_SEQUENCE_HISTOGRAM_TITLE_NAME_STR}')
         print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
         print(LEARNING_ACTIVITY_STATS_SEQUENCE_NAME_STR)
         print('VS')
         print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
         print(' ')
 
-        self._plot_stat_hist_plot_per_group(learning_activity_sequence_stats_merged,
-                                            LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                            False,
-                                            LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                            True,
-                                            True)
+        plot_stat_hist_plot_per_group(learning_activity_sequence_stats_merged,
+                                      LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                      False,
+                                      False,
+                                      LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                      LEARNING_ACTIVITY_SEQUENCE_HISTOGRAM_TITLE_NAME_STR,
+                                      True,
+                                      True)
 
-        self._plot_stat_hist_plot_per_group(learning_activity_sequence_stats_merged,
-                                            LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
-                                            True,
-                                            LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
-                                            True,
-                                            True)
+        plot_stat_hist_plot_per_group(learning_activity_sequence_stats_merged,
+                                      LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                      True,
+                                      False,
+                                      LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                      LEARNING_ACTIVITY_SEQUENCE_HISTOGRAM_TITLE_NAME_STR,
+                                      True,
+                                      True)
 
-        self._plot_stat_hist_plot_per_group(learning_activity_sequence_stats_merged,
-                                            LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
-                                            True,
-                                            LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
-                                            True,
-                                            True)
+        plot_stat_hist_plot_per_group(learning_activity_sequence_stats_merged,
+                                      LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                      True,
+                                      False,
+                                      LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
+                                      LEARNING_ACTIVITY_SEQUENCE_HISTOGRAM_TITLE_NAME_STR,
+                                      True,
+                                      True)
+
+        ####################################################################################################################
+
+        # unique sequences per group figures - statistic vs frequency
+        print(' ')
+        print(STAR_STRING)
+        print(STAR_STRING)
+        print(' ')
+        print(f'{LEARNING_ACTIVITY_UNIQUE_SEQUENCES_STAT_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR}')
+        print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
+        print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
+        print(' ')
+
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         True,
+                                         False,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_VS_FREQUENCY_PCT_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         False,
+                                         False,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                         True,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_VS_FREQUENCY_PCT_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                         False,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
+                                         True,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_VS_FREQUENCY_PCT_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
+                                         False,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_VS_FREQUENCY_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+
+        ####################################################################################################################
+
+        # unique sequences per group figures - statistic vs statistic
+        print(' ')
+        print(STAR_STRING)
+        print(STAR_STRING)
+        print(' ')
+        print(f'{LEARNING_ACTIVITY_UNIQUE_SEQUENCES_STAT_VS_UNIQUE_SEQUENCES_STAT_PER_GROUP_TITLE_NAME_STR}')
+        print(' ')
+        print(f'{LEARNING_ACTIVITY_STATS_SEQUENCE_FACET_BASE_STR}')
+        print(LEARNING_ACTIVITY_STATS_UNIQUE_SEQUENCE_NAME_STR)
+        print(' ')
+
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                         False,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_VS_LENGTH_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
+                                         False,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_VS_LENGTH_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
+
+        plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                         LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
+                                         True,
+                                         True,
+                                         False,
+                                         False,
+                                         LEARNING_ACTIVITY_SEQUENCES_REPEATED_LEARNING_ACTIVITIES_PCT_VS_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_TITLE_NAME_STR,
+                                         True,
+                                         True)
 
     def print_seq_count_per_group(self) -> None:
         """Prints sequence count and unique sequence count per group
