@@ -179,7 +179,7 @@ def print_and_plot_group_user_learning_activity_relationship(interactions: pd.Da
     interactions = interactions.copy()    
 
     if not group_field:
-        interactions[GROUP_FIELD_NAME_STR] = '0'
+        interactions[GROUP_FIELD_NAME_STR] = 0
 
     # learning_activities per user
     print(STAR_STRING)
