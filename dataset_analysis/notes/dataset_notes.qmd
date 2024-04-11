@@ -15,6 +15,7 @@ number-depth: 4
 format: 
     html:
         include-in-header: add-class.html
+        css: styles.css 
         theme: default
         embed-resources: true
         page-layout: article
@@ -29,12 +30,17 @@ bibliography: references.bib
 csl: elsevier-harvard.csl
 
 constants:
+  interaction: interaction
   learning_activity: learning resource
+  learning_activity_all_cap: Learning Resource
   group: topic
+  group_cap: Topic
   user: user
   user_cap: User
   course: course
   timestamp: timestamp
+  score: score
+  is_correct: is-correct
   learning_path: learning pathway
   learning_path_cap: Learning pathway
   csedm_2019: CSEDM 2019
@@ -61,30 +67,38 @@ from IPython.display import Markdown
 
 -   Values of the {{< meta constants.user >}}, {{< meta constants.group >}} and {{< meta constants.learning_activity >}} fields are remapped to integers starting from 0 and then transformed to strings. To recreate the original values a remapping dataset will be generated and be made available online in combination with the final datasets.
 
--   A dataset can potentially contain entries or interactions which are not directly related to the learning process and therefore will be disregarded and filtered out. [//TODO: List possible non-learning related interactions] Theses interactions could among other things consist of random clicks [//TODO: Is this correct?] if the respective datasets tracks them; navigation through {{< meta constants.course >}} menu pages or the reading and writing of forum and wikis entries.\
-Concrete examples:
-    - In the **{{< meta constants.kdd_2015 >}}** dataset (see @sec-kdd_2015) only interactions labeled as `problem` or `video` will be kept.
-    - In the **{{< meta constants.ou >}}** dataset (see @sec-open_university) only interactions labeled as `resource`, `subpage` and `oucontent` will be kept.
+-   A dataset can potentially contain entries or {{< meta constants.interaction >}}s which are not directly related to the learning process and therefore will be disregarded and filtered out. \[//TODO: List possible non-learning related {{< meta constants.interaction >}}s\] Theses {{< meta constants.interaction >}}s could among other things consist of random clicks \[//TODO: Is this correct?\] if the respective datasets tracks them; navigation through {{< meta constants.course >}} menu pages or the reading and writing of forum and wiki entries.\
+    Concrete examples:
+
+    -   In the {{< meta constants.kdd_2015 >}} dataset (see @sec-kdd_2015) only {{< meta constants.interaction >}}s labeled as `problem` or `video` will be kept.
+    -   In the {{< meta constants.ou >}} dataset (see @sec-open_university) only {{< meta constants.interaction >}}s labeled as `resource`, `subpage` and `oucontent` will be kept.
+
+-   Some datasets do not have `{{< meta constants.group >}}s` and the {{< meta constants.learning_path >}}s of `{{< meta constants.user >}}s` encompass the whole `{{< meta constants.course >}}`. In those cases a {{< meta constants.course >}}-wide dummy `{{< meta constants.group >}}` '0' is created in order to make plots and results comparable.\
+    Datasets without `{{< meta constants.group >}}s`:\
+
+    -   {{< meta constants.csedm_2019 >}} (see @sec-csedm_2019)
+    -   \[//TODO: add datasets\]
 
 -   A {{< meta constants.learning_path >}} is defined as a sequence of {{< meta constants.learning_activity >}}es of a {{< meta constants.user >}} for a certain {{< meta constants.group >}} (or for a certain course if the course cannot be subdivided into {{< meta constants.group >}}s) ordered by some kind of {{< meta constants.timestamp >}}. The removal of an entry with a missing {{< meta constants.learning_activity >}} or a {{< meta constants.timestamp >}} within a sequence would lead to a misrepresentation or bias of this {{< meta constants.learning_path >}}, i.e. effectively omitting crucial information about the learning process. Therefore sequences that contain missing values of {{< meta constants.learning_activity >}}s or {{< meta constants.timestamp >}}s will be removed entirely. The same reasoning will be applied to necessary evaluation fields.\
-{{< meta constants.user_cap >}} and {{< meta constants.group >}} values identify to which particular {{< meta constants.learning_path >}} a certain {{< meta constants.learning_activity >}} belongs to. Therefore if those values are missing, the respective entry cannot be backtracked to a certain {{< meta constants.learning_path >}}. In those cases only the particular entry will be removed.
+    {{< meta constants.user_cap >}} and {{< meta constants.group >}} values identify to which particular {{< meta constants.learning_path >}} a certain {{< meta constants.learning_activity >}} belongs to. Therefore if those values are missing, the respective entry cannot be backtracked to a certain {{< meta constants.learning_path >}}. In those cases only the particular entry will be removed.
 
--   The interactions within {{< meta constants.group >}}s are being sorted by {{< meta constants.user >}}s and their {{< meta constants.timestamp >}} of occurrence to represent consecutive {{< meta constants.learning_path >}}s throughout time. If a dataset does not have {{< meta constants.group >}}s the interactions are instead sorted by {{< meta constants.user >}}s and {{< meta constants.timestamp >}} over the whole {{< meta constants.course >}}.\
-In case no {{< meta constants.timestamp >}} field exists a different sorting rule, if available, must be applied or the inherent order of the original dataset taken as given.\
-Concrete examples of the sort order of interactions without explicit timestamp:  
-    -   In the **{{< meta constants.ou >}}** dataset (see @sec-open_university) there is only a so called 'date' field indicating on which day relative to the official starting day of the {{< meta constants.course >}} an interaction has been performed (days before the starting date are denoted as negative integers, days thereafter as positive ones). Therefore there is no strict ordering of interactions within a particular day. But after inspection of a subset of {{< meta constants.learning_activity >}} sequences it could be confirmed that the inherent ordering within days relative to the course starting day of the dataset is consecutive in time and constitutes valid {{< meta constants.learning_path >}}s. [//TODO: Find out if the ordering within a day in the raw dataset is already sorted from earliest to latest interaction]  
-  
--   [//TODO] If the the score ranges over {{< meta constants.learning_activity >}}s are consistent it is possible to infer a threshold above which the {{< meta constants.learning_activity >}} can be considered as correct (if not explicitly stated in data).\
+-   The {{< meta constants.interaction >}}s within {{< meta constants.group >}}s are being sorted by {{< meta constants.user >}}s and their {{< meta constants.timestamp >}} of occurrence to represent consecutive {{< meta constants.learning_path >}}s throughout time. If a dataset does not have {{< meta constants.group >}}s the {{< meta constants.interaction >}}s are instead sorted by {{< meta constants.user >}}s and {{< meta constants.timestamp >}} over the whole {{< meta constants.course >}}.\
+    In case no {{< meta constants.timestamp >}} field exists a different sorting rule, if available, must be applied or the inherent order of the original dataset taken as given.\
+    Concrete examples of the sort order of {{< meta constants.interaction >}}s without explicit timestamp:
+
+    -   In the {{< meta constants.ou >}} dataset (see @sec-open_university) there is only a so called 'date' field indicating on which day relative to the official starting day of the {{< meta constants.course >}} an {{< meta constants.interaction >}} has been performed (days before the starting date are denoted as negative integers, days thereafter as positive ones). Therefore there is no strict ordering of {{< meta constants.interaction >}}s within a particular day. But after inspection of a subset of {{< meta constants.learning_activity >}} sequences it could be confirmed that the inherent ordering within days relative to the course starting day of the dataset is consecutive in time and constitutes valid {{< meta constants.learning_path >}}s. \[//TODO: Find out if the ordering within a day in the raw dataset is already sorted from earliest to latest {{< meta constants.interaction >}}\]
+
+-   \[//TODO\] If the the score ranges over {{< meta constants.learning_activity >}}s are consistent it is possible to infer a threshold above which the {{< meta constants.learning_activity >}} can be considered as correct (if not explicitly stated in data).\
     This is applicable for following datasets:
 
     -   @sec-csedm_2021
 
--   [//TODO]: Add evaluation fields ({{< meta constants.learning_activity >}}, {{< meta constants.group >}}, course if available) + averages
+-   \[//TODO\]: Add evaluation fields ({{< meta constants.learning_activity >}}, {{< meta constants.group >}}, course if available) + averages
 
--   Consecutive interactions of {{< meta constants.user >}}s with the same {{< meta constants.learning_activity >}} without a different {{< meta constants.learning_activity >}} between them will be reduced to one interaction keeping the last one (see @fig-learning_pathway_reduction). Before the reduction the information from repeated interactions with the same {{< meta constants.learning_activity >}} is being utilized to extract possible evaluation metrics for the {{< meta constants.learning_activity >}}(e.g. number of interactions with the {{< meta constants.learning_activity >}}, number of hints, highest score...).      
-  - //TODO examples here
-  - 
-Non-consecutive but reoccurring interactions with an already known {{< meta constants.learning_activity >}} along a {{< meta constants.learning_path >}} will be kept since a revisit is of educational relevancy potentially implying a not yet finished familiarization with a given learning material.
+-   Consecutive {{< meta constants.interaction >}}s of {{< meta constants.user >}}s with the same {{< meta constants.learning_activity >}} without a different {{< meta constants.learning_activity >}} between them will be reduced to one {{< meta constants.interaction >}} keeping the last one (see @fig-learning_pathway_reduction). Before the reduction the information from repeated {{< meta constants.interaction >}}s with the same {{< meta constants.learning_activity >}} is being utilized to extract possible evaluation metrics for the {{< meta constants.learning_activity >}}(e.g. number of {{< meta constants.interaction >}}s with the {{< meta constants.learning_activity >}}, number of hints, highest score...).\
+    Non-consecutive but reoccurring {{< meta constants.interaction >}}s with an already known {{< meta constants.learning_activity >}} along a {{< meta constants.learning_path >}} will be kept since a revisit is of educational relevancy potentially implying a not yet finished familiarization with a given learning material.
+
+    -   //TODO examples here
 
 ::: {#fig-learning_pathway_reduction layout-nrow="2"}
 ```{mermaid}
@@ -115,13 +129,30 @@ flowchart LR
   end
 ```
 
-
-Exemplary reduction of consecutive repeated {{< meta constants.learning_activity >}}s 
+Exemplary reduction of consecutive repeated {{< meta constants.learning_activity >}}s
 :::
 
 -   Each unique sequence of {{< meta constants.learning_activity >}}s over a {{< meta constants.group >}} (or over a course if the course cannot be subdivided into {{< meta constants.group >}}s) receives an unique sequence id which allows for backtracking of {{< meta constants.user >}}s who follow in their learning process a particular {{< meta constants.learning_path >}}.
 
+-   Idiosyncratic sequences have the potential of distorting the analysis of learning behaviour. Abnormalities in {{< meta constants.learning_path >}}s can be due to multiple reasons. First they can be the result of inconsequential learning behaviour on part of the {{< meta constants.user >}}, e.g. just clicking through some exercises without purpose and the intention of finishing. Secondly human error can be involved, e.g. prematurely quitting an exercise. Finally the data collection process itself can be faulty, e.g. missing to record {{< meta constants.learning_activity >}}s due to some kind of technical error. Regardless of the exact cause, too irregular sequences need to be filtered out. This is being done by applying qualitative- as well as frequency-based criteria.\
+    From a qualitative perspective sequences need to include at least a minimum percentage of all available unique {{< meta constants.learning_activity >}}s per {{< meta constants.group >}} in order to ensure non-truncated {{< meta constants.learning_path >}}s. At the same time an upper cap on the percentage of repeated {{< meta constants.learning_activity >}}s within a sequence needs to be enforced. The exact thresholds are dataset-dependent and are listed in @tbl-filter_criteria. [//TODO: finish table and decide if a certain threshold fits all datasets]\
+    {{< meta constants.learning_path_cap >}}s can vary in their lengths. It is hypothesized here that, with respect to the majority within a {{< meta constants.group >}}, too long or short {{< meta constants.learning_path >}}s follow a different generative process. They are distinct from normal learning behaviour and originate from a separate underlying distribution. In addition {{< meta constants.learning_path >}}s of unusual length are also likely to distort sequence distance calculations. Therefore such sequences need to be regarded as anomalies and be removed. To detect and filter outliers in sequence length per {{< meta constants.group >}} the adjusted boxplot method of @hubert2008 is being applied which improves upon the original method proposed by @tukey1977 to be also applicable for skewed distributions.\
+    After applying aforementioned filter criteria it may be possible for some {{< meta constants.group >}}s to have an insufficient number, both in unique and absolute terms, of {{< meta constants.learning_path >}}s for statistical analysis and therefore need to be disregarded. The thresholds for removal are dataset specific and are being chosen based on the ratio of the count of unique sequence to all sequences within a {{< meta constants.group >}} as well as on the differences in sequence count between {{< meta constants.group >}}s. The exact thresholds are again listed in @tbl-filter_criteria. [//TODO: finish table and decide if a certain threshold fits all datasets]
+
+|           Dataset Name            | Min % of Unique {{< meta constants.learning_activity_all_cap >}}s per {{< meta constants.group_cap >}} in Sequence | Max % of Repeated Unique {{< meta constants.learning_activity_all_cap >}}s per {{< meta constants.group_cap >}} in Sequence |
+|:-------------------------------:|:----------------:|:-------------------:|
+| {{< meta constants.csedm_2019 >}} |                                                         ..                                                         |                                                             ..                                                              |
+| {{< meta constants.csedm_2021 >}} |                                                         n                                                          |                                                              n                                                              |
+|    {{< meta constants.epm >}}     |                                                         ..                                                         |                                                             ..                                                              |
+|  {{< meta constants.kdd_2010 >}}  |                                                         1                                                          |                                                              1                                                              |
+|  {{< meta constants.kdd_2015 >}}  |                                                         1                                                          |                                                              1                                                              |
+|     {{< meta constants.ou >}}     |                                                         1                                                          |                                                              1                                                              |
+
+: Filter Criteria per Dataset {#tbl-filter_criteria}
+
 ## Datasets
+
+### {{< meta constants.csedm_2019 >}} {#sec-csedm_2019}
 
 ### {{< meta constants.csedm_2021 >}} {#sec-csedm_2021}
 
@@ -135,9 +166,14 @@ PATH_TO_INTERACTION_DATA = '../../../../../../data/ddia/kdd_2015/complete/log_tr
 PATH_TO_ENROLLMENT_DATA = '../../../../../../data/ddia/kdd_2015/complete/enrollment_train.csv'
 PATH_TO_DROPOUT_DATA = '../../../../../../data/ddia/kdd_2015/complete/truth_train.csv'
 PATH_TO_OBJECT_DATA = '../../../../../../data/ddia/kdd_2015/ObjectData/object.csv'
+# fields used in the analysis
+LEARNING_ACTIVITY_FIELD = 'object'
 # fields used in dataset preparation
 ENROLLMENT_FIELD = 'enrollment_id'
 DROPOUT_FIELD = 'is_dropout'
+MODULE_FIELD = 'module_id'
+EVENT_FIELD = 'event'
+CATEGORY_FIELD = 'category'
 
 
 interactions = pd.read_csv(PATH_TO_INTERACTION_DATA)
@@ -145,15 +181,15 @@ enrollments = pd.read_csv(PATH_TO_ENROLLMENT_DATA)
 dropouts = pd.read_csv(PATH_TO_DROPOUT_DATA, names=[ENROLLMENT_FIELD, DROPOUT_FIELD])
 objects = pd.read_csv(PATH_TO_OBJECT_DATA) 
 
-df_to_merge = objects[['module_id', 'category']].rename(columns={'module_id': 'object'})
+df_to_merge = objects[[MODULE_FIELD, CATEGORY_FIELD]].rename(columns={MODULE_FIELD: LEARNING_ACTIVITY_FIELD})
 df_to_merge = df_to_merge.loc[~df_to_merge.duplicated(), :]
-interactions_merged = interactions.merge(df_to_merge, how='left', on='object')
+interactions_merged = interactions.merge(df_to_merge, how='left', on=LEARNING_ACTIVITY_FIELD)
 ```
 
 #### Datasets used for Generation of the Final Interactions Dataframe
 
-| Dataset Name                  | Description                                                                                                                          |
-|-----------------------|-------------------------------------------------|
+| Dataset Name                  | Description                                                                                                                         |
+|-------------------------|-----------------------------------------------|
 | complete/log_train.csv        | Contains interactions of enrollment ids ({{< meta constants.user >}}s-course pairs)/ with {{< meta constants.learning_activity >}}s |
 | complete/enrollment_train.csv | Links enrollment ids to username and course                                                                                         |
 | complete/truth_train.csv      | Contains information whether a certain enrollment id was a dropout (evaluation metric)                                              |
@@ -187,12 +223,13 @@ Markdown(objects.head(10).to_markdown(index=False))
 
 #### Preprocessing
 
-After merging(left join) the log_train dataframe(@tbl-kdd_2015_log_train) containing the interactions with the object dataframe(@tbl-kdd_2015_object), the `event` field(coming from log_train) as well as the `category` field(coming from object) hold information about the type of the object a {{< meta constants.user >}} interacted with. The frequencies of the individual values of those fields occurring in the merged dataframe are listed in @tbl-kdd_2015_interaction_event_frequencies and @tbl-kdd_2015_interaction_category_frequencies. In contrast, the unmerged object dataframe contains more levels of the category field(@tbl-kdd_2015_object_category_frequencies), meaning that those objects do not occur in the log_train dataframe(@tbl-kdd_2015_log_train).
+The interactions dataframe is created by joining log_train(@tbl-kdd_2015_log_train), which contains the `{{< meta constants.learning_activity >}}s` and `{{< meta constants.timestamp >}}s`, with `{{< meta constants.user >}}` and `{{< meta constants.group >}}`(which are whole `{{< meta constants.course >}}s` in {{< meta constants.kdd_2015 >}}) fields from enrollment_train(@tbl-kdd_2015_enrollment_train) \[//TODO: decide whether to include one course or all as topic\]. Subsequently the `is_dropout` field from truth_train(@tbl-kdd_2015_truth_train) which indicates whether a `{{< meta constants.user >}}` dropped out of a `{{< meta constants.group >}}` is used as `{{< meta constants.group >}}`-`{{< meta constants.is_correct >}}` evaluation field. Both the log_train(@tbl-kdd_2015_log_train) and the object(@tbl-kdd_2015_object) dataframe contain information about the type of objects an {{< meta constants.user >}} interacts with. Not all of them can be categorized as being {{< meta constants.learning_activity >}}s. While log_train(@tbl-kdd_2015_log_train) records various kinds of interactions of a {{< meta constants.user >}} within the VLE, including navigation to and from resources(e.g. `access`, `navigate` and `page_close`), object(@tbl-kdd_2015_object) represents a tree-like structure of all {{< meta constants.course >}}s in the dataset, ranging from whole chapters at the top level to individual {{< meta constants.learning_activity >}}s at the bottom.\
+After merging(left join) the log_train dataframe(@tbl-kdd_2015_log_train) containing the interactions with the object dataframe(@tbl-kdd_2015_object), the `event` field(coming from log_train) as well as the `category` field(coming from object) hold information about the specific type of the object a {{< meta constants.user >}} interacted with. The frequencies of the individual values of those fields occurring in the merged dataframe are listed in @tbl-kdd_2015_interaction_event_frequencies and @tbl-kdd_2015_interaction_category_frequencies. In contrast, the unmerged object dataframe contains more levels of the category field(@tbl-kdd_2015_object_category_frequencies), meaning that those objects do not occur in the log_train(@tbl-kdd_2015_log_train) dataframe.
 
 ::: callout-note
 # Preprocessing Step
 
-Because `problem` and `video` values most closely resemble learning objects and because they are the only values which occur in the event as well as in the category field, the interactions of {{< meta constants.user >}}s will be limited to those types.
+Because `problem` and `video` values most closely resemble learning objects and because they are the only values which occur in the `event` as well as in the `category` field, the interactions of {{< meta constants.user >}}s will be limited to those types. Due to the `category` field having some missing values, the 'problem' and 'video' values in the 'event' field will be used for filtering and creating the final dataframe.
 :::
 
 ```{python}
