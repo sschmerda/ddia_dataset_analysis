@@ -1,12 +1,12 @@
 from .standard_import import *
 from .constants import *
 
-class ResultTables():
+class AggregatedResultTables():
     """A class which upon initialization holds data about summary statistics, sequence summary statistics, the available fields and the score is_correct relationship of 
     the analysed datasets.
     """    
     # class vars
-    path_to_html_table_dir = PATH_TO_PICKLED_OBJECTS_FOLDER + PATH_TO_HTML_TABLES_PICKLE_FOLDER
+    path_to_html_table_dir = PATH_TO_PICKLED_OBJECTS_FOLDER + PATH_TO_RESULT_TABLES_PICKLE_FOLDER
     n_rows_str = N_ROWS_STR
     n_unique_users_str = N_UNIQUE_USERS_STR
     n_unique_learning_activities_str = N_UNIQUE_LEARNING_ACTIVITIES_STR
@@ -19,17 +19,22 @@ class ResultTables():
     field_str = FIELD_STR
     dataset_name_str = DATASET_NAME_STR
 
+    path_to_sequence_distances_analytics_dir = PATH_TO_PICKLED_OBJECTS_FOLDER + PATH_TO_SEQUENCE_DISTANCE_ANALYTICS_PICKLE_FOLDER
+
     def __init__(self):
 
         # calculated upon initialization
         # html table for each dataset
         self.html_tables_dict = self._load_html_tables()
+        self.avg_sequence_distance_per_group_agg_df, self.avg_unique_sequence_distance_per_group_agg_df  = self._load_sequence_distance_analytics()
 
         # result dataframes
         self.available_fields_result_df = self._gen_available_fields_result_df()
         self.summary_statistics_result_df = self._gen_summary_statistics_result_df()
         self.sequence_summary_statistics_result_df = self._gen_sequence_summary_statistics_result_df()
         self.score_is_correct_relationship_result_df = self._gen_score_is_correct_relationship_result_df()
+
+
     
     def _load_html_tables(self):
         """Returns a dictionary containing the html table objects of the analysed datasets
@@ -39,7 +44,7 @@ class ResultTables():
         pd.DataFrame
             A dictionary containing the html table objects of the analysed datasets
         """        
-        html_table_dir = self.path_to_html_table_dir
+        html_table_dir = AggregatedResultTables.path_to_html_table_dir
         html_tables_list = glob.glob(html_table_dir + '*.pickle')
 
         html_tables_dict = {}
@@ -51,9 +56,26 @@ class ResultTables():
         
         return html_tables_dict
 
-    def _load_sequence_distances(self):
-        pass
+    def _load_sequence_distance_analytics(self):
+        sequence_distances_analytics_dir = AggregatedResultTables.path_to_sequence_distances_analytics_dir
+        sequence_distances_analytics_list = glob.glob(sequence_distances_analytics_dir + '*.pickle')
 
+        avg_sequence_distance_per_group_agg_df = pd.DataFrame()
+        avg_unique_sequence_distance_per_group_agg_df = pd.DataFrame()
+        for i in sequence_distances_analytics_list:
+            with open(i, 'rb') as f:
+                sequence_distance_analytics = pickle.load(f)
+            
+            avg_sequence_distance_per_group_df = sequence_distance_analytics.avg_sequence_distance_per_group_df
+            avg_unique_sequence_distance_per_group_df = sequence_distance_analytics.avg_unique_sequence_distance_per_group_df
+        
+        avg_sequence_distance_per_group_agg_df = pd.concat([avg_sequence_distance_per_group_agg_df, 
+                                                            avg_sequence_distance_per_group_df])
+        avg_unique_sequence_distance_per_group_agg_df = pd.concat([avg_unique_sequence_distance_per_group_agg_df, 
+                                                                   avg_unique_sequence_distance_per_group_df])
+        
+        return avg_sequence_distance_per_group_agg_df, avg_unique_sequence_distance_per_group_agg_df
+            
     def _gen_summary_statistics_result_df(self):
         """Returns a dataframe which contains summary statistics of the analysed datasets.
 
@@ -71,13 +93,13 @@ class ResultTables():
         summary_statistics_result_df = pd.concat(summary_statistics_dfs, join='inner', axis=0)
 
         # typecast to integer type which also can take on NAs
-        idx = [ResultTables.n_rows_str,
-               ResultTables.n_unique_users_str, 
-               ResultTables.n_unique_groups_str, 
-               ResultTables.n_unique_learning_activities_str]
+        idx = [AggregatedResultTables.n_rows_str,
+               AggregatedResultTables.n_unique_users_str, 
+               AggregatedResultTables.n_unique_groups_str, 
+               AggregatedResultTables.n_unique_learning_activities_str]
         typecast_dict = {i: 'Int64' for i in idx}
         summary_statistics_result_df = summary_statistics_result_df.astype(typecast_dict)
-        summary_statistics_result_df = summary_statistics_result_df.reset_index(names=self.dataset_name_str)
+        summary_statistics_result_df = summary_statistics_result_df.reset_index(names=AggregatedResultTables.dataset_name_str)
 
         return summary_statistics_result_df
 
@@ -98,8 +120,8 @@ class ResultTables():
         sequence_summary_statistics_result_df = pd.concat(summary_statistics_dfs, join='inner', axis=0)
 
         # typecast to integer type which also can take on NAs
-        idx = [ResultTables.n_sequences_str,
-               ResultTables.n_unique_sequences_str]
+        idx = [AggregatedResultTables.n_sequences_str,
+               AggregatedResultTables.n_unique_sequences_str]
         typecast_dict = {i: 'Int64' for i in idx}
         sequence_summary_statistics_result_df = sequence_summary_statistics_result_df.astype(typecast_dict)
         sequence_summary_statistics_result_df = sequence_summary_statistics_result_df.reset_index(names=self.dataset_name_str)
@@ -127,7 +149,7 @@ class ResultTables():
         available_fields_dfs = [v for k,v in sorted(available_fields_dict.items(), key=lambda x: x[0].lower())]
         available_fields_dfs = map(set_index, available_fields_dfs)
         available_fields_result_df = pd.concat(available_fields_dfs, join='inner', axis=1)
-        available_fields_result_df.columns = pd.MultiIndex.from_product([[self.is_available_str], available_fields_result_df.columns])
+        available_fields_result_df.columns = pd.MultiIndex.from_product([[AggregatedResultTables.is_available_str], available_fields_result_df.columns])
         available_fields_result_df = available_fields_result_df.reset_index()
 
         return available_fields_result_df
@@ -206,7 +228,7 @@ class ResultTables():
         available_fields_result_df = available_fields_result_df.replace('<th>', '<th style = "background-color: royalblue; color: white; text-align:center">')
         available_fields_result_df = available_fields_result_df.replace('<td>True</td>', '<td style = "background-color: green; color: white; text-align:center">True</td>')
         available_fields_result_df = available_fields_result_df.replace('<td>False</td>', '<td style = "background-color: red; color: white; text-align:center">False</td>')
-        available_fields_result_df = available_fields_result_df.replace(f'<th colspan="3" halign="left">{ResultTables.is_available_str}</th>', f'<th colspan="3" halign="left", style = "background-color: royalblue; color: white; text-align:center">{ResultTables.is_available_str}</th>')
+        available_fields_result_df = available_fields_result_df.replace(f'<th colspan="3" halign="left">{AggregatedResultTables.is_available_str}</th>', f'<th colspan="3" halign="left", style = "background-color: royalblue; color: white; text-align:center">{AggregatedResultTables.is_available_str}</th>')
 
         display(Markdown(available_fields_result_df))
 
@@ -285,3 +307,78 @@ class ResultTables():
                                                                       .to_latex()
                                                                       .replace('<NA>', '-')
                                                                       .replace('nan', '-'))
+
+class ResultPlots():
+    """A class which upon initialization holds data about summary statistics, sequence summary statistics, the available fields and the score is_correct relationship of 
+    the analysed datasets.
+    """    
+    # class vars
+    path_to_html_table_dir = PATH_TO_PICKLED_OBJECTS_FOLDER + PATH_TO_RESULT_TABLES_PICKLE_FOLDER
+    n_rows_str = N_ROWS_STR
+    n_unique_users_str = N_UNIQUE_USERS_STR
+    n_unique_learning_activities_str = N_UNIQUE_LEARNING_ACTIVITIES_STR
+    n_unique_groups_str = N_UNIQUE_GROUPS_STR
+    sparsity_user_learning_activity_matrix_str = SPARSITY_USER_LEARNING_ACTIVITY_MATRIX_STR
+    sparsity_user_group_matrix_str = SPARSITY_USER_GROUP_MATRIX_STR
+    n_sequences_str = N_SEQUENCES_STR
+    n_unique_sequences_str = N_UNIQUE_SEQUENCES_STR
+    is_available_str = IS_AVAILABLE_STR
+    field_str = FIELD_STR
+    dataset_name_str = DATASET_NAME_STR
+
+    path_to_sequence_distances_analytics_dir = PATH_TO_PICKLED_OBJECTS_FOLDER + PATH_TO_SEQUENCE_DISTANCE_ANALYTICS_PICKLE_FOLDER
+
+    def __init__(self):
+
+        # calculated upon initialization
+        # html table for each dataset
+        self.html_tables_dict = self._load_html_tables()
+        self.avg_sequence_distance_per_group_agg_df, self.avg_unique_sequence_distance_per_group_agg_df  = self._load_sequence_distance_analytics()
+
+        # result dataframes
+        self.available_fields_result_df = self._gen_available_fields_result_df()
+        self.summary_statistics_result_df = self._gen_summary_statistics_result_df()
+        self.sequence_summary_statistics_result_df = self._gen_sequence_summary_statistics_result_df()
+        self.score_is_correct_relationship_result_df = self._gen_score_is_correct_relationship_result_df()
+
+
+    
+    def _load_html_tables(self):
+        """Returns a dictionary containing the html table objects of the analysed datasets
+
+        Returns
+        -------
+        pd.DataFrame
+            A dictionary containing the html table objects of the analysed datasets
+        """        
+        html_table_dir = AggregatedResultTables.path_to_html_table_dir
+        html_tables_list = glob.glob(html_table_dir + '*.pickle')
+
+        html_tables_dict = {}
+        for i in html_tables_list:
+            with open(i, 'rb') as f:
+                html_table = pickle.load(f)
+                dataset_name = html_table.dataset_name
+            html_tables_dict[dataset_name] = html_table
+        
+        return html_tables_dict
+
+    def _load_sequence_distance_analytics(self):
+        sequence_distances_analytics_dir = AggregatedResultTables.path_to_sequence_distances_analytics_dir
+        sequence_distances_analytics_list = glob.glob(sequence_distances_analytics_dir + '*.pickle')
+
+        avg_sequence_distance_per_group_agg_df = pd.DataFrame()
+        avg_unique_sequence_distance_per_group_agg_df = pd.DataFrame()
+        for i in sequence_distances_analytics_list:
+            with open(i, 'rb') as f:
+                sequence_distance_analytics = pickle.load(f)
+            
+            avg_sequence_distance_per_group_df = sequence_distance_analytics.avg_sequence_distance_per_group_df
+            avg_unique_sequence_distance_per_group_df = sequence_distance_analytics.avg_unique_sequence_distance_per_group_df
+        
+        avg_sequence_distance_per_group_agg_df = pd.concat([avg_sequence_distance_per_group_agg_df, 
+                                                            avg_sequence_distance_per_group_df])
+        avg_unique_sequence_distance_per_group_agg_df = pd.concat([avg_unique_sequence_distance_per_group_agg_df, 
+                                                                   avg_unique_sequence_distance_per_group_df])
+        
+        return avg_sequence_distance_per_group_agg_df, avg_unique_sequence_distance_per_group_agg_df
