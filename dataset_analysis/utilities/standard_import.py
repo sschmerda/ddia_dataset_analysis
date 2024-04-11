@@ -2,6 +2,7 @@
 import os
 import glob
 import time
+import random
 from collections import defaultdict
 from itertools import chain, combinations, combinations_with_replacement
 import pickle
@@ -15,6 +16,7 @@ from typing import List
 from numpy.typing import ArrayLike
 from abc import ABC
 from bs4 import BeautifulSoup
+from pympler import asizeof
 
 # var
 from IPython.display import display, Markdown
@@ -31,12 +33,12 @@ import statsmodels.api as sm
 from scipy.stats import iqr
 from scipy.stats.contingency import crosstab
 from scipy.spatial.distance import squareform
-import pingouin as pg
 
 # libraries for clustering and statistical tests
 import umap
 from sklearn.decomposition import PCA
-# import hdbscan
+from sklearn.cluster import HDBSCAN  
+import pingouin as pg
 
 # sequence distance libraries
 # imported in config file!
