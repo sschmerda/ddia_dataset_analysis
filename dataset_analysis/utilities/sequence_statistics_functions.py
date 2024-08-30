@@ -15,7 +15,7 @@ class SequenceStatistics():
     sequence_count_per_group : pd.DataFrame
         A dataframe containing sequence counts and unique sequence counts per group
 
-    MethodS
+    Methods
     -------
     return_unique_learning_activity_sequence_stats_per_group(interactions, dataset_name, group_field)
         Return a dataframe which contains statistics (frequencies and lengths) of unique learning_activity sequences over user entities grouped by group entities
@@ -477,7 +477,9 @@ class SequenceStatistics():
                           color=SEABORN_LINE_COLOR_ORANGE, 
                           linewidth=SEABORN_LINE_WIDTH_JOINTPLOT, 
                           zorder=0)
-        g.ax_joint.legend(loc='center left', bbox_to_anchor=(1.25, 0.5))
+        g.ax_joint.legend(loc='center left', 
+                          bbox_to_anchor=(1.25, 0.5),
+                          title=GROUP_FIELD_NAME_STR)
         plt.show(g);
 
         # all groups in one figure - seq freq stats
