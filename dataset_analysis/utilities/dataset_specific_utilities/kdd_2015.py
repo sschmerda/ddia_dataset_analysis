@@ -81,12 +81,18 @@ SEQUENCE_DISTANCE_ANALYTICS_PICKLE_PATH_LIST, SEQUENCE_DISTANCE_ANALYTICS_PICKLE
                                                                                                                               PATH_TO_SEQUENCE_DISTANCE_ANALYTICS_PICKLE_FOLDER,
                                                                                                                               SEQUENCE_DISTANCE_ANALYTICS_PICKLE_NAME)
 
+SEQUENCE_DISTANCE_CLUSTER_ANALYSIS_PICKLE_PATH_LIST, SEQUENCE_DISTANCE_CLUSTER_ANALYSIS_PICKLE_FULL_NAME = return_pickle_path_list_and_name(DATASET_NAME, 
+                                                                                                                                            PATH_TO_SEQUENCE_DIST_CLUSTER_ANALYSIS_PICKLE_FOLDER,
+                                                                                                                                            SEQUENCE_DISTANCE_CLUSTER_ANALYSIS_OBJECT_PICKLE_NAME)
+
 ########################################################################################################################
 ### initialize ResultTables which transform and holds preprocessing and result data in table form ###
 
 result_tables = ResultTables(DATASET_NAME,
                              GROUP_FIELD,
                              EVALUATION_SCORE_RANGES_DATA_LIST,
+                             None,
+                             None,
                              None,
                              None,
                              None,
