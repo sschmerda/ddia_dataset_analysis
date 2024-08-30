@@ -106,10 +106,10 @@ class ImportInteractions(ABC):
     def _create_empty_interaction_type_df(self) -> pd.DataFrame:
 
         interaction_types_df = pd.DataFrame({DATASET_NAME_STR: self.dataset_name,
-                                            INTERACTIONS_TYPE_NAME_STR: None,
-                                            INTERACTIONS_COUNT_NAME_STR: None,
-                                            INTERACTIONS_TYPE_USED_NAME_STR: None},
-                                            index=[0])
+                                             INTERACTIONS_TYPE_NAME_STR: None,
+                                             INTERACTIONS_COUNT_NAME_STR: None,
+                                             INTERACTIONS_TYPE_USED_NAME_STR: None},
+                                             index=[0])
 
         return interaction_types_df
     
