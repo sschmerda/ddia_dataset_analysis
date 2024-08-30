@@ -597,10 +597,10 @@ class SequenceDistanceClustersPerGroup():
         learning_activity_sequence_stats_per_group = self._add_cluster_id_to_sequence_stats_df(self.sequence_distance_analytics.learning_activity_sequence_stats_per_group,
                                                                                                sequence_cluster_per_group_df)
         # add data to results_table
-        result_tables.cluster_results_per_group_df = cluster_results_per_group_df
-        result_tables.sequence_cluster_per_group_df = sequence_cluster_per_group_df
-        result_tables.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group
-        result_tables.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group
+        result_tables.cluster_results_per_group_df = cluster_results_per_group_df.copy()
+        result_tables.sequence_cluster_per_group_df = sequence_cluster_per_group_df.copy()
+        result_tables.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group.copy()
+        result_tables.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group.copy()
 
     def plot_cluster_hyperparameter_tuning_matrix(self,
                                                   cluster_param_1: str,
@@ -951,7 +951,7 @@ class SequenceDistanceClustersPerGroup():
 
             plt.show(g)
 
-    def _return_user_id_seq_id_mapping_per_group_dict(self) -> dict[dict[int, int]]:
+    def _return_user_id_seq_id_mapping_per_group_dict(self) -> dict[int, dict[int, int]]:
 
         user_seq_mapping_dict_per_group = {}
         for group, df in self.sequence_distance_analytics.unique_learning_activity_sequence_stats_per_group.groupby(GROUP_FIELD_NAME_STR):
@@ -964,8 +964,8 @@ class SequenceDistanceClustersPerGroup():
         return user_seq_mapping_dict_per_group
 
     def _return_seq_id_cluster_mapping_per_group_dict(self,
-                                                      sequence_cluster_per_group_df: pd.DataFrame) -> dict: 
-        seq_id_cluster_mapping_dict_per_group = {}
+                                                      sequence_cluster_per_group_df: pd.DataFrame) -> dict[int, dict[int, tuple]]: 
+        seq_id_cluster_mapping_dict_per_group = defaultdict(lambda: defaultdict(tuple))
         for group, df in sequence_cluster_per_group_df.groupby(GROUP_FIELD_NAME_STR):
             seq_id_cluster_mapping_dict = defaultdict(set)
 
