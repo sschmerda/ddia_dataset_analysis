@@ -61,13 +61,16 @@ def return_color_palette(n_colors: int,
                                     **kwargs)
     return col_palette
 
-def plot_legend(data: ArrayLike) -> None:
+def plot_legend(data: ArrayLike,
+                title: str) -> None:
     """Plots a legend for the unique values in data
 
     Parameters
     ----------
     data : ArrayLike
         An array of values for which a legend is being plotted
+    title : str
+        The title of the legend
 
     Returns
     -------
@@ -76,7 +79,10 @@ def plot_legend(data: ArrayLike) -> None:
     legend_labels = np.unique(data)
     n_labels = len(legend_labels)
     legend_handles = [plt.scatter([], [], color=color, lw=2, label=label) for color, label in zip(return_color_palette(n_colors=n_labels), legend_labels)]
-    plt.legend(handles=legend_handles, loc='center left', bbox_to_anchor=(1, 0.5))
+    plt.legend(handles=legend_handles, 
+               loc='center left',
+               bbox_to_anchor=(1, 0.5),
+               title=title)
 
 def calculate_suptitle_position(g: FacetGrid,
                                 cm_top_offset: Union[int, float]) -> float:
@@ -200,17 +206,63 @@ def add_central_tendency_marker_per_facet(g: FacetGrid,
 
     labels = [LEARNING_ACTIVITY_SEQUENCE_MEAN_NAME_STR, LEARNING_ACTIVITY_SEQUENCE_MEDIAN_NAME_STR]
 
-    g.add_legend(title=None, 
+    g.add_legend(title=LEARNING_ACTIVITY_SEQUENCE_SCATTER_LEGEND_TITLE_NAME_STR, 
                  label_order=labels, 
                  legend_data={label: handle for label, handle in zip(labels, handles)}, 
                  frameon=True)
 
     return g
 
+def integer_formatter(x: int | float, 
+                      pos) -> str:
+    """Return input value as string if it is a natural number, otherwise return empty str. The return value
+    is being used as tick value for a matplotlib figure. 
+
+    Parameters
+    ----------
+    x : int | float
+        The input number
+    pos : -
+        Mandatory input for matplotlib FuncFormatter function
+        
+
+    Returns
+    -------
+    str
+        The output string
+    """
+    cond = ((x % 1) == 0)
+    if cond:
+        return f'{int(x)}'
+    else:
+        return ''
+
+def draw_heatmap(sort_columns_reverse: bool,
+                 sort_index_reverse: bool,
+                 *args, 
+                 **kwargs) -> None:
+    """Draw a seaborn heatmap within a facet grid accepting data in long format
+
+    Parameters
+    ----------
+    sort_columns_reverse : bool
+        A flag indicating whether to sort column values in reverse order
+    sort_index_reverse : bool
+        A flag indicating whether to sort index values in reverse order
+    """
+    data = kwargs.pop('data')
+    d = data.pivot(index=args[1], columns=args[0], values=args[2])
+    columns = d.columns
+    index = d.index
+    columns_sorted = sorted(columns, key=int, reverse=sort_columns_reverse)
+    index_sorted = sorted(index, key=int, reverse=sort_index_reverse)
+    d = d.loc[index_sorted, columns_sorted]
+    sns.heatmap(d, **kwargs)
+
 def plot_distribution(data: pd.DataFrame,
                       x_var: str,
                       label: str,
-                      log_scale: bool):
+                      log_scale: bool) -> None:
     """Plot the distribution of a variable via boxplot-stripplot, kernel-density and histogram.
 
     Parameters
@@ -233,7 +285,8 @@ def plot_distribution(data: pd.DataFrame,
                   height=SEABORN_FIGURE_LEVEL_HEIGHT_WIDE_SINGLE,
                   aspect=SEABORN_FIGURE_LEVEL_ASPECT_WIDE,
                   showmeans=True,
-                  meanprops=marker_config)
+                  meanprops=marker_config,
+                  linewidth=SEABORN_BOX_LINE_WIDTH_SINGLE)
 
     g.map_dataframe(sns.stripplot,
                     x=x_var,
@@ -334,11 +387,11 @@ def plot_stat_plot(sequence_stats_per_group_df: pd.DataFrame,
                   palette=return_color_palette(n_groups),
                   height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET_2_COL,
                   aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
-                  facet_kws=dict(sharex=True,
-                                 sharey=True,
-                                 xlim=axis_lim))
+                  linewidth=SEABORN_BOX_LINE_WIDTH_FACET,
+                  facet_kws=dict(xlim=axis_lim))
     # Create a custom legend
-    plot_legend(sequence_stats_per_group_df[GROUP_FIELD_NAME_STR])
+    plot_legend(sequence_stats_per_group_df[GROUP_FIELD_NAME_STR],
+                GROUP_FIELD_NAME_STR)
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)
     plt.tight_layout()
@@ -361,11 +414,10 @@ def plot_stat_plot(sequence_stats_per_group_df: pd.DataFrame,
                   height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET_2_COL,
                   aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
                   legend=False,
-                  facet_kws=dict(sharex=True,
-                                 sharey=True,
-                                 ylim=axis_lim))
+                  facet_kws=dict(ylim=axis_lim))
     # Create a custom legend
-    plot_legend(sequence_stats_per_group_df[GROUP_FIELD_NAME_STR])
+    plot_legend(sequence_stats_per_group_df[GROUP_FIELD_NAME_STR],
+                GROUP_FIELD_NAME_STR)
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)
     plt.tight_layout()
@@ -391,7 +443,8 @@ def plot_stat_plot(sequence_stats_per_group_df: pd.DataFrame,
                                  sharey=True,
                                  xlim=axis_lim))
     # Create a custom legend
-    plot_legend(sequence_stats_per_group_df[GROUP_FIELD_NAME_STR])
+    plot_legend(sequence_stats_per_group_df[GROUP_FIELD_NAME_STR],
+                GROUP_FIELD_NAME_STR)
     for ax in g.axes.flatten():
         ax.tick_params(labelbottom=True)
     plt.tight_layout()
@@ -468,9 +521,9 @@ def plot_stat_scatter_plot_per_group(sequence_stats_per_group_df: pd.DataFrame,
                   edgecolor=SEABORN_POINT_EDGECOLOR,
                   linewidth=SEABORN_POINT_LINEWIDTH,
                   facet_kws=dict(sharex=share_x,
-                                  sharey=share_y,
-                                  xlim=xlim,
-                                  ylim=ylim))
+                                 sharey=share_y,
+                                 xlim=xlim,
+                                 ylim=ylim))
     g.map_dataframe(sns.regplot,
                     x=statistic_x,
                     y=statistic_y,
@@ -492,8 +545,8 @@ def plot_stat_scatter_plot_per_group(sequence_stats_per_group_df: pd.DataFrame,
     y_loc = calculate_suptitle_position(g,
                                         SEABORN_SUPTITLE_HEIGHT_CM)
     g.figure.suptitle(title, 
-                        fontsize=SEABORN_TITLE_FONT_SIZE,
-                        y=y_loc)
+                      fontsize=SEABORN_TITLE_FONT_SIZE,
+                      y=y_loc)
     plt.show(g);
 
 def plot_stat_hist_plot_per_group(sequence_stats_per_group_df: pd.DataFrame,
