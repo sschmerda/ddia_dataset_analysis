@@ -6,6 +6,7 @@ from .sequence_distance import *
 from .io_functions import *
 from .sequence_statistics_functions import SequenceStatistics
 from .plotting_functions import plot_distribution
+from .plotting_functions import draw_heatmap
 
 class SequenceDistanceAnalytics:
     """A class for analysing sequence distances per group"""
@@ -50,8 +51,7 @@ class SequenceDistanceAnalytics:
                  dataset_name: str,
                  interactions: pd.DataFrame,
                  unique_learning_activity_sequence_stats_per_group: pd.DataFrame,
-                 learning_activity_sequence_stats_per_group: pd.DataFrame,
-                 result_tables: Type[Any]) -> None:
+                 learning_activity_sequence_stats_per_group: pd.DataFrame) -> None:
         self.dataset_name = dataset_name
         self.interactions = interactions.copy()
         self.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group.copy()
@@ -135,10 +135,6 @@ class SequenceDistanceAnalytics:
                                                                                                     self.learning_activity_sequence_stats_per_group)
         self.unique_learning_activity_sequence_stats_per_group = self._add_seq_dist_to_seq_stats_per_group(SEQUENCE_DISTANCE_ANALYTICS_SEQUENCE_DIST_BASE_UNIQUE_SEQ_NAME_STR,
                                                                                                            self.unique_learning_activity_sequence_stats_per_group)
-
-        # add data to results_table
-        result_tables.unique_learning_activity_sequence_stats_per_group = self.unique_learning_activity_sequence_stats_per_group.copy()
-        result_tables.learning_activity_sequence_stats_per_group = self.learning_activity_sequence_stats_per_group.copy()
 
         ################################################################################################################
         # avg sequence distance dataframes - entities = user/sequence_id combinations distances aggregated over groups (more distance pairs than actual sequences)
@@ -556,7 +552,7 @@ class SequenceDistanceAnalytics:
         dict
             A dictionary containing the group string and the corresponding sequence distance matrix
         """
-        if isinstance(group, int):
+        if isinstance(group, int) or isinstance(group, np.int64):
             try:
                 file_name_substring = self._return_seq_dist_square_matrix_per_group_substring(normalize_distance,
                                                                                               use_unique_sequence_distances)
@@ -575,7 +571,7 @@ class SequenceDistanceAnalytics:
             except: ValueError(f'There is no distance matrix associated with group: {group}')
 
         else:
-            raise TypeError('group_str needs to be of type int')
+            raise TypeError('group needs to be of type int')
 
     def plot_sequence_distances_per_sequence_per_group(self,
                                                        distance_avg_metric: Literal['mean', 'median'],
@@ -937,15 +933,6 @@ class SequenceDistanceAnalytics:
                                       for group in group_list)
         
         square_matrices_per_group_df = pd.concat(square_matrix_df_generator)
-        
-        # helper function
-        def draw_heatmap(*args, **kwargs):
-            data = kwargs.pop('data')
-            d = data.pivot(index=args[1], columns=args[0], values=args[2])
-            labels = d.columns
-            labels_sorted = sorted(labels, key=int)
-            d = d.loc[labels_sorted,labels_sorted]
-            sns.heatmap(d, **kwargs)
 
         if normalize_distance:
             distance_str = f'Normalized {SEQUENCE_STR} Distance Matrix per {GROUP_FIELD_NAME_STR}:'
@@ -982,16 +969,21 @@ class SequenceDistanceAnalytics:
                           height=height, 
                           aspect= SEABORN_FIGURE_LEVEL_ASPECT_SQUARE)
         if normalize_distance:
-            g.map_dataframe(draw_heatmap, 
+            g.map_dataframe(draw_heatmap,
+                            False,
+                            False, 
                             'column', 
                             'row', 
                             'value',
+                            cmap=SEABORN_HEATMAP_CMAP,
                             vmin=0,
                             vmax=1,
                             cbar=True, 
                             square = True)
         else:
-            g.map_dataframe(draw_heatmap, 
+            g.map_dataframe(draw_heatmap,
+                            False,
+                            False, 
                             'column', 
                             'row', 
                             'value', 
