@@ -80,7 +80,7 @@ def pickle_write(object_to_pickle,
         pickle.dump(object_to_pickle, f, pickle.HIGHEST_PROTOCOL)
 
 def pickle_read(path_within_pickle_directory_list: list[str],
-                filename) -> Any:
+                filename: str) -> Any:
     """Reads and returns a serialized python object located in the specified directory 
 
     Parameters
