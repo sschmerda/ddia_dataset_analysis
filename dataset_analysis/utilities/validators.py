@@ -34,10 +34,27 @@ def return_value_if_not_none(value: Any,
     return return_value_not_none
 
 def check_if_is_instance(object_: Any,
-                         class_: Callable):
+                         class_: Callable) -> bool:
     if not isinstance(object_, class_):
         raise TypeError(f'Object is not of type {type(class_)}')
     
     return True
 
-
+def check_if_not_empty(value: Any,
+                       error_message: str | None = None) -> bool:
+    if isinstance(value, 
+                  pd.DataFrame):
+        is_empty = value.empty
+    elif isinstance(value, 
+                  np.ndarray):
+        is_empty = (value.size == 0)
+    else:
+        is_empty = (len(value) == 0)
+    
+    if is_empty:
+        message_str = ''
+        if error_message:
+            message_str = '\n' + error_message 
+        raise ValueError(f'Value was empty!' + f'{message_str}')
+    
+    return True
