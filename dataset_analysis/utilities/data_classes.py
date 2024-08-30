@@ -32,3 +32,25 @@ class ClusterResults:
     min_cluster_size: int
     sequence_distances_is_normalized: bool
     cluster_entity_type: str
+
+@dataclass
+class TestResultsContingency:
+    group: int
+    test_type: str
+    test_statistic: float | None
+    degrees_of_freedom: float | None
+    pval: float
+    cramersv: float
+    cramersv_conf_inv: tuple[float, float]
+    power: float | None
+
+@dataclass
+class TestResultsContinuous:
+    group: int
+    test_type: str
+    test_statistic: float | None
+    degrees_of_freedom: float | None
+    pval: float
+    cramersv: float
+    cramersv_conf_inv: tuple[float, float]
+    power: float | None
