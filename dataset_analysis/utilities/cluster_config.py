@@ -4,7 +4,14 @@ from .sequence_clustering import *
 from .standard_import import *
 
 ########################################################################################################################
-### dimensionality reduction and clustering parameters ###
+### dimensionality reduction and clustering algorithms ###
+########################################################################################################################
+
+cluster_algo = hdbscan.HDBSCAN
+dim_reduct_algo = umap.UMAP
+
+########################################################################################################################
+### dimensionality reduction and clustering algorithms parameters ###
 ########################################################################################################################
 
 # configure classes for parameter grid generation
@@ -117,10 +124,10 @@ CLUSTERING_HDBSCAN_VALIDITY_INDEX_METRIC_VALUE_NAME_STR = 'euclidean'
 CLUSTERING_HDBSCAN_RELATIVE_VALIDITY_ATTRIBUTE_NAME_STR = 'relative_validity_'
 
 # validation attributes tuple
-CLUSTER_VALIDATION_ATTRIBUTES = (CLUSTERING_HDBSCAN_RELATIVE_VALIDITY_ATTRIBUTE_NAME_STR,)
+cluster_validation_attributes = (CLUSTERING_HDBSCAN_RELATIVE_VALIDITY_ATTRIBUTE_NAME_STR,)
 
 # cluster validation functions tuple
-CLUSTER_VALIDATION_FUNCTIONS = (hdbscan.validity.validity_index,)
+cluster_validation_functions = (hdbscan.validity.validity_index,)
 
 # cluster validation parameter grids
 class ValidityIndex(ParaGrid):
@@ -139,7 +146,7 @@ validity_index_grid_generator = ValidityIndex(None)
 validity_index_para_grid = validity_index_grid_generator.return_param_grid()
 
 # cluster validation parameter grids tuple
-CLUSTER_VALIDATION_PARAMETERS = (validity_index_para_grid,)
+cluster_validation_parameters = (validity_index_para_grid,)
 
 ########################################################################################################################
 ### parallel coordinates field list ###
@@ -155,7 +162,7 @@ parallel_coordinates_param_list = [CLUSTERING_UMAP_N_COMPONENTS_NAME_STR,
 ########################################################################################################################
 
 reducer_umap = umap.UMAP(n_components=2,
-                    random_state=RNG_SEED,
-                    verbose = False)
+                         random_state=RNG_SEED,
+                         verbose = False)
 
 reducer_pca = PCA(n_components=2)
