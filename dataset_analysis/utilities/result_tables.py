@@ -105,6 +105,8 @@ class ResultTables():
                  seq_stats_sequence_count_per_group: pd.DataFrame,
                  unique_learning_activity_sequence_stats_per_group: pd.DataFrame,
                  learning_activity_sequence_stats_per_group: pd.DataFrame,
+                 cluster_results_per_group_df: pd.DataFrame,
+                 sequence_cluster_per_group_df: pd.DataFrame,
                  object_size_df: pd.DataFrame) -> None: 
 
         # data to be calculated
@@ -129,6 +131,8 @@ class ResultTables():
         self.seq_stats_sequence_count_per_group = seq_stats_sequence_count_per_group
         self.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group
         self.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group
+        self.cluster_results_per_group_df = cluster_results_per_group_df
+        self.sequence_cluster_per_group_df = sequence_cluster_per_group_df
         self.object_size_df = object_size_df
 
     @property
@@ -273,6 +277,34 @@ class ResultTables():
 
         else:
             self._learning_activity_sequence_stats_per_group = None 
+
+    @property
+    def cluster_results_per_group_df(self):
+        return self._cluster_results_per_group_df
+    
+    @cluster_results_per_group_df.setter
+    def cluster_results_per_group_df(self, 
+                                          cluster_results_per_group_df: pd.DataFrame):
+
+        if isinstance(cluster_results_per_group_df, pd.DataFrame):
+            self._cluster_results_per_group_df = cluster_results_per_group_df.copy()
+
+        else:
+            self._cluster_results_per_group_df = None 
+
+    @property
+    def sequence_cluster_per_group_df(self):
+        return self._sequence_cluster_per_group_df
+    
+    @sequence_cluster_per_group_df.setter
+    def sequence_cluster_per_group_df(self, 
+                                           sequence_cluster_per_group_df: pd.DataFrame):
+
+        if isinstance(sequence_cluster_per_group_df, pd.DataFrame):
+            self._sequence_cluster_per_group_df = sequence_cluster_per_group_df.copy()
+
+        else:
+            self._sequence_cluster_per_group_df = None 
 
     @property
     def object_size_df(self):
