@@ -190,8 +190,8 @@ class ClusterEvalMetricOmnibusTest():
         axes_iterable = zip(sns_plot.axes.flat, sns_plot.facet_data())
         for ax, (_, subset) in axes_iterable:
 
-            measure_of_association_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_EFFECT_SIZE_VALUE_FIELD_NAME_STR
-            measure_of_association_conf_int_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_EFFECT_SIZE_CONF_INT_VALUE_FIELD_NAME_STR
+            measure_of_association_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
+            measure_of_association_conf_int_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
 
             if self.evaluation_metric_field_is_categorical:
                 n_obs_field = OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR
@@ -777,16 +777,16 @@ class ClusterEvalMetricOmnibusTest():
         measure_of_association_result_dict = {}
         for result in measure_of_association_results_list:
 
-            measure_of_association_value_field_name = result.measure_of_association_type + OMNIBUS_TESTS_EFFECT_SIZE_VALUE_FIELD_NAME_STR
-            measure_of_association_conf_int_value_field_name = result.measure_of_association_type + OMNIBUS_TESTS_EFFECT_SIZE_CONF_INT_VALUE_FIELD_NAME_STR
+            measure_of_association_value_field_name = result.measure_of_association_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
+            measure_of_association_conf_int_value_field_name = result.measure_of_association_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
 
             measure_of_association_result = {measure_of_association_value_field_name: result.measure_of_association_value,
                                              measure_of_association_conf_int_value_field_name: [tuple(result.measure_of_association_conf_int)]}
             
             measure_of_association_result_dict = measure_of_association_result_dict | measure_of_association_result
 
-        additional_info_dict = {OMNIBUS_TESTS_EFFECT_SIZE_CONF_INT_ALPHA_FIELD_NAME_STR: result.measure_of_association_conf_int_level,
-                                OMNIBUS_TESTS_EFFECT_SIZE_CONF_INT_N_BOOTSTRAP_SAMPLES_FIELD_NAME_STR: OMNIBUS_TESTS_BOOTSTRAPPING_EFFECT_SIZE_N_RESAMPLES}
+        additional_info_dict = {OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_ALPHA_FIELD_NAME_STR: result.measure_of_association_conf_int_level,
+                                OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_N_BOOTSTRAP_SAMPLES_FIELD_NAME_STR: OMNIBUS_TESTS_BOOTSTRAPPING_EFFECT_SIZE_N_RESAMPLES}
 
         measure_of_association_result_dict = measure_of_association_result_dict | additional_info_dict
 
