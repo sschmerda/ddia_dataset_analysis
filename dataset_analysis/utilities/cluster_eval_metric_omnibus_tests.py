@@ -28,6 +28,12 @@ class ClusterEvalMetricOmnibusTest():
         self._measure_association_fail_dict_per_group: DefaultDict[int, DefaultDict[str, int]] = defaultdict(lambda: defaultdict(int))
         self._measure_of_association_results_per_group: dict[int, list[MeasureAssociationContingencyResults | MeasureAssociationAOVResults]] = {}
 
+        # initialization of p-value fields list
+        self._p_val_field_name_list = [OMNIBUS_TESTS_PVAL_FIELD_NAME_STR,
+                                       OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR,
+                                       OMNIBUS_TESTS_R_PVAL_FIELD_NAME_STR,
+                                       OMNIBUS_TESTS_R_PERM_PVAL_FIELD_NAME_STR]
+
         # data transformation
         self.sequence_cluster_eval_metric_per_group_df = self._return_seq_cluster_eval_metric_per_group_df(self.sequence_cluster_per_group_df,
                                                                                                            self.interactions)
@@ -42,6 +48,12 @@ class ClusterEvalMetricOmnibusTest():
             self.omnibus_test_result_df = self._return_omnibus_test_result_categorical_var()
         else:
             self.omnibus_test_result_df = self._return_omnibus_test_result_continuous_var()
+        
+        # correct p-values for multiple testing
+        self._perform_p_value_correction(self.omnibus_test_result_df)
+
+        # add p-value is significant fields for alpha specified in config
+        self._add_p_value_is_significant_fields(self.omnibus_test_result_df)
     
     def return_omnibus_test_result(self) -> pd.DataFrame:
 
@@ -135,9 +147,10 @@ class ClusterEvalMetricOmnibusTest():
                             CLUSTER_FIELD_NAME_STR, 
                             self.evaluation_metric_field)
         
-        self.add_plot_data_title(g,
-                                 OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
-                                 FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
+        self._add_plot_data_title(g,
+                                  OMNIBUS_TESTS_P_VALUE_CORRECTION_PLOT_INCLUDE,
+                                  OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
+                                  FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
 
         plt.show(g)
 
@@ -162,9 +175,10 @@ class ClusterEvalMetricOmnibusTest():
                         y=self.evaluation_metric_field,
                         orient='v')
 
-        self.add_plot_data_title(g,
-                                 OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
-                                 FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
+        self._add_plot_data_title(g,
+                                  OMNIBUS_TESTS_P_VALUE_CORRECTION_PLOT_INCLUDE,
+                                  OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
+                                  FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
 
         plt.show(g)
 
@@ -182,35 +196,34 @@ class ClusterEvalMetricOmnibusTest():
                     showmeans=True, 
                     meanprops=marker_config_eval_metric_mean)
         
-    def add_plot_data_title(self,
-                            sns_plot,
-                            measure_of_association_method: ContingencyEffectSizeEnum | AOVEffectSizeEnum,
-                            h_space_title: int | float) -> None:
+    def _add_plot_data_title(self,
+                             sns_plot,
+                             p_value_correction_method: PValueCorrectionEnum,
+                             measure_of_association_method: ContingencyEffectSizeEnum | AOVEffectSizeEnum,
+                             h_space_title: int | float) -> None:
 
         axes_iterable = zip(sns_plot.axes.flat, sns_plot.facet_data())
         for ax, (_, subset) in axes_iterable:
 
+            p_value_correction_value_field_name = OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR + OMNIBUS_TESTS_PVAL_CORRECTED_FIELD_NAME_STR + p_value_correction_method.value 
             measure_of_association_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
             measure_of_association_conf_int_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
 
             if self.evaluation_metric_field_is_categorical:
-                n_obs_field = OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR
                 has_exp_freq_below_t_field = OMNIBUS_TESTS_CONTINGENCY_HAS_EXPECTED_FREQ_BELOW_THRESHOLD_FIELD_NAME_STR
                 test_statistic_field = OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_TEST_STATISTIC_FIELD_NAME_STR
-                p_val_perm_field = OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_PERM_PVAL_FIELD_NAME_STR
             else:
-                n_obs_field = OMNIBUS_TESTS_CONTINUOUS_AOV_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR
                 test_statistic_field = OMNIBUS_TESTS_CONTINUOUS_AOV_F_TEST_STATISTIC_FIELD_NAME_STR
-                p_val_perm_field = OMNIBUS_TESTS_CONTINUOUS_AOV_PERM_PVAL_FIELD_NAME_STR
 
             # extract data for plotting
             group = subset[GROUP_FIELD_NAME_STR].iloc[0]
             is_group_series = self.omnibus_test_result_df[GROUP_FIELD_NAME_STR] == group
-            n_observations = self.omnibus_test_result_df.loc[is_group_series, n_obs_field].values[0] 
+            n_observations = self.omnibus_test_result_df.loc[is_group_series, OMNIBUS_TESTS_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR].values[0] 
             if self.evaluation_metric_field_is_categorical:
                 has_expected_frequency_below_threshold = self.omnibus_test_result_df.loc[is_group_series, has_exp_freq_below_t_field].values[0] 
             test_statistic = round(self.omnibus_test_result_df.loc[is_group_series, test_statistic_field].values[0], 3)
-            p_value_perm = round(self.omnibus_test_result_df.loc[is_group_series, p_val_perm_field].values[0], 3)
+            p_value_perm = round(self.omnibus_test_result_df.loc[is_group_series, OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR].values[0], 3)
+            p_value_perm_corrected = round(self.omnibus_test_result_df.loc[is_group_series, p_value_correction_value_field_name].values[0], 3)
             measure_of_association_type = measure_of_association_value_field_name
             measure_of_association_value = round(self.omnibus_test_result_df.loc[is_group_series, measure_of_association_value_field_name].values[0], 3)
             measure_of_association_conf_int = self.omnibus_test_result_df.loc[is_group_series, measure_of_association_conf_int_value_field_name].values[0]
@@ -218,28 +231,26 @@ class ClusterEvalMetricOmnibusTest():
             measure_of_association_conf_int_lvl = int(OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL * 100)
     
             # generate title strings for plot
-            if p_value_perm > 0.05:
-                star_str = ''
-            elif 0.01 < p_value_perm <= 0.05:
-                star_str = '*'
-            elif 0.001 < p_value_perm <= 0.01:
-                star_str = '**'
-            else:
-                star_str = '***'
+            p_value_perm_star_str = self._return_p_value_star_string(p_value_perm)
+            p_value_perm_corrected_star_str = self._return_p_value_star_string(p_value_perm_corrected)
 
             group_str = f'{GROUP_FIELD_NAME_STR}: {group}'
+
             n_observations_str = f'\n{OMNIBUS_TESTS_NUMBER_OBSERVATIONS_PLOT_VALUE_NAME_STR}: {n_observations}'
+
             if self.evaluation_metric_field_is_categorical:
                 has_expected_frequency_below_threshold_str = f'\n{OMNIBUS_TESTS_HAS_EXPECTED_FREQ_BELOW_THRESHOLD_PLOT_VALUE_NAME_STR}{OMNIBUS_TESTS_CONTINGENCY_EXPECTED_FREQ_THRESHOLD_VALUE}: {has_expected_frequency_below_threshold}'
             else:
                 has_expected_frequency_below_threshold_str = ''
-            test_statistic_str = f'\n{OMNIBUS_TESTS_CHI_SQUARED_PLOT_VALUE_NAME_STR}: {test_statistic}'
 
-            if p_value_perm <= 0.05:
-                pvalue_star_str = f'$\mathbf{ {p_value_perm} }$ $\mathbf{ {star_str} }$'
+            if self.evaluation_metric_field_is_categorical:
+                test_statistic_str = f'\n{OMNIBUS_TESTS_CHI_SQUARED_PLOT_VALUE_NAME_STR}: {test_statistic}'
             else:
-                pvalue_star_str = f'{p_value_perm}{star_str}'
-            pvalue_perm_str = f'\n{OMNIBUS_TESTS_PVAL_PERM_PLOT_VALUE_NAME_STR}: ' + pvalue_star_str
+                test_statistic_str = f'\n{OMNIBUS_TESTS_F_PLOT_VALUE_NAME_STR}: {test_statistic}'
+
+            p_value_perm_str = f'\n{OMNIBUS_TESTS_PVAL_PERM_PLOT_VALUE_NAME_STR}: ' + p_value_perm_star_str
+            p_value_perm_corrected_str = f'\n{OMNIBUS_TESTS_PVAL_PERM_CORRECTED_PLOT_VALUE_NAME_STR}: ' + p_value_perm_corrected_star_str
+            p_value_correction_method_str = f'\n{OMNIBUS_TESTS_PVAL_CORRECTION_METHOD_PLOT_VALUE_NAME_STR}: ' + p_value_correction_method.value
 
             sub_strings = measure_of_association_type.split('_')
             measure_of_association_type = '_'.join([sub_str.capitalize() for sub_str in sub_strings])
@@ -250,12 +261,32 @@ class ClusterEvalMetricOmnibusTest():
                                  n_observations_str,
                                  has_expected_frequency_below_threshold_str,
                                  test_statistic_str,
-                                 pvalue_perm_str,
+                                 p_value_perm_str,
+                                 p_value_perm_corrected_str,
+                                 p_value_correction_method_str,
                                  measure_of_association_str,
                                  measure_of_association_conf_int_str))
             ax.set_title(title_str)
         
         plt.subplots_adjust(hspace=h_space_title)
+    
+    def _return_p_value_star_string(self,
+                                    p_value: float) -> str:
+        if p_value > OMNIBUS_TESTS_ALPHA_LEVEL:
+            star_str = ''
+        elif OMNIBUS_TESTS_TWO_STAR_UPPER_BOUND < p_value <= OMNIBUS_TESTS_ONE_STAR_UPPER_BOUND:
+            star_str = '*'
+        elif OMNIBUS_TESTS_THREE_STAR_UPPER_BOUND < p_value <= OMNIBUS_TESTS_TWO_STAR_UPPER_BOUND:
+            star_str = '**'
+        else:
+            star_str = '***'
+
+        if p_value <= OMNIBUS_TESTS_ALPHA_LEVEL:
+            p_value_star_str = f'$\mathbf{ {p_value} }$ $\mathbf{ {star_str} }$'
+        else:
+            p_value_star_str = f'{p_value}{star_str}'
+        
+        return p_value_star_str
 
     def _return_omnibus_test_result_categorical_var(self) -> pd.DataFrame:
 
@@ -378,12 +409,14 @@ class ClusterEvalMetricOmnibusTest():
             n_elements_contingency_table = expected_frequencies.size
             n_elements_contingency_table_below_threshold = has_small_expected_freq_matrix.sum()
             pct_elements_contingency_table_below_threshold = n_elements_contingency_table_below_threshold / n_elements_contingency_table * 100
+            dimensions_contingency_table = expected_freq.shape
             
             expected_frequencies_stats = ContingencyExpectedFrequenciesStats(OMNIBUS_TESTS_CONTINGENCY_EXPECTED_FREQ_THRESHOLD_VALUE,
                                                                              has_small_expected_freq,
                                                                              n_elements_contingency_table,
                                                                              n_elements_contingency_table_below_threshold,
-                                                                             pct_elements_contingency_table_below_threshold)
+                                                                             pct_elements_contingency_table_below_threshold,
+                                                                             dimensions_contingency_table)
 
             return expected_frequencies_stats
 
@@ -498,19 +531,20 @@ class ClusterEvalMetricOmnibusTest():
 
         test_results_dict = {DATASET_NAME_FIELD_NAME_STR: dataset_name,
                              GROUP_FIELD_NAME_STR: group,
-                             OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR: chi_squared_test_results.n_observations,
+                             OMNIBUS_TESTS_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR: chi_squared_test_results.n_observations,
                              OMNIBUS_TESTS_CONTINGENCY_EXPECTED_FREQ_THRESHOLD_FIELD_NAME_STR: expected_frequencies_stats.expected_frequencies_threshold,
                              OMNIBUS_TESTS_CONTINGENCY_HAS_EXPECTED_FREQ_BELOW_THRESHOLD_FIELD_NAME_STR: expected_frequencies_stats.has_expected_frequency_below_threshold,
                              OMNIBUS_TESTS_CONTINGENCY_NUMBER_ELEMENTS_FIELD_NAME_STR: expected_frequencies_stats.n_elements_contingency_table,
                              OMNIBUS_TESTS_CONTINGENCY_EXPECTED_NUMBER_ELEMENTS_BELOW_THRESHOLD_FREQ_FIELD_NAME_STR: expected_frequencies_stats.n_elements_contingency_table_expected_below_threshold,
                              OMNIBUS_TESTS_CONTINGENCY_EXPECTED_PCT_ELEMENTS_BELOW_THRESHOLD_FREQ_FIELD_NAME_STR: expected_frequencies_stats.pct_elements_contingency_table_expected_below_threshold,
+                             OMNIBUS_TESTS_CONTINGENCY_TABLE_DIMENSIONS_FIELD_NAME_STR: [expected_frequencies_stats.table_dimensions],
                              OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_TEST_STATISTIC_FIELD_NAME_STR: chi_squared_test_results.chi_squared_statistic,
                              OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_DEGREES_OF_FREEDOM_FIELD_NAME_STR: chi_squared_test_results.degrees_of_freedom,
-                             OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_PVAL_FIELD_NAME_STR: chi_squared_test_results.p_value,
-                             OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_PERM_PVAL_FIELD_NAME_STR: p_val_perm,
-                             OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_R_PVAL_FIELD_NAME_STR: p_val_r,
-                             OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_R_PERM_PVAL_FIELD_NAME_STR: p_val_r_perm,
-                             OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_PERM_N_PERMS_FIELD_NAME_STR: OMNIBUS_TESTS_CONTINGENCY_PERMUTATION_N_RESAMPLES}
+                             OMNIBUS_TESTS_PVAL_FIELD_NAME_STR: chi_squared_test_results.p_value,
+                             OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR: p_val_perm,
+                             OMNIBUS_TESTS_R_PVAL_FIELD_NAME_STR: p_val_r,
+                             OMNIBUS_TESTS_R_PERM_PVAL_FIELD_NAME_STR: p_val_r_perm,
+                             OMNIBUS_TESTS_PERM_N_PERMS_FIELD_NAME_STR: OMNIBUS_TESTS_CONTINGENCY_PERMUTATION_N_RESAMPLES}
 
         measure_of_association_result_dict = self._return_measure_of_association_result_dict(measure_of_association_contingency_results_list)
 
@@ -640,7 +674,7 @@ class ClusterEvalMetricOmnibusTest():
             case AOVEffectSizeEnum.ETA_SQUARED:
                 measure_of_association = self._return_eta_squared(sequence_cluster_df)
             case AOVEffectSizeEnum.COHENS_F:
-                measure_of_association = self._return_eta_squared(sequence_cluster_df)
+                measure_of_association = self._return_cohens_f(sequence_cluster_df)
             case _:
                 #TODO: find fitting error
                 print('error')
@@ -749,7 +783,7 @@ class ClusterEvalMetricOmnibusTest():
 
         test_results_dict = {DATASET_NAME_FIELD_NAME_STR: dataset_name,
                              GROUP_FIELD_NAME_STR: group,
-                             OMNIBUS_TESTS_CONTINUOUS_AOV_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR: anova_test_results.n_observations,
+                             OMNIBUS_TESTS_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR: anova_test_results.n_observations,
                              OMNIBUS_TESTS_CONTINUOUS_AOV_F_TEST_STATISTIC_FIELD_NAME_STR: anova_test_results.f_statistic,
                              OMNIBUS_TESTS_CONTINUOUS_AOV_DOF_BETWEEN_FIELD_NAME_STR: anova_test_results.degrees_of_freedom_between,
                              OMNIBUS_TESTS_CONTINUOUS_AOV_DOF_WITHIN_FIELD_NAME_STR: anova_test_results.degrees_of_freedom_within,
@@ -757,11 +791,11 @@ class ClusterEvalMetricOmnibusTest():
                              OMNIBUS_TESTS_CONTINUOUS_AOV_SS_WITHIN_FIELD_NAME_STR: anova_test_results.ss_within,
                              OMNIBUS_TESTS_CONTINUOUS_AOV_MSS_BETWEEN_FIELD_NAME_STR: anova_test_results.mss_between,
                              OMNIBUS_TESTS_CONTINUOUS_AOV_MSS_WITHIN_FIELD_NAME_STR: anova_test_results.mss_within,
-                             OMNIBUS_TESTS_CONTINUOUS_AOV_PVAL_FIELD_NAME_STR: anova_test_results.p_value,
-                             OMNIBUS_TESTS_CONTINUOUS_AOV_PERM_PVAL_FIELD_NAME_STR: p_val_perm,
-                             OMNIBUS_TESTS_CONTINUOUS_AOV_R_PVAL_FIELD_NAME_STR: p_val_r,
-                             OMNIBUS_TESTS_CONTINUOUS_AOV_R_PERM_PVAL_FIELD_NAME_STR: p_val_r_perm,
-                             OMNIBUS_TESTS_CONTINUOUS_AOV_PERM_N_PERMS_FIELD_NAME_STR: OMNIBUS_TESTS_CONTINGENCY_PERMUTATION_N_RESAMPLES}
+                             OMNIBUS_TESTS_PVAL_FIELD_NAME_STR: anova_test_results.p_value,
+                             OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR: p_val_perm,
+                             OMNIBUS_TESTS_R_PVAL_FIELD_NAME_STR: p_val_r,
+                             OMNIBUS_TESTS_R_PERM_PVAL_FIELD_NAME_STR: p_val_r_perm,
+                             OMNIBUS_TESTS_PERM_N_PERMS_FIELD_NAME_STR: OMNIBUS_TESTS_CONTINGENCY_PERMUTATION_N_RESAMPLES}
 
         measure_of_association_result_dict = self._return_measure_of_association_result_dict(measure_of_association_aov_results_list)
 
@@ -770,7 +804,7 @@ class ClusterEvalMetricOmnibusTest():
         test_results_df = pd.DataFrame(test_results_dict,
                                        index = (0,))
         return test_results_df
-
+    
     def _return_measure_of_association_result_dict(self,
                                                    measure_of_association_results_list: list[MeasureAssociationContingencyResults | MeasureAssociationAOVResults]) -> dict:
 
@@ -791,6 +825,60 @@ class ClusterEvalMetricOmnibusTest():
         measure_of_association_result_dict = measure_of_association_result_dict | additional_info_dict
 
         return measure_of_association_result_dict
+
+    def _perform_p_value_correction(self,
+                                    test_results_df: pd.DataFrame) -> None:
+
+        idx_to_insert = test_results_df.columns.get_loc(self._p_val_field_name_list[-1]) + 1
+
+        for correction in OMNIBUS_TESTS_P_VALUE_CORRECTION_METHOD_LIST:
+
+            for field in self._p_val_field_name_list:
+
+                has_none = test_results_df[field].isnull().any()
+                if has_none:
+                    corrected_p_values = None
+                else:
+                    corrected_p_values = sm.stats.multipletests(test_results_df[field], 
+                                                                alpha=OMNIBUS_TESTS_ALPHA_LEVEL, 
+                                                                method=correction.value)[1]
+
+                label = field + OMNIBUS_TESTS_PVAL_CORRECTED_FIELD_NAME_STR + correction.value 
+                
+                test_results_df.insert(idx_to_insert,
+                                       label,
+                                       corrected_p_values)
+
+                idx_to_insert += 1
+
+    def _add_p_value_is_significant_fields(self,
+                                           test_results_df: pd.DataFrame) -> None:
+
+        idx_to_insert = test_results_df.columns.get_loc(OMNIBUS_TESTS_PERM_N_PERMS_FIELD_NAME_STR) + 1
+
+        field_list = self._p_val_field_name_list.copy()
+        for correction in OMNIBUS_TESTS_P_VALUE_CORRECTION_METHOD_LIST:
+
+            for field in self._p_val_field_name_list:
+
+                label = field + OMNIBUS_TESTS_PVAL_CORRECTED_FIELD_NAME_STR + correction.value 
+                field_list.append(label)
+        
+        for field in field_list:
+
+            has_none = test_results_df[field].isnull().any()
+            if has_none:
+                is_significant = None
+            else:
+                is_significant = (test_results_df[field] <= OMNIBUS_TESTS_ALPHA_LEVEL).values
+            
+            label = field + OMNIBUS_TESTS_PVAL_IS_SIGNIFICANT_FIELD_NAME_STR
+
+            test_results_df.insert(idx_to_insert,
+                                   label,
+                                   is_significant)
+
+            idx_to_insert += 1
     
     def _return_seq_cluster_eval_metric_per_group_df(self,
                                                      sequence_cluster_per_group_df: pd.DataFrame,
