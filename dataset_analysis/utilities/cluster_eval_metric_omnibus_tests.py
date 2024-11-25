@@ -54,6 +54,9 @@ class ClusterEvalMetricOmnibusTest():
 
         # add p-value is significant fields for alpha specified in config
         self._add_p_value_is_significant_fields(self.omnibus_test_result_df)
+
+        # round results
+        self.omnibus_test_result_df = self.omnibus_test_result_df.round(RESULTS_ROUND_N_DIGITS)
     
     def return_omnibus_test_result(self) -> pd.DataFrame:
 
@@ -199,7 +202,7 @@ class ClusterEvalMetricOmnibusTest():
     def _add_plot_data_title(self,
                              sns_plot,
                              p_value_correction_method: PValueCorrectionEnum,
-                             measure_of_association_method: ContingencyEffectSizeEnum | AOVEffectSizeEnum,
+                             measure_of_association_method: ContingencyMeasureAssociationEnum | AOVMeasueAssociationEnum,
                              h_space_title: int | float) -> None:
 
         axes_iterable = zip(sns_plot.axes.flat, sns_plot.facet_data())
@@ -409,7 +412,7 @@ class ClusterEvalMetricOmnibusTest():
             n_elements_contingency_table = expected_frequencies.size
             n_elements_contingency_table_below_threshold = has_small_expected_freq_matrix.sum()
             pct_elements_contingency_table_below_threshold = n_elements_contingency_table_below_threshold / n_elements_contingency_table * 100
-            dimensions_contingency_table = expected_freq.shape
+            dimensions_contingency_table = expected_frequencies.shape
             
             expected_frequencies_stats = ContingencyExpectedFrequenciesStats(OMNIBUS_TESTS_CONTINGENCY_EXPECTED_FREQ_THRESHOLD_VALUE,
                                                                              has_small_expected_freq,
@@ -446,18 +449,74 @@ class ClusterEvalMetricOmnibusTest():
     
     def _return_measure_association_contingency(self,
                                                 observed_freq: np.ndarray,
-                                                method: ContingencyEffectSizeEnum) -> float:
+                                                method: ContingencyMeasureAssociationEnum) -> float:
 
-        measure_of_association = association(observed_freq,
-                                             method=method.name,
-                                             correction=OMNIBUS_TESTS_CONTINGENCY_YATES_CORRECTION_VALUE)
+        match method:
+            case ContingencyMeasureAssociationEnum.CRAMER:
+                measure_of_association = self._return_cramers_v(observed_freq)
+            case ContingencyMeasureAssociationEnum.CRAMER_BIAS_CORRECTED:
+                measure_of_association = self._return_cramers_v_bias_corrected(observed_freq)
+            case ContingencyMeasureAssociationEnum.TSCHUPROW:
+                measure_of_association = self._return_tschuprows_t(observed_freq)
+            case ContingencyMeasureAssociationEnum.PEARSON:
+                measure_of_association = self._return_pearsons_c(observed_freq)
+            case _:
+                #TODO: find fitting error
+                print('error')
+
         return measure_of_association
+    
+    def _return_cramers_v(self,
+                          observed_freq: np.ndarray) -> float:
+
+        cramers_v = association(observed_freq,
+                                method='cramer',
+                                correction=OMNIBUS_TESTS_CONTINGENCY_YATES_CORRECTION_VALUE)
+        return cramers_v
+
+    def _return_tschuprows_t(self,
+                             observed_freq: np.ndarray) -> float:
+
+        tschuprows_t = association(observed_freq,
+                                   method='tschuprow',
+                                   correction=OMNIBUS_TESTS_CONTINGENCY_YATES_CORRECTION_VALUE)
+        return tschuprows_t
+
+    def _return_pearsons_c(self,
+                           observed_freq: np.ndarray) -> float:
+
+        pearsons_c = association(observed_freq,
+                                 method='pearson',
+                                 correction=OMNIBUS_TESTS_CONTINGENCY_YATES_CORRECTION_VALUE)
+        return pearsons_c
+
+    def _return_cramers_v_bias_corrected(self,
+                                         observed_freq: np.ndarray) -> float:
+
+        chi2_stat = sp.stats.chi2_contingency(observed_freq).statistic
+
+        n_observations = np.sum(observed_freq)
+        phi_squared = chi2_stat / n_observations
+        n_rows = observed_freq.shape[0]
+        n_cols = observed_freq.shape[1]
+
+        phi_squared_bias_corrected = phi_squared - ((1 / (n_observations - 1)) * (n_rows - 1) * (n_cols - 1))
+
+        phi_squared_bias_corrected_non_neg = max(0, phi_squared_bias_corrected)
+
+        r_tilde = n_rows - (1 / (n_observations - 1)) * (n_rows - 1) ** 2
+        c_tilde = n_cols - (1 / (n_observations - 1)) * (n_cols - 1) ** 2
+
+        cramers_v_squared_bias_corrected = phi_squared_bias_corrected_non_neg / min(r_tilde - 1, c_tilde - 1)
+        cramers_v_bias_corrected = math.sqrt(cramers_v_squared_bias_corrected)
+
+        return cramers_v_bias_corrected
 
     def _return_measure_association_contingency_conf_interval_bootstrap(self,
                                                                         clusters: np.ndarray,
                                                                         eval_metrics: np.ndarray,
                                                                         group: int,
-                                                                        method: ContingencyEffectSizeEnum) -> Any:
+                                                                        method: ContingencyMeasureAssociationEnum) -> Any:
 
         def return_measure_association_bootstrap(x: np.ndarray, 
                                                  y: np.ndarray) -> float:
@@ -470,6 +529,10 @@ class ClusterEvalMetricOmnibusTest():
                 warnings.simplefilter('ignore', RuntimeWarning)
                 measure_of_association = self._return_measure_association_contingency(observed_freq,
                                                                                       method)
+
+            if method == ContingencyMeasureAssociationEnum.CRAMER_BIAS_CORRECTED:
+                if measure_of_association == 0:
+                    measure_of_association = np.random.uniform(low=0.0, high=0.000001, size=None)
 
             #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
@@ -490,6 +553,85 @@ class ClusterEvalMetricOmnibusTest():
                                       random_state=RNG_SEED)
 
         return bootstrap_result
+
+    def _return_measure_association_contingency_strength_value(self,
+                                                               measure_of_association_value: float,
+                                                               strength_guideline_method: ContingencyMeasureAssociationStrengthGuidelineEnum) -> str:
+
+        match strength_guideline_method:
+            case ContingencyMeasureAssociationStrengthGuidelineEnum.COHEN_1988:
+                measure_of_association_strength = self._return_cohen_1988_measure_association_contingency_strength(measure_of_association_value)
+            case ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016:
+                measure_of_association_strength = self._return_gignac_szodorai_2016_measure_association_contingency_strength(measure_of_association_value)
+            case ContingencyMeasureAssociationStrengthGuidelineEnum.FUNDER_OZER_2019:
+                measure_of_association_strength = self._return_funder_ozer_2019_measure_association_contingency_strength(measure_of_association_value)
+            case ContingencyMeasureAssociationStrengthGuidelineEnum.LOVAKOV_AGADULLINA_2021:
+                measure_of_association_strength = self._return_lovakov_agadullina_2021_measure_association_contingency_strength(measure_of_association_value)
+            case _:
+                #TODO: find fitting error
+                print('error')
+
+        return measure_of_association_strength
+
+    def _return_cohen_1988_measure_association_contingency_strength(self,
+                                                                    measure_of_association_value: float) -> str:
+        
+        if measure_of_association_value < 0.1:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.3:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.5:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+        else:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+        
+        return moa_strength
+
+    def _return_gignac_szodorai_2016_measure_association_contingency_strength(self,
+                                                                              measure_of_association_value: float) -> str:
+        
+        if measure_of_association_value < 0.1:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.2:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.3:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+        else:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+
+        return moa_strength
+
+    def _return_funder_ozer_2019_measure_association_contingency_strength(self,
+                                                                          measure_of_association_value: float) -> str:
+        
+        if measure_of_association_value < 0.05:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_TINY_VALUE_STR
+        if measure_of_association_value < 0.1:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.2:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.3:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+        elif measure_of_association_value < 0.4:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+        else:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_LARGE_VALUE_STR
+
+        return moa_strength
+
+    def _return_lovakov_agadullina_2021_measure_association_contingency_strength(self,
+                                                                                 measure_of_association_value: float) -> str:
+        
+        if measure_of_association_value < 0.12:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.24:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.41:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+        else:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+
+        return moa_strength
                             
     def _return_measure_association_contingency_results(self,
                                                         clusters: np.ndarray,
@@ -498,23 +640,30 @@ class ClusterEvalMetricOmnibusTest():
                                                         group: int) -> list[MeasureAssociationContingencyResults]:
 
         measure_of_association_contingency_results_list = []
-        for method in OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_LIST:
+        for moa_method, moa_strength_guide_method_list in OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_DICT.items():
 
-            measure_of_association_type = method.value
+            measure_of_association_type = moa_method.value
             measure_of_association_value = self._return_measure_association_contingency(observed_freq,
-                                                                                        method)
+                                                                                        moa_method)
+            
+            moa_strength_guide_methods = [moa_strength_guide_method.value for moa_strength_guide_method in moa_strength_guide_method_list]
+            moa_strength_guide_values = [self._return_measure_association_contingency_strength_value(measure_of_association_value, 
+                                                                                                     moa_strength_guide_method)
+                                            for moa_strength_guide_method in moa_strength_guide_method_list]
 
             bootstrap_result = self._return_measure_association_contingency_conf_interval_bootstrap(clusters,
                                                                                                     eval_metrics,
                                                                                                     group,
-                                                                                                    method)
+                                                                                                    moa_method)
 
             measure_of_association_contingency_results = MeasureAssociationContingencyResults(measure_of_association_type,
                                                                                               measure_of_association_value,
                                                                                               OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL,
                                                                                               bootstrap_result.confidence_interval,
                                                                                               bootstrap_result.bootstrap_distribution,
-                                                                                              bootstrap_result.standard_error)
+                                                                                              bootstrap_result.standard_error,
+                                                                                              moa_strength_guide_methods,
+                                                                                              moa_strength_guide_values)
             measure_of_association_contingency_results_list.append(measure_of_association_contingency_results)
 
         return measure_of_association_contingency_results_list
@@ -668,13 +817,15 @@ class ClusterEvalMetricOmnibusTest():
 
     def _return_measure_association_aov(self,
                                         sequence_cluster_df: pd.DataFrame,
-                                        method: AOVEffectSizeEnum) -> float:
+                                        method: AOVMeasueAssociationEnum) -> float:
 
         match method:
-            case AOVEffectSizeEnum.ETA_SQUARED:
+            case AOVMeasueAssociationEnum.ETA_SQUARED:
                 measure_of_association = self._return_eta_squared(sequence_cluster_df)
-            case AOVEffectSizeEnum.COHENS_F:
+            case AOVMeasueAssociationEnum.COHENS_F:
                 measure_of_association = self._return_cohens_f(sequence_cluster_df)
+            case AOVMeasueAssociationEnum.OMEGA_SQUARED:
+                measure_of_association = self._return_omega_squared(sequence_cluster_df)
             case _:
                 #TODO: find fitting error
                 print('error')
@@ -708,11 +859,29 @@ class ClusterEvalMetricOmnibusTest():
         cohens_f = (eta_squared / (1 - eta_squared)) ** (1/2)
     
         return cohens_f
+    
+    def _return_omega_squared(self,
+                              sequence_cluster_df: pd.DataFrame) -> float:
+
+        n_groups = sequence_cluster_df[CLUSTER_FIELD_NAME_STR].nunique()
+        df_within = sequence_cluster_df.shape[0] - n_groups
+
+        grand_mean = sequence_cluster_df[self.evaluation_metric_field].mean()
+        ss_between = (sequence_cluster_df.groupby(CLUSTER_FIELD_NAME_STR)[self.evaluation_metric_field]
+                                         .transform(lambda x: (np.mean(x) - grand_mean)**2).sum())
+        ss_within = (sequence_cluster_df.groupby(CLUSTER_FIELD_NAME_STR)[self.evaluation_metric_field]
+                                        .transform(lambda x: (x - np.mean(x))**2).sum())
+        
+        mean_squared_error = ss_within / df_within
+        
+        omega_squared = (ss_between - (n_groups - 1) * mean_squared_error) / (ss_within + ss_between + mean_squared_error)
+    
+        return omega_squared
 
     def _return_measure_association_aov_conf_interval_bootstrap(self,
                                                                 sequence_cluster_df: pd.DataFrame,
                                                                 group: int,
-                                                                method: AOVEffectSizeEnum) -> Any:
+                                                                method: AOVMeasueAssociationEnum) -> Any:
 
         def return_measure_association_bootstrap(x: np.ndarray, 
                                                  y: np.ndarray) -> float:
@@ -746,27 +915,77 @@ class ClusterEvalMetricOmnibusTest():
 
         return bootstrap_result
 
+    def _return_measure_association_aov_strength_value(self,
+                                                       measure_of_association_value: float,
+                                                       strength_guideline_method: AOVMeasureAssociationStrengthGuidelineEnum) -> str:
+
+        match strength_guideline_method:
+            case AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988:
+                measure_of_association_strength = self._return_cohen_1988_measure_association_aov_strength(measure_of_association_value)
+            case AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988_F:
+                measure_of_association_strength = self._return_cohen_1988_f_measure_association_aov_strength(measure_of_association_value)
+            case _:
+                #TODO: find fitting error
+                print('error')
+
+        return measure_of_association_strength
+    
+    def _return_cohen_1988_measure_association_aov_strength(self,
+                                                            measure_of_association_value: float) -> str:
+        
+        if measure_of_association_value < 0.0099:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.0588:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.1379:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+        else:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+        
+        return moa_strength
+
+    def _return_cohen_1988_f_measure_association_aov_strength(self,
+                                                              measure_of_association_value: float) -> str:
+        
+        if measure_of_association_value < 0.10:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.25:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+        elif measure_of_association_value < 0.4:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+        else:
+            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+        
+        return moa_strength
+
     def _return_measure_association_aov_results(self,
                                                 sequence_cluster_df: pd.DataFrame,
                                                 group: int) -> list[MeasureAssociationAOVResults]:
 
         measure_of_association_aov_results_list = []
-        for method in OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_LIST:
+        for moa_method, moa_strength_guide_method_list in OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_DICT.items():
 
-            measure_of_association_type = method.value
+            measure_of_association_type = moa_method.value
             measure_of_association_value = self._return_measure_association_aov(sequence_cluster_df,
-                                                                                method)
+                                                                                moa_method)
+
+            moa_strength_guide_methods = [moa_strength_guide_method.value for moa_strength_guide_method in moa_strength_guide_method_list]
+            moa_strength_guide_values = [self._return_measure_association_aov_strength_value(measure_of_association_value, 
+                                                                                             moa_strength_guide_method)
+                                            for moa_strength_guide_method in moa_strength_guide_method_list]
 
             bootstrap_result = self._return_measure_association_aov_conf_interval_bootstrap(sequence_cluster_df,
                                                                                             group,
-                                                                                            method)
+                                                                                            moa_method)
 
             measure_of_association_aov_results = MeasureAssociationAOVResults(measure_of_association_type,
                                                                               measure_of_association_value,
                                                                               OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL,
                                                                               bootstrap_result.confidence_interval,
                                                                               bootstrap_result.bootstrap_distribution,
-                                                                              bootstrap_result.standard_error)
+                                                                              bootstrap_result.standard_error,
+                                                                              moa_strength_guide_methods,
+                                                                              moa_strength_guide_values)
 
             measure_of_association_aov_results_list.append(measure_of_association_aov_results)
 
@@ -811,15 +1030,28 @@ class ClusterEvalMetricOmnibusTest():
         measure_of_association_result_dict = {}
         for result in measure_of_association_results_list:
 
-            measure_of_association_value_field_name = result.measure_of_association_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
-            measure_of_association_conf_int_value_field_name = result.measure_of_association_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
+            measure_of_association_value_field_name = result.measure_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
+            measure_of_association_conf_int_value_field_name = result.measure_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
 
-            measure_of_association_result = {measure_of_association_value_field_name: result.measure_of_association_value,
-                                             measure_of_association_conf_int_value_field_name: [tuple(result.measure_of_association_conf_int)]}
+            measure_of_association_result = {measure_of_association_value_field_name: result.measure_value,
+                                             measure_of_association_conf_int_value_field_name: [tuple(map(lambda x: round(x, RESULTS_ROUND_N_DIGITS), result.conf_int))]}
+
+            moa_interpretation_guidelines_result = {}
+            moa_interpretation_guidelines = zip(result.interpretation_guideline_methods, result.interpretation_guideline_strength_values)
+            for moa_guideline_method, moa_guideline_strength_value in moa_interpretation_guidelines:
+
+                measure_of_association_interpretation_guideline_field_name = (result.measure_type +
+                                                                              '_' + 
+                                                                              moa_guideline_method + 
+                                                                              OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR)
+
+                moa_interpretation_guidelines_result[measure_of_association_interpretation_guideline_field_name] = moa_guideline_strength_value
+            
+            measure_of_association_result = measure_of_association_result | moa_interpretation_guidelines_result
             
             measure_of_association_result_dict = measure_of_association_result_dict | measure_of_association_result
 
-        additional_info_dict = {OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_ALPHA_FIELD_NAME_STR: result.measure_of_association_conf_int_level,
+        additional_info_dict = {OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_ALPHA_FIELD_NAME_STR: result.conf_int_level,
                                 OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_N_BOOTSTRAP_SAMPLES_FIELD_NAME_STR: OMNIBUS_TESTS_BOOTSTRAPPING_EFFECT_SIZE_N_RESAMPLES}
 
         measure_of_association_result_dict = measure_of_association_result_dict | additional_info_dict
