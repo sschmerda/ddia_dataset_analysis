@@ -16,7 +16,8 @@ class ClusterEvalMetricOmnibusTest():
                  evaluation_metric_field: str,
                  evaluation_metric_is_categorical: bool,
                  exclude_non_clustered: bool,
-                 include_r_test_results: bool) -> None:
+                 include_r_test_results: bool,
+                 parallelize_computation: bool) -> None:
 
         self.dataset_name: str = dataset_name
         self.interactions: pd.DataFrame = interactions
@@ -25,8 +26,8 @@ class ClusterEvalMetricOmnibusTest():
         self.evaluation_metric_field_is_categorical: bool = evaluation_metric_is_categorical
         self.exclude_non_clustered: bool = exclude_non_clustered
         self.include_r_test_results: bool = include_r_test_results
-        self._measure_association_fail_dict_per_group: DefaultDict[int, DefaultDict[str, int]] = defaultdict(lambda: defaultdict(int))
-        self._measure_of_association_results_per_group: dict[int, list[MeasureAssociationContingencyResults | MeasureAssociationAOVResults]] = {}
+        self.parallelize_computation = parallelize_computation
+        self._omnibus_tests_results: List[OmnibusTestResults] = []
 
         # initialization of p-value fields list
         self._p_val_field_name_list = [OMNIBUS_TESTS_PVAL_FIELD_NAME_STR,
@@ -67,35 +68,37 @@ class ClusterEvalMetricOmnibusTest():
 
     def return_measure_association_conf_int_bootstrap_failures(self) -> pd.DataFrame:
 
-        _ = check_if_not_empty(self.omnibus_test_result_df,
+        _ = check_if_not_empty(self._omnibus_tests_results,
                                OMNIBUS_TESTS_ERROR_NO_TEST_RESULTS_NAME_STR)
 
         moa_fail_dict_list = []
-        for group, moa_dict in self._measure_association_fail_dict_per_group.items():
-            moa_fail_dict = {GROUP_FIELD_NAME_STR: group}
-            for moa, fail_count in moa_dict.items():
+        for res in self._omnibus_tests_results:
+            moa_fail_dict = {GROUP_FIELD_NAME_STR: res.group}
+            for fail_dict in res.measure_of_association_fail_dict:
+                for moa, fail_count in fail_dict.items():
 
-                fail_count_pct = (fail_count / OMNIBUS_TESTS_BOOTSTRAPPING_EFFECT_SIZE_N_RESAMPLES * 100)
+                    fail_count_pct = (fail_count / OMNIBUS_TESTS_BOOTSTRAPPING_EFFECT_SIZE_N_RESAMPLES * 100)
 
-                moa_fail_count_field_name = moa + OMNIBUS_TESTS_MEASURE_ASSOCIATION_BOOTSTRAP_CONF_INT_FAIL_COUNT_FIELD_NAME_STR
-                moa_fail_pct_field_name = moa + OMNIBUS_TESTS_MEASURE_ASSOCIATION_BOOTSTRAP_CONF_INT_FAIL_PCT_FIELD_NAME_STR
+                    moa_fail_count_field_name = moa + OMNIBUS_TESTS_MEASURE_ASSOCIATION_BOOTSTRAP_CONF_INT_FAIL_COUNT_FIELD_NAME_STR
+                    moa_fail_pct_field_name = moa + OMNIBUS_TESTS_MEASURE_ASSOCIATION_BOOTSTRAP_CONF_INT_FAIL_PCT_FIELD_NAME_STR
 
-                moa_fail_dict[moa_fail_count_field_name] = fail_count
-                moa_fail_dict[moa_fail_pct_field_name] = fail_count_pct
-
+                    moa_fail_dict[moa_fail_count_field_name] = fail_count
+                    moa_fail_dict[moa_fail_pct_field_name] = fail_count_pct
             moa_fail_dict_list.append(moa_fail_dict)
 
         measure_association_conf_int_fail_count = pd.DataFrame(moa_fail_dict_list)
-        measure_association_conf_int_fail_count
+        measure_association_conf_int_fail_count = measure_association_conf_int_fail_count.sort_values(by=GROUP_FIELD_NAME_STR, ascending=True)
 
         return measure_association_conf_int_fail_count 
     
-    def return_measure_association_results_per_group_dict(self) -> dict:
+    def return_measure_association_results_per_group_dict(self) -> dict[int, list[MeasureAssociationContingencyResults] | list[MeasureAssociationAOVResults]]:
 
-        _ = check_if_not_empty(self.omnibus_test_result_df,
+        _ = check_if_not_empty(self._omnibus_tests_results,
                                OMNIBUS_TESTS_ERROR_NO_TEST_RESULTS_NAME_STR)
 
-        return self._measure_of_association_results_per_group
+        measure_of_association_results_per_group = {res.group: res.measure_of_association_results for res in self._omnibus_tests_results}
+
+        return measure_of_association_results_per_group
 
     def plot_cluster_eval_metric_per_group_plot(self) -> None:
 
@@ -293,72 +296,87 @@ class ClusterEvalMetricOmnibusTest():
 
     def _return_omnibus_test_result_categorical_var(self) -> pd.DataFrame:
 
-        omnibus_test_results = self._return_omnibus_test_result_chi_squared_independence()
+        omnibus_test_results = self._return_omnibus_test_result(self._return_omnibus_test_result_chi_squared_independence)
 
         return omnibus_test_results
 
     def _return_omnibus_test_result_continuous_var(self) -> pd.DataFrame:
 
-        omnibus_test_results = self._return_omnibus_test_result_aov()
+        omnibus_test_results = self._return_omnibus_test_result(self._return_omnibus_test_result_aov)
 
         return omnibus_test_results
+    
+    def _return_omnibus_test_result(self,
+                                    omnibus_test_function: Callable) -> pd.DataFrame:
 
-    def _return_omnibus_test_result_chi_squared_independence(self) -> pd.DataFrame:
+        if self.parallelize_computation:
+            self._omnibus_tests_results = (Parallel(n_jobs=NUMBER_OF_CORES)
+                                           (delayed(omnibus_test_function)
+                                            (group,
+                                             df) for group, df in self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR)))
+        else:
+            self._omnibus_tests_results = [omnibus_test_function(group, df) for group, df in self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR)]
 
-        test_results_per_group_df = pd.DataFrame()
-
-        test_results_df_list = []
-        for group, df in self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR):
-
-            clusters = df[CLUSTER_FIELD_NAME_STR].values
-            eval_metrics = df[self.evaluation_metric_field].values
-
-            # get chi squared test results which includes the chi squared statistic
-            chi_squared_test_results = self._return_chi_squared_test_results(clusters,
-                                                                             eval_metrics,
-                                                                             False,
-                                                                             None)
-
-            expected_freq_stats = self._return_expected_frequencies_stats(chi_squared_test_results.expected_frequency)
-
-            # perform a chi squared permutation test
-            p_value_perm = self._return_chi_squared_perm_p_value(clusters,
-                                                                 eval_metrics,
-                                                                 chi_squared_test_results)
-
-            # perform the chi squared test in R as sanity check
-            if self.include_r_test_results:
-                p_value_r = self._return_chi_squared_p_value_r(clusters,
-                                                               eval_metrics,
-                                                               False)
-                p_value_r_perm = self._return_chi_squared_p_value_r(clusters,
-                                                                    eval_metrics,
-                                                                    True)
-            else:
-                p_value_r, p_value_r_perm = None, None
-
-            # calculate measure of association results
-            measure_of_association_contingency_results_list = self._return_measure_association_contingency_results(clusters,
-                                                                                                                   eval_metrics,
-                                                                                                                   chi_squared_test_results.observed_frequency,
-                                                                                                                   group)
-            self._measure_of_association_results_per_group[group] = measure_of_association_contingency_results_list
-
-            test_results_df = self._return_test_result_df_chi_squared_independence(self.dataset_name,
-                                                                                   group,
-                                                                                   chi_squared_test_results,
-                                                                                   expected_freq_stats,
-                                                                                   p_value_perm,
-                                                                                   p_value_r,
-                                                                                   p_value_r_perm,
-                                                                                   measure_of_association_contingency_results_list)
-
-            test_results_df_list.append(test_results_df)
+        test_results_df_list = [res.test_result_df for res in self._omnibus_tests_results]
 
         test_results_per_group_df = pd.concat(test_results_df_list, 
                                               ignore_index=True)
+        
+        test_results_per_group_df = test_results_per_group_df.sort_values(by=GROUP_FIELD_NAME_STR, ascending=True)
 
         return test_results_per_group_df
+
+    def _return_omnibus_test_result_chi_squared_independence(self,
+                                                             group: int,
+                                                             sequence_cluster_eval_metric_df: pd.DataFrame) -> OmnibusTestResults:
+
+        clusters = sequence_cluster_eval_metric_df[CLUSTER_FIELD_NAME_STR].values
+        eval_metrics = sequence_cluster_eval_metric_df[self.evaluation_metric_field].values
+
+        # get chi squared test results which includes the chi squared statistic
+        chi_squared_test_results = self._return_chi_squared_test_results(clusters,
+                                                                            eval_metrics,
+                                                                            False,
+                                                                            None)
+
+        expected_freq_stats = self._return_expected_frequencies_stats(chi_squared_test_results.expected_frequency)
+
+        # perform a chi squared permutation test
+        p_value_perm = self._return_chi_squared_perm_p_value(clusters,
+                                                             eval_metrics,
+                                                             chi_squared_test_results)
+
+        # perform the chi squared test in R as sanity check
+        if self.include_r_test_results:
+            p_value_r = self._return_chi_squared_p_value_r(clusters,
+                                                           eval_metrics,
+                                                           False)
+            p_value_r_perm = self._return_chi_squared_p_value_r(clusters,
+                                                                eval_metrics,
+                                                                True)
+        else:
+            p_value_r, p_value_r_perm = None, None
+
+        # calculate measure of association results
+        measure_of_association_contingency_results_list, measure_of_association_contingency_fail_dict_list = self._return_measure_association_contingency_results(clusters,
+                                                                                                                                                                  eval_metrics,
+                                                                                                                                                                  chi_squared_test_results.observed_frequency)
+
+        test_results_df = self._return_test_result_df_chi_squared_independence(self.dataset_name,
+                                                                               group,
+                                                                               chi_squared_test_results,
+                                                                               expected_freq_stats,
+                                                                               p_value_perm,
+                                                                               p_value_r,
+                                                                               p_value_r_perm,
+                                                                               measure_of_association_contingency_results_list)
+
+
+
+        return OmnibusTestResults(group,
+                                  test_results_df,
+                                  measure_of_association_contingency_results_list,
+                                  measure_of_association_contingency_fail_dict_list)
     
     def _return_chi_squared_test_results(self,
                                          clusters: np.ndarray,
@@ -429,6 +447,9 @@ class ClusterEvalMetricOmnibusTest():
                                       clusters: np.ndarray,
                                       eval_metrics: np.ndarray,
                                       do_permutation_test: bool) -> float:
+
+        rpy2.rinterface_lib.callbacks.consolewrite_print = lambda x: None 
+        rpy2.rinterface_lib.callbacks.consolewrite_warnerror = lambda x: None
 
         with localconverter(ro.default_converter + numpy2ri.converter):
             clusters_r = ro.conversion.py2rpy(clusters)
@@ -515,9 +536,10 @@ class ClusterEvalMetricOmnibusTest():
     def _return_measure_association_contingency_conf_interval_bootstrap(self,
                                                                         clusters: np.ndarray,
                                                                         eval_metrics: np.ndarray,
-                                                                        group: int,
-                                                                        method: ContingencyMeasureAssociationEnum) -> Any:
+                                                                        method: ContingencyMeasureAssociationEnum) -> tuple[Any, DefaultDict[str, int]]:
 
+        measure_association_fail_dict = defaultdict(int)
+        measure_association_fail_dict[method.value]
         def return_measure_association_bootstrap(x: np.ndarray, 
                                                  y: np.ndarray) -> float:
             crosstab_res = crosstab(x, y)
@@ -536,10 +558,9 @@ class ClusterEvalMetricOmnibusTest():
 
             #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
-                self._measure_association_fail_dict_per_group[group][method.value] += 1
+                measure_association_fail_dict[method.value] += 1
                 return np.random.uniform(low=0.0, high=1.0, size=None)
             else:
-                self._measure_association_fail_dict_per_group[group][method.value]
                 return measure_of_association
 
         bootstrap_result = bootstrap((clusters, eval_metrics),
@@ -552,7 +573,7 @@ class ClusterEvalMetricOmnibusTest():
                                       method=OMNIBUS_TESTS_BOOTSTRAPPING_METHOD,
                                       random_state=RNG_SEED)
 
-        return bootstrap_result
+        return bootstrap_result, measure_association_fail_dict
 
     def _return_measure_association_contingency_strength_value(self,
                                                                measure_of_association_value: float,
@@ -636,10 +657,10 @@ class ClusterEvalMetricOmnibusTest():
     def _return_measure_association_contingency_results(self,
                                                         clusters: np.ndarray,
                                                         eval_metrics: np.ndarray,
-                                                        observed_freq: np.ndarray,
-                                                        group: int) -> list[MeasureAssociationContingencyResults]:
+                                                        observed_freq: np.ndarray) -> tuple[list[MeasureAssociationContingencyResults], list[DefaultDict[str, int]]]:
 
         measure_of_association_contingency_results_list = []
+        measure_of_association_contingency_fail_dict_list = []
         for moa_method, moa_strength_guide_method_list in OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_DICT.items():
 
             measure_of_association_type = moa_method.value
@@ -651,10 +672,9 @@ class ClusterEvalMetricOmnibusTest():
                                                                                                      moa_strength_guide_method)
                                             for moa_strength_guide_method in moa_strength_guide_method_list]
 
-            bootstrap_result = self._return_measure_association_contingency_conf_interval_bootstrap(clusters,
-                                                                                                    eval_metrics,
-                                                                                                    group,
-                                                                                                    moa_method)
+            bootstrap_result, measure_association_fail_dict = self._return_measure_association_contingency_conf_interval_bootstrap(clusters,
+                                                                                                                                   eval_metrics,
+                                                                                                                                   moa_method)
 
             measure_of_association_contingency_results = MeasureAssociationContingencyResults(measure_of_association_type,
                                                                                               measure_of_association_value,
@@ -664,9 +684,11 @@ class ClusterEvalMetricOmnibusTest():
                                                                                               bootstrap_result.standard_error,
                                                                                               moa_strength_guide_methods,
                                                                                               moa_strength_guide_values)
-            measure_of_association_contingency_results_list.append(measure_of_association_contingency_results)
 
-        return measure_of_association_contingency_results_list
+            measure_of_association_contingency_results_list.append(measure_of_association_contingency_results)
+            measure_of_association_contingency_fail_dict_list.append(measure_association_fail_dict)
+
+        return measure_of_association_contingency_results_list, measure_of_association_contingency_fail_dict_list
 
     def _return_test_result_df_chi_squared_independence(self,
                                                         dataset_name: str,
@@ -703,45 +725,36 @@ class ClusterEvalMetricOmnibusTest():
                                        index=(0,))
         return test_results_df
 
-    def _return_omnibus_test_result_aov(self) -> pd.DataFrame:
+    def _return_omnibus_test_result_aov(self,
+                                        group: int,
+                                        sequence_cluster_eval_metric_df: pd.DataFrame) -> OmnibusTestResults:
 
-        test_results_per_group_df = pd.DataFrame()
+        # get anova test results
+        anova_test_results = self._return_aov_test_results(sequence_cluster_eval_metric_df)
 
-        test_results_df_list = []
-        for group, df in self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR):
+        # perform an anova permutation test
+        p_value_perm = self._return_aov_perm_p_value(sequence_cluster_eval_metric_df)
 
+        # perform the anova test in R as sanity check
+        if self.include_r_test_results:
+            p_value_r, p_value_r_perm = self._return_aov_p_value_r(sequence_cluster_eval_metric_df)
+        else:
+            p_value_r, p_value_r_perm = None, None
 
-            # get anova test results
-            anova_test_results = self._return_aov_test_results(df)
+        # calculate measure of association results
+        measure_of_association_aov_results_list, measure_of_association_aov_fail_dict_list = self._return_measure_association_aov_results(sequence_cluster_eval_metric_df)
 
-            # perform an anova permutation test
-            p_value_perm = self._return_aov_perm_p_value(df)
-
-            # perform the anova test in R as sanity check
-            if self.include_r_test_results:
-                p_value_r, p_value_r_perm = self._return_aov_p_value_r(df)
-            else:
-                p_value_r, p_value_r_perm = None, None
-
-            # calculate measure of association results
-            measure_of_association_aov_results_list = self._return_measure_association_aov_results(df,
-                                                                                                   group)
-            self._measure_of_association_results_per_group[group] = measure_of_association_aov_results_list
-
-            test_results_df = self._return_test_result_df_aov(self.dataset_name,
-                                                              group,
-                                                              anova_test_results,
-                                                              p_value_perm,
-                                                              p_value_r,
-                                                              p_value_r_perm,
-                                                              measure_of_association_aov_results_list)
-
-            test_results_df_list.append(test_results_df)
-
-        test_results_per_group_df = pd.concat(test_results_df_list, 
-                                              ignore_index=True)
-
-        return test_results_per_group_df
+        test_results_df = self._return_test_result_df_aov(self.dataset_name,
+                                                          group,
+                                                          anova_test_results,
+                                                          p_value_perm,
+                                                          p_value_r,
+                                                          p_value_r_perm,
+                                                          measure_of_association_aov_results_list)
+        return OmnibusTestResults(group,
+                                  test_results_df,
+                                  measure_of_association_aov_results_list,
+                                  measure_of_association_aov_fail_dict_list)
 
     def _return_aov_test_results(self,
                                  sequence_cluster_df: pd.DataFrame) -> TestResultsAOV:
@@ -802,6 +815,9 @@ class ClusterEvalMetricOmnibusTest():
 
     def _return_aov_p_value_r(self,
                               sequence_cluster_df: pd.DataFrame) -> tuple[float, float]:
+
+        rpy2.rinterface_lib.callbacks.consolewrite_print = lambda x: None 
+        rpy2.rinterface_lib.callbacks.consolewrite_warnerror = lambda x: None
 
         with localconverter(ro.default_converter + pandas2ri.converter):
             sequence_cluster_df_r = ro.conversion.py2rpy(sequence_cluster_df)
@@ -880,9 +896,10 @@ class ClusterEvalMetricOmnibusTest():
 
     def _return_measure_association_aov_conf_interval_bootstrap(self,
                                                                 sequence_cluster_df: pd.DataFrame,
-                                                                group: int,
-                                                                method: AOVMeasueAssociationEnum) -> Any:
+                                                                method: AOVMeasueAssociationEnum) -> tuple[Any, DefaultDict[str, int]]:
 
+        measure_association_fail_dict = defaultdict(int)
+        measure_association_fail_dict[method.value]
         def return_measure_association_bootstrap(x: np.ndarray, 
                                                  y: np.ndarray) -> float:
 
@@ -894,10 +911,9 @@ class ClusterEvalMetricOmnibusTest():
 
             #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
-                self._measure_association_fail_dict_per_group[group][method.value] += 1
+                measure_association_fail_dict[method.value] += 1
                 return np.random.uniform(low=0.0, high=1.0, size=None)
             else:
-                self._measure_association_fail_dict_per_group[group][method.value]
                 return measure_of_association
 
         clusters = sequence_cluster_df[CLUSTER_FIELD_NAME_STR].values
@@ -913,7 +929,7 @@ class ClusterEvalMetricOmnibusTest():
                                       method=OMNIBUS_TESTS_BOOTSTRAPPING_METHOD,
                                       random_state=RNG_SEED)
 
-        return bootstrap_result
+        return bootstrap_result, measure_association_fail_dict
 
     def _return_measure_association_aov_strength_value(self,
                                                        measure_of_association_value: float,
@@ -959,10 +975,10 @@ class ClusterEvalMetricOmnibusTest():
         return moa_strength
 
     def _return_measure_association_aov_results(self,
-                                                sequence_cluster_df: pd.DataFrame,
-                                                group: int) -> list[MeasureAssociationAOVResults]:
+                                                sequence_cluster_df: pd.DataFrame) -> tuple[list[MeasureAssociationAOVResults], list[DefaultDict[str, int]]]:
 
         measure_of_association_aov_results_list = []
+        measure_of_association_aov_fail_dict_list = []
         for moa_method, moa_strength_guide_method_list in OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_DICT.items():
 
             measure_of_association_type = moa_method.value
@@ -974,9 +990,8 @@ class ClusterEvalMetricOmnibusTest():
                                                                                              moa_strength_guide_method)
                                             for moa_strength_guide_method in moa_strength_guide_method_list]
 
-            bootstrap_result = self._return_measure_association_aov_conf_interval_bootstrap(sequence_cluster_df,
-                                                                                            group,
-                                                                                            moa_method)
+            bootstrap_result, measure_association_fail_dict = self._return_measure_association_aov_conf_interval_bootstrap(sequence_cluster_df,
+                                                                                                                           moa_method)
 
             measure_of_association_aov_results = MeasureAssociationAOVResults(measure_of_association_type,
                                                                               measure_of_association_value,
@@ -988,8 +1003,9 @@ class ClusterEvalMetricOmnibusTest():
                                                                               moa_strength_guide_values)
 
             measure_of_association_aov_results_list.append(measure_of_association_aov_results)
+            measure_of_association_aov_fail_dict_list.append(measure_association_fail_dict)
 
-        return measure_of_association_aov_results_list
+        return measure_of_association_aov_results_list, measure_of_association_aov_fail_dict_list
 
     def _return_test_result_df_aov(self,
                                    dataset_name: str,
