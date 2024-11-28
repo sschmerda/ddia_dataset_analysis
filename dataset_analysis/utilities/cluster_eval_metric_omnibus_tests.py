@@ -559,7 +559,7 @@ class ClusterEvalMetricOmnibusTest():
             #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
                 measure_association_fail_dict[method.value] += 1
-                return np.random.uniform(low=0.0, high=1.0, size=None)
+                return 0
             else:
                 return measure_of_association
 
@@ -912,7 +912,7 @@ class ClusterEvalMetricOmnibusTest():
             #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
                 measure_association_fail_dict[method.value] += 1
-                return np.random.uniform(low=0.0, high=1.0, size=None)
+                return 0
             else:
                 return measure_of_association
 
