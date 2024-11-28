@@ -58,6 +58,14 @@ class ClusterEvalMetricOmnibusTest():
 
         # round results
         self.omnibus_test_result_df = self.omnibus_test_result_df.round(RESULTS_ROUND_N_DIGITS)
+
+        # add evaluation metric information
+        self.omnibus_test_result_df.insert(2,
+                                           OMNIBUS_TESTS_EVAlUATION_FIELD_TYPE_FIELD_NAME_STR,
+                                           self.evaluation_metric_field)
+        self.omnibus_test_result_df.insert(3,
+                                           OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR,
+                                           self.evaluation_metric_field_is_categorical)
     
     def return_omnibus_test_result(self) -> pd.DataFrame:
 
@@ -109,6 +117,13 @@ class ClusterEvalMetricOmnibusTest():
             self._plot_cluster_eval_metric_mosaic_plot()
         else:
             self._plot_cluster_eval_metric_boxplot()
+    
+    def add_omnibus_test_result_to_results_tables(self,
+                                                  result_tables: Type[Any]) -> None:
+
+        # add data to results_table
+        result_tables.omnibus_test_result_df = self.return_omnibus_test_result().copy()
+        result_tables.measure_association_conf_int_bootstrap_failures_df = self.return_measure_association_conf_int_bootstrap_failures().copy()
     
     def _plot_cluster_eval_metric_mosaic_plot(self) -> None:
                                              
