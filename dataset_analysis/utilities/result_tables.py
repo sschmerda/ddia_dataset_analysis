@@ -57,7 +57,7 @@ class ResultTables():
         A dataframe containing statistics for unique sequences per group 
     learning_activity_sequence_stats_per_group : pd.DataFrame
         A dataframe containing statistics for all sequences per group 
-    cluster_results_per_group_df : pd.DataFrame
+    best_cluster_results_per_group_df : pd.DataFrame
         A dataframe containing parameters and cluster statistics for the optimal cluster results per group.
     sequence_cluster_per_group_df : pd.DataFrame
         A dataframe containing sequence-cluster relation information per group 
