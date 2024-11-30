@@ -453,7 +453,7 @@ class SequenceDistanceClustersPerGroup():
         # groups
         self.groups = self.sequence_distance_analytics.unique_learning_activity_sequence_stats_per_group[GROUP_FIELD_NAME_STR].unique()
         #TODO: delete
-        # self.groups = [12, 13, 15]
+        # self.groups = [12, 13, 15, 22, 31, 36, 37]
 
         # cluster results field list
         self._cluster_results_list = [CLUSTERING_CLUSTER_LABELS_NAME_STR, 
@@ -518,13 +518,13 @@ class SequenceDistanceClustersPerGroup():
 
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=UserWarning)
-            cluster_results_list = [self._cluster_sequences(group, self.normalize_distance, self.use_unique_sequence_distances) for group in self.groups]
+            cluster_results_list = [self._cluster_sequences(group, self.normalize_distance, self.use_unique_sequence_distances) for group in tqdm(self.groups)]
             
             self.cluster_results_per_group = pd.concat(cluster_results_list)
 
-    def return_cluster_results_per_group_df(self,
-                                            cluster_validation_metric: str,
-                                            cluster_validation_lower_is_better: bool) -> pd.DataFrame:
+    def return_best_cluster_results_per_group_df(self,
+                                                 cluster_validation_metric: str,
+                                                 cluster_validation_lower_is_better: bool) -> pd.DataFrame:
 
         _ = check_value_not_none(self.cluster_results_per_group,
                                  CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
@@ -574,10 +574,10 @@ class SequenceDistanceClustersPerGroup():
 
         return learning_activity_sequence_stats_per_group
 
-    def add_cluster_result_to_results_table(self,
-                                            result_tables: Type[Any],
-                                            cluster_validation_metric: str,
-                                            cluster_validation_lower_is_better: bool) -> None:
+    def add_cluster_result_to_results_tables(self,
+                                             result_tables: Type[Any],
+                                             cluster_validation_metric: str,
+                                             cluster_validation_lower_is_better: bool) -> None:
 
         _ = check_value_not_none(self.cluster_results_per_group,
                                  CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
@@ -781,7 +781,7 @@ class SequenceDistanceClustersPerGroup():
             print(DASH_STRING)
             print(f'{GROUP_FIELD_NAME_STR}: {group}')
             fig = go.Figure(data=go.Parcoords(line = line_dict,
-                                            dimensions = list(dimensions_data_list)))
+                                              dimensions = list(dimensions_data_list)))
             
             fig.update_layout(width=PLOTLY_PARALLEL_COORDINATES_FIGURE_WIDTH,
                               height=PLOTLY_PARALLEL_COORDINATES_FIGURE_HEIGHT)
@@ -791,7 +791,8 @@ class SequenceDistanceClustersPerGroup():
     def plot_clusters_per_group_2d(self,
                                    cluster_validation_metric: str,
                                    cluster_validation_lower_is_better: bool,
-                                   reducer: Callable) -> None:
+                                   reducer: Callable,
+                                   use_best_dimension_reduction_params: bool) -> None:
 
         _ = check_value_not_none(self.cluster_results_per_group,
                                  CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
@@ -802,7 +803,10 @@ class SequenceDistanceClustersPerGroup():
         cluster_results_dict = self._return_cluster_results_per_group_dict(cluster_validation_metric,
                                                                            cluster_validation_lower_is_better)
 
-        embeddings_2d_dfs = [self._calc_cluster_per_group_plotting_data(group, cluster_results_dict[group], reducer) for group in self.groups]
+        embeddings_2d_dfs = [self._calc_cluster_per_group_plotting_data(group, 
+                                                                        cluster_results_dict[group], 
+                                                                        reducer, 
+                                                                        use_best_dimension_reduction_params) for group in self.groups]
 
         embeddings_2d_per_group_dfs = pd.concat(embeddings_2d_dfs)
         max_n_clusters = np.max([result.number_clusters for result in cluster_results_dict.values()])
@@ -814,7 +818,7 @@ class SequenceDistanceClustersPerGroup():
         print(STAR_STRING)
         print(' ')
         print(DASH_STRING)
-        print(f'    - {CLUSTERING_RESULT_DIMENSIONALITY_REDUCER_TITLE_NAME_STR}{reducer.__class__.__name__}')
+        print(f'    - {CLUSTERING_RESULT_DIMENSIONALITY_REDUCER_TITLE_NAME_STR}{reducer.__name__}')
         print(f'    - {CLUSTERING_RESULT_UNCLUSTERED_COLOR_TITLE_NAME_STR}')
         print(f'    - {CLUSTERING_PARAMETER_TUNING_SEQ_DIST_IS_NORMALIZED_TITLE_NAME_STR}{self.normalize_distance}')
         print(f'    - {CLUSTERING_PARAMETER_TUNING_SEQ_DIST_ENTITIES_TITLE_NAME_STR}{self.seq_dist_entity}')
@@ -843,14 +847,15 @@ class SequenceDistanceClustersPerGroup():
                             palette=return_color_palette(max_n_clusters),
                             alpha=SEABORN_POINT_ALPHA_FACET_CLUSTER_2D,
                             s=SEABORN_POINT_SIZE_FACET_CLUSTER_2D)
+            g.add_legend(title=CLUSTER_FIELD_NAME_STR,
+                         frameon=True)
+            sns.move_legend(g, "upper left", bbox_to_anchor=(1.01, 0.75))
             g.set(xlabel=CLUSTERING_2D_PLOT_X_AXIS_LABEL_NAME_STR, 
                   ylabel=CLUSTERING_2D_PLOT_Y_AXIS_LABEL_NAME_STR)
             for ax in g.axes.flatten():
                 ax.tick_params(labelbottom=True)
             g.figure.subplots_adjust(top=0.95)
             g.figure.tight_layout(rect=[0, 0.03, 1, 0.98]);
-            plot_legend(embeddings_2d_per_group_dfs[CLUSTER_FIELD_NAME_STR],
-                        CLUSTER_FIELD_NAME_STR)
             plt.show(g)
     
     def plot_number_of_sequences_per_cluster_per_group(self,
@@ -876,7 +881,7 @@ class SequenceDistanceClustersPerGroup():
                                             CLUSTERING_NUMBER_OF_SEQUENCES_PER_CLUSTER_VAL_FIELD_NAME_STR)
 
         n_cols = set_facet_grid_column_number(n_seq_per_cluster_df_long[GROUP_FIELD_NAME_STR],
-                                              SEABORN_SEQUENCE_FILTER_FACET_GRID_2_COL_N_COLUMNS)
+                                              SEABORN_SEQUENCE_FILTER_FACET_GRID_N_COLUMNS)
 
         print(STAR_STRING)
         print(f'{CLUSTERING_RESULT_N_SEQ_PER_CLUSTER_TITLE_NAME_STR}')
@@ -900,6 +905,9 @@ class SequenceDistanceClustersPerGroup():
                         aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
                         sharex=True,
                         sharey=True)
+        plt.tight_layout()
+        g.add_legend(title=CLUSTERING_NUMBER_OF_SEQUENCES_PER_CLUSTER_VAR_FIELD_NAME_STR,
+                    frameon=True)
         plt.show(g)
 
     def plot_cluster_stats_per_group(self,
@@ -1239,13 +1247,25 @@ class SequenceDistanceClustersPerGroup():
     def _calc_cluster_per_group_plotting_data(self,
                                               group: int,
                                               cluster_results: ClusterResults,
-                                              reducer: Callable) -> pd.DataFrame:
+                                              reducer: Callable,
+                                              use_best_dimension_reduction_params: bool) -> pd.DataFrame:
 
         distance_matrix = self._return_distance_matrix(group,
-                                                       False,
-                                                       False)
+                                                       self.normalize_distance,
+                                                       self.use_unique_sequence_distances)
+        if use_best_dimension_reduction_params:
+            params_dict = cluster_results.best_dim_reduction_parameters
+            _ = params_dict.pop(CLUSTERING_N_COMPONENTS_NAME_STR)
+        else:
+            params_dict = {}
 
-        embedding_2D = reducer.fit_transform(distance_matrix.values)
+        #TODO: delete
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', UserWarning)
+            dim_reducer = reducer(n_components=2,
+                                  **params_dict)
+
+            embedding_2D = dim_reducer.fit_transform(distance_matrix.values)
 
         clustered_labels = cluster_results.cluster_labels[cluster_results.clustered]
 
@@ -1310,8 +1330,11 @@ class SequenceDistanceClustersPerGroup():
                                                                cluster_validation_metric,
                                                                cluster_validation_lower_is_better)
             cluster_result_series = data.iloc[0, :][self._cluster_results_list]
+            cluster_results = list(cluster_result_series.values)
+            best_dim_reduction_parameters = data.iloc[0, :][self.dim_reduct_para_fields].to_dict()
+            cluster_results.append(best_dim_reduction_parameters)
 
-            cluster_results_dict[group] = ClusterResults(*cluster_result_series.values)
+            cluster_results_dict[group] = ClusterResults(*cluster_results)
         
         return cluster_results_dict
     
