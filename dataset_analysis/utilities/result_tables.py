@@ -57,6 +57,15 @@ class ResultTables():
         A dataframe containing statistics for unique sequences per group 
     learning_activity_sequence_stats_per_group : pd.DataFrame
         A dataframe containing statistics for all sequences per group 
+    cluster_results_per_group_df : pd.DataFrame
+        A dataframe containing parameters and cluster statistics for the optimal cluster results per group.
+    sequence_cluster_per_group_df : pd.DataFrame
+        A dataframe containing sequence-cluster relation information per group 
+    omnibus_test_result_df : pd.DataFrame
+        A dataframe containing the results of the omnibus tests for differences in the evaluation metric between clusters 
+    measure_association_conf_int_bootstrap_failures_df : pd.DataFrame
+        A dataframe containing information about the number of failures in the calculation of the bootstrap confidence intervals
+        of the measures of association
     object_size_df: pd.DataFrame
         A dataframe containing informations about the in-memory sizes of objects relevant for preprocessing and the analysis
     """    
@@ -105,8 +114,10 @@ class ResultTables():
                  seq_stats_sequence_count_per_group: pd.DataFrame,
                  unique_learning_activity_sequence_stats_per_group: pd.DataFrame,
                  learning_activity_sequence_stats_per_group: pd.DataFrame,
-                 cluster_results_per_group_df: pd.DataFrame,
+                 best_cluster_results_per_group_df: pd.DataFrame,
                  sequence_cluster_per_group_df: pd.DataFrame,
+                 omnibus_test_result_df: pd.DataFrame,
+                 measure_association_conf_int_bootstrap_failures_df: pd.DataFrame,
                  object_size_df: pd.DataFrame) -> None: 
 
         # data to be calculated
@@ -131,8 +142,10 @@ class ResultTables():
         self.seq_stats_sequence_count_per_group = seq_stats_sequence_count_per_group
         self.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group
         self.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group
-        self.cluster_results_per_group_df = cluster_results_per_group_df
+        self.best_cluster_results_per_group_df = best_cluster_results_per_group_df
         self.sequence_cluster_per_group_df = sequence_cluster_per_group_df
+        self.omnibus_test_result_df = omnibus_test_result_df
+        self.measure_association_conf_int_bootstrap_failures_df = measure_association_conf_int_bootstrap_failures_df
         self.object_size_df = object_size_df
 
     @property
@@ -279,18 +292,18 @@ class ResultTables():
             self._learning_activity_sequence_stats_per_group = None 
 
     @property
-    def cluster_results_per_group_df(self):
-        return self._cluster_results_per_group_df
+    def best_cluster_results_per_group_df(self):
+        return self._best_cluster_results_per_group_df
     
-    @cluster_results_per_group_df.setter
-    def cluster_results_per_group_df(self, 
-                                          cluster_results_per_group_df: pd.DataFrame):
+    @best_cluster_results_per_group_df.setter
+    def best_cluster_results_per_group_df(self, 
+                                          best_cluster_results_per_group_df: pd.DataFrame):
 
-        if isinstance(cluster_results_per_group_df, pd.DataFrame):
-            self._cluster_results_per_group_df = cluster_results_per_group_df.copy()
+        if isinstance(best_cluster_results_per_group_df, pd.DataFrame):
+            self._best_cluster_results_per_group_df = best_cluster_results_per_group_df.copy()
 
         else:
-            self._cluster_results_per_group_df = None 
+            self._best_cluster_results_per_group_df = None 
 
     @property
     def sequence_cluster_per_group_df(self):
@@ -298,13 +311,41 @@ class ResultTables():
     
     @sequence_cluster_per_group_df.setter
     def sequence_cluster_per_group_df(self, 
-                                           sequence_cluster_per_group_df: pd.DataFrame):
+                                      sequence_cluster_per_group_df: pd.DataFrame):
 
         if isinstance(sequence_cluster_per_group_df, pd.DataFrame):
             self._sequence_cluster_per_group_df = sequence_cluster_per_group_df.copy()
 
         else:
             self._sequence_cluster_per_group_df = None 
+
+    @property
+    def omnibus_test_result_df(self):
+        return self._omnibus_test_result_df
+    
+    @omnibus_test_result_df.setter
+    def omnibus_test_result_df(self, 
+                               omnibus_test_result_df: pd.DataFrame):
+
+        if isinstance(omnibus_test_result_df, pd.DataFrame):
+            self._omnibus_test_result_df = omnibus_test_result_df.copy()
+
+        else:
+            self._omnibus_test_result_df = None 
+
+    @property
+    def measure_association_conf_int_bootstrap_failures_df(self):
+        return self._measure_association_conf_int_bootstrap_failures_df
+    
+    @measure_association_conf_int_bootstrap_failures_df.setter
+    def measure_association_conf_int_bootstrap_failures_df(self, 
+                                                           measure_association_conf_int_bootstrap_failures_df: pd.DataFrame):
+
+        if isinstance(measure_association_conf_int_bootstrap_failures_df, pd.DataFrame):
+            self._measure_association_conf_int_bootstrap_failures_df = measure_association_conf_int_bootstrap_failures_df.copy()
+
+        else:
+            self._measure_association_conf_int_bootstrap_failures_df = None 
 
     @property
     def object_size_df(self):
