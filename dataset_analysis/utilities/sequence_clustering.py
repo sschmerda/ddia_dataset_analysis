@@ -536,6 +536,13 @@ class SequenceDistanceClustersPerGroup():
                                                                                  cluster_validation_lower_is_better)
         return cluster_results_per_group_df
 
+    def return_cluster_results_per_group_df(self) -> pd.DataFrame:
+
+        _ = check_value_not_none(self.cluster_results_per_group,
+                                 CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
+
+        return self.cluster_results_per_group
+
     def return_sequence_cluster_per_group_df(self,
                                              cluster_validation_metric: str,
                                              cluster_validation_lower_is_better: bool) -> pd.DataFrame:
@@ -574,6 +581,36 @@ class SequenceDistanceClustersPerGroup():
 
         return learning_activity_sequence_stats_per_group
 
+    def print_number_sequences_per_cluster_per_group(self,
+                                                     cluster_validation_metric: str,
+                                                     cluster_validation_lower_is_better: bool) -> None:
+
+        _ = check_value_not_none(self.cluster_results_per_group,
+                                 CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
+
+        _ = check_value_in_iterable(cluster_validation_metric,
+                                    self.cluster_validation_algo_names)
+                                                     
+        sequence_cluster_per_group_df = self._return_sequence_cluster_per_group_df(cluster_validation_metric,
+                                                                                   cluster_validation_lower_is_better)
+
+        n_seq_per_cluster_df = self._return_n_sequences_per_cluster_per_group_df(sequence_cluster_per_group_df)
+
+        for seq_count_type in [CLUSTERING_NUMBER_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR, 
+                               CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_FIELD_NAME_STR]:
+            seq_per_cluster_count = n_seq_per_cluster_df.pivot(columns=CLUSTER_FIELD_NAME_STR, 
+                                                               index=GROUP_FIELD_NAME_STR, 
+                                                               values=seq_count_type).fillna(0).astype(int)
+            seq_per_cluster_count[CLUSTERING_TOTAL_NAME_STR] = seq_per_cluster_count.apply(lambda x: sum(x), axis=1)
+
+            print(STAR_STRING)
+            print(seq_count_type)
+            print(STAR_STRING)
+            print(DASH_STRING)
+            print(seq_per_cluster_count)
+            print(DASH_STRING)
+            print(' ')
+
     def add_cluster_result_to_results_tables(self,
                                              result_tables: Type[Any],
                                              cluster_validation_metric: str,
@@ -596,7 +633,7 @@ class SequenceDistanceClustersPerGroup():
         learning_activity_sequence_stats_per_group = self._add_cluster_id_to_sequence_stats_df(self.sequence_distance_analytics.learning_activity_sequence_stats_per_group,
                                                                                                sequence_cluster_per_group_df)
         # add data to results_table
-        result_tables.cluster_results_per_group_df = cluster_results_per_group_df.copy()
+        result_tables.best_cluster_results_per_group_df = cluster_results_per_group_df.copy()
         result_tables.sequence_cluster_per_group_df = sequence_cluster_per_group_df.copy()
         result_tables.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group.copy()
         result_tables.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group.copy()
@@ -624,6 +661,9 @@ class SequenceDistanceClustersPerGroup():
                                                                   cluster_param_2,
                                                                   cluster_validation_metric,
                                                                   cluster_validation_lower_is_better))
+
+        seq_count_per_cluster_per_group_dict = self._return_n_sequences_per_cluster_per_group_dict(cluster_validation_metric,
+                                                                                                   cluster_validation_lower_is_better)
 
         # Create a custom colormap
         colors = [SEABORN_HEATMAP_ANNOTATION_COLOR, 'white']
@@ -670,6 +710,8 @@ class SequenceDistanceClustersPerGroup():
 
                 algo_params = algo_params_dict[row_name]
                 cluster_results = cluster_validation_results_dict[row_name]
+                seq_count_per_cluster = seq_count_per_cluster_per_group_dict[row_name]
+
                 param_str = self._return_hyperparameter_tuning_string(row_name,
                                                                       self.normalize_distance,
                                                                       self.seq_dist_entity,
@@ -685,7 +727,7 @@ class SequenceDistanceClustersPerGroup():
                                                                       cluster_results.cluster_validation_metric_optimum_value,
                                                                       cluster_results.number_clusters,
                                                                       cluster_results.percentage_clustered,
-                                                                      cluster_results.seq_count_per_cluster)
+                                                                      seq_count_per_cluster)
                 # add str on left side of first column in facet grid
                 if column_index == 0:
                     ax.annotate(param_str, 
@@ -1123,24 +1165,12 @@ class SequenceDistanceClustersPerGroup():
         output_string += '\n\n'
         output_string += f'{CLUSTERING_PARAMETER_TUNING_VALIDATION_NUMBER_SEQUENCES_PER_CLUSTER_TITLE_NAME_STR}'
         output_string += '\n\n'
-        output_string += f'{seq_count_per_cluster.to_string(index=False)}'
+        output_string += f'{seq_count_per_cluster.to_string(index=True)}'
         output_string += '\n\n'
         output_string += STAR_STRING[:51]
 
         return output_string
     
-    def _calc_seq_count_per_cluster(self,
-                                    cluster_labels: np.ndarray) -> pd.DataFrame:
-
-        seq_count_per_clust = (pd.Series(cluster_labels)
-                                .value_counts()
-                                .reset_index(name=LEARNING_ACTIVITY_SEQUENCE_COUNT_NAME_STR)
-                                .rename({'index': CLUSTER_FIELD_NAME_STR}, axis=1)
-                                .sort_values(by=CLUSTER_FIELD_NAME_STR)
-                                .reset_index(drop=True))
-
-        return seq_count_per_clust
-
     def _select_best_cluster_results_embedding(self,
                                                cluster_results_per_group: pd.DataFrame,
                                                cluster_validation_metric: str,
@@ -1188,8 +1218,6 @@ class SequenceDistanceClustersPerGroup():
             cluster_validation_metric_value = data[cluster_validation_metric].iloc[0]
             number_clusters = data[CLUSTERING_NUMBER_CLUSTERS_NAME_STR].iloc[0]
             percentage_clustered = data[CLUSTERING_PERCENTAGE_CLUSTERED_NAME_STR].iloc[0]
-            cluster_labels = data[CLUSTERING_CLUSTER_LABELS_NAME_STR].iloc[0]
-            seq_count_per_clust_df = self._calc_seq_count_per_cluster(cluster_labels)
 
             algo_params_dict[group] = AlgoParams(cluster_algo_name,
                                                  dim_reduction_algo_name,
@@ -1199,8 +1227,7 @@ class SequenceDistanceClustersPerGroup():
             cluster_validation_results_dict[group] = ClusterValidationResults(cluster_validation_metric,
                                                                               cluster_validation_metric_value,
                                                                               number_clusters,
-                                                                              percentage_clustered,
-                                                                              seq_count_per_clust_df)
+                                                                              percentage_clustered)
 
             # create data in long format for heatmap in facet grid
             data_long = pd.melt(data,
@@ -1421,6 +1448,30 @@ class SequenceDistanceClustersPerGroup():
         n_seq_per_cluster_df = n_seq_per_cluster_df.reset_index()
 
         return n_seq_per_cluster_df
+
+    def _return_n_sequences_per_cluster_per_group_dict(self,
+                                                       cluster_validation_metric: str,
+                                                       cluster_validation_lower_is_better: bool) -> dict[int, pd.DataFrame]:
+
+        _ = check_value_not_none(self.cluster_results_per_group,
+                                 CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
+
+        _ = check_value_in_iterable(cluster_validation_metric,
+                                    self.cluster_validation_algo_names)
+
+        sequence_cluster_per_group_df = self.return_sequence_cluster_per_group_df(cluster_validation_metric,
+                                                                                  cluster_validation_lower_is_better)
+
+        n_seq_per_cluster_df = self._return_n_sequences_per_cluster_per_group_df(sequence_cluster_per_group_df)
+        n_seq_per_cluster_df.columns = [GROUP_FIELD_NAME_STR, 
+                                        CLUSTER_FIELD_NAME_STR, 
+                                        CLUSTERING_NUMBER_SEQUENCES_PER_CLUSTER_SHORT_FIELD_NAME_STR, 
+                                        CLUSTERING_NUMBER_UNIQUE_SEQUENCES_PER_CLUSTER_SHORT_FIELD_NAME_STR]
+
+        n_sequences_per_cluster_per_group_dict = {group: df.drop(GROUP_FIELD_NAME_STR, axis=1).set_index(CLUSTER_FIELD_NAME_STR) 
+                                                  for group, df in n_seq_per_cluster_df.groupby(GROUP_FIELD_NAME_STR)}
+        
+        return n_sequences_per_cluster_per_group_dict
 
     def _return_object_name(self,
                             obj: Any) -> str | None:
