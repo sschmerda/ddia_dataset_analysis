@@ -454,6 +454,7 @@ class SequenceDistanceClustersPerGroup():
         self.groups = self.sequence_distance_analytics.unique_learning_activity_sequence_stats_per_group[GROUP_FIELD_NAME_STR].unique()
         #TODO: delete
         # self.groups = [12, 13, 15, 22, 31, 36, 37]
+        self.groups = [12, 13, 15]
 
         # cluster results field list
         self._cluster_results_list = [CLUSTERING_CLUSTER_LABELS_NAME_STR, 
@@ -759,6 +760,7 @@ class SequenceDistanceClustersPerGroup():
 
     def plot_cluster_hyperparameter_tuning_parallel_coordinates(self,
                                                                 param_list: List[str],
+                                                                groups_to_include: list[int] | None,
                                                                 cluster_validation_metric: str,
                                                                 additional_cluster_validation_metrics: str | list[str] | None,
                                                                 cluster_validation_lower_is_better: bool,
@@ -795,6 +797,10 @@ class SequenceDistanceClustersPerGroup():
         print(DASH_STRING)
         print('\n')
         for group, data in self.cluster_results_per_group.groupby(GROUP_FIELD_NAME_STR):
+
+            if groups_to_include is not None:
+                if group not in groups_to_include:
+                    continue
 
             if select_only_best_embedding:
                 data = self._select_best_cluster_results_embedding(data,
