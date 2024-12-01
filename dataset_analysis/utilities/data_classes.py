@@ -20,7 +20,6 @@ class ClusterValidationResults:
     cluster_validation_metric_optimum_value: float
     number_clusters: int
     percentage_clustered: float
-    seq_count_per_cluster: pd.DataFrame
 
 @dataclass
 class ClusterResults:
@@ -32,25 +31,63 @@ class ClusterResults:
     min_cluster_size: int
     sequence_distances_is_normalized: bool
     cluster_entity_type: str
+    best_dim_reduction_parameters: dict
 
 @dataclass
-class TestResultsContingency:
-    group: int
-    test_type: str
-    test_statistic: float | None
-    degrees_of_freedom: float | None
-    pval: float
-    cramersv: float
-    cramersv_conf_inv: tuple[float, float]
-    power: float | None
+class TestResultsChiSquared:
+    observed_frequency: np.ndarray
+    expected_frequency: np.ndarray
+    n_observations: int
+    chi_squared_statistic: float
+    degrees_of_freedom: int
+    p_value: float
 
 @dataclass
-class TestResultsContinuous:
+class ContingencyExpectedFrequenciesStats:
+    expected_frequencies_threshold: int
+    has_expected_frequency_below_threshold: bool
+    n_elements_contingency_table: int
+    n_elements_contingency_table_expected_below_threshold: int
+    pct_elements_contingency_table_expected_below_threshold: float
+    table_dimensions: tuple[int, int]
+
+@dataclass
+class MeasureAssociationContingencyResults:
+    measure_type: str
+    measure_value: float
+    conf_int_level: float
+    conf_int: tuple[float, float]
+    bootstrap_dist: np.ndarray
+    bootstrap_standard_error: float | np.ndarray
+    interpretation_guideline_methods: list[str]
+    interpretation_guideline_strength_values: list[str]
+
+@dataclass
+class TestResultsAOV:
+    n_observations: int
+    f_statistic: float
+    degrees_of_freedom_between: int
+    degrees_of_freedom_within: int
+    ss_between: int
+    ss_within: int
+    mss_between: float
+    mss_within: float
+    p_value: float
+
+@dataclass
+class MeasureAssociationAOVResults:
+    measure_type: str
+    measure_value: float
+    conf_int_level: float
+    conf_int: tuple[float, float]
+    bootstrap_dist: np.ndarray
+    bootstrap_standard_error: float | np.ndarray
+    interpretation_guideline_methods: list[str]
+    interpretation_guideline_strength_values: list[str]
+
+@dataclass
+class OmnibusTestResults:
     group: int
-    test_type: str
-    test_statistic: float | None
-    degrees_of_freedom: float | None
-    pval: float
-    cramersv: float
-    cramersv_conf_inv: tuple[float, float]
-    power: float | None
+    test_result_df: pd.DataFrame 
+    measure_of_association_results: list[MeasureAssociationContingencyResults] | list[MeasureAssociationAOVResults]
+    measure_of_association_fail_dict: list[DefaultDict[str, int]]
