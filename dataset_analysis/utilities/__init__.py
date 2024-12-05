@@ -1,9 +1,10 @@
 # constants 
 from .constants import *
 # config files
-from .config import *
+from .general_config import *
 from .cluster_config import *
 from .omnibus_tests_config import *
+from .preprocessing_config import *
 # utilities
 from .preprocessing_functions import *
 from .evaluation_functions import *
