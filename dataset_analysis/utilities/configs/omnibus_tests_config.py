@@ -1,4 +1,4 @@
-from ..constants import *
+from ..constants.constants import *
 from ..standard_import import *
 
 ########################################################################################################################
@@ -46,7 +46,9 @@ OMNIBUS_TESTS_ALPHA_LEVEL = 0.05
 OMNIBUS_TESTS_ONE_STAR_UPPER_BOUND = 0.05
 OMNIBUS_TESTS_TWO_STAR_UPPER_BOUND = 0.01
 OMNIBUS_TESTS_THREE_STAR_UPPER_BOUND = 0.001
-RESULTS_ROUND_N_DIGITS = 6
+OMNIBUS_TEST_RESULTS_ROUND_N_DIGITS = 6
+OMNIBUS_TESTS_EXCLUDE_NON_CLUSTERED_SEQUENCES = True
+OMNIBUS_TESTS_INCLUDE_R_TEST_RESULTS_SEQUENCES = True
 
 ########################################################################################################################
 ### chi squared test options ###
@@ -62,18 +64,21 @@ OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_DICT = {ContingencyMeasureAssoc
                                                                                                                    ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016]}
 # the measure_of_association used for plotting
 OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE = ContingencyMeasureAssociationEnum.CRAMER
+# the measure_of_association strength guideline used for plotting
+OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_PLOT_INCLUDE = ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016
 
 ########################################################################################################################
 ### analysis of variance test options ###
 ########################################################################################################################
 
 OMNIBUS_TESTS_AOV_PERMUTATION_N_RESAMPLES = 100_000
-OMNIBUS_TESTS_CONTINGENCY_PERMUTATION_BATCH_SIZE = 2000
 # needs to be a dict with entries of the form: key=measure_of_association; value=[measure_of_association_strength_guideline]
 OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_DICT = {AOVMeasueAssociationEnum.OMEGA_SQUARED: [AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988]}
                                                  
 # the measure_of_association used for plotting
 OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE = AOVMeasueAssociationEnum.OMEGA_SQUARED
+# the measure_of_association strength guideline used for plotting
+OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_PLOT_INCLUDE = AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988
 
 ########################################################################################################################
 ### p-value correction options ###

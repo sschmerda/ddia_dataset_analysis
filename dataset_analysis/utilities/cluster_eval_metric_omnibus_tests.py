@@ -1,10 +1,10 @@
+from .configs.general_config import *
+from .configs.omnibus_tests_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 from .plotting_functions import *
 from .validators import *
 from .data_classes import *
-from .omnibus_tests_config import *
 
 class ClusterEvalMetricOmnibusTest():
     """docstring for ClassName."""
@@ -57,7 +57,7 @@ class ClusterEvalMetricOmnibusTest():
         self._add_p_value_is_significant_fields(self.omnibus_test_result_df)
 
         # round results
-        self.omnibus_test_result_df = self.omnibus_test_result_df.round(RESULTS_ROUND_N_DIGITS)
+        self.omnibus_test_result_df = self.omnibus_test_result_df.round(OMNIBUS_TEST_RESULTS_ROUND_N_DIGITS)
 
         # add evaluation metric information
         self.omnibus_test_result_df.insert(2,
@@ -171,6 +171,7 @@ class ClusterEvalMetricOmnibusTest():
         self._add_plot_data_title(g,
                                   OMNIBUS_TESTS_P_VALUE_CORRECTION_PLOT_INCLUDE,
                                   OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
+                                  OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_PLOT_INCLUDE,
                                   FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
 
         plt.show(g)
@@ -199,6 +200,7 @@ class ClusterEvalMetricOmnibusTest():
         self._add_plot_data_title(g,
                                   OMNIBUS_TESTS_P_VALUE_CORRECTION_PLOT_INCLUDE,
                                   OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
+                                  OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_PLOT_INCLUDE,
                                   FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
 
         plt.show(g)
@@ -221,6 +223,7 @@ class ClusterEvalMetricOmnibusTest():
                              sns_plot,
                              p_value_correction_method: PValueCorrectionEnum,
                              measure_of_association_method: ContingencyMeasureAssociationEnum | AOVMeasueAssociationEnum,
+                             measure_of_association_strength_guideline: ContingencyMeasureAssociationStrengthGuidelineEnum | AOVMeasureAssociationStrengthGuidelineEnum,
                              h_space_title: int | float) -> None:
 
         axes_iterable = zip(sns_plot.axes.flat, sns_plot.facet_data())
@@ -229,6 +232,10 @@ class ClusterEvalMetricOmnibusTest():
             p_value_correction_value_field_name = OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR + OMNIBUS_TESTS_PVAL_CORRECTED_FIELD_NAME_STR + p_value_correction_method.value 
             measure_of_association_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
             measure_of_association_conf_int_value_field_name = measure_of_association_method.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
+            measure_of_association_strength_guideline_field_name = (measure_of_association_method.value +
+                                                                    '_' + 
+                                                                    measure_of_association_strength_guideline.value + 
+                                                                    OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR)
 
             if self.evaluation_metric_field_is_categorical:
                 has_exp_freq_below_t_field = OMNIBUS_TESTS_CONTINGENCY_HAS_EXPECTED_FREQ_BELOW_THRESHOLD_FIELD_NAME_STR
@@ -250,6 +257,7 @@ class ClusterEvalMetricOmnibusTest():
             measure_of_association_conf_int = self.omnibus_test_result_df.loc[is_group_series, measure_of_association_conf_int_value_field_name].values[0]
             measure_of_association_conf_int = tuple(map(lambda x: round(x, 3), measure_of_association_conf_int))
             measure_of_association_conf_int_lvl = int(OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL * 100)
+            measure_of_association_strength_guideline_value = self.omnibus_test_result_df.loc[is_group_series, measure_of_association_strength_guideline_field_name].values[0]
     
             # generate title strings for plot
             p_value_perm_star_str = self._return_p_value_star_string(p_value_perm)
@@ -278,6 +286,11 @@ class ClusterEvalMetricOmnibusTest():
             measure_of_association_str = f'\n{measure_of_association_type}: {measure_of_association_value}'
             measure_of_association_conf_int_str = f'\n{measure_of_association_conf_int_lvl}% {OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_PLOT_VALUE_NAME_STR}: {measure_of_association_conf_int}'
 
+            sub_strings = measure_of_association_strength_guideline.value.split('_')
+            measure_of_association_strength_guideline_type = '_'.join([sub_str.capitalize() for sub_str in sub_strings])
+            measure_of_association_strength_guideline_type = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_PLOT_VALUE_NAME_STR + measure_of_association_strength_guideline_type
+            measure_of_association_strength_guideline_str = f'\n{measure_of_association_strength_guideline_type}:\n{measure_of_association_strength_guideline_value}'
+
             title_str = ''.join((group_str,
                                  n_observations_str,
                                  has_expected_frequency_below_threshold_str,
@@ -286,7 +299,8 @@ class ClusterEvalMetricOmnibusTest():
                                  p_value_perm_corrected_str,
                                  p_value_correction_method_str,
                                  measure_of_association_str,
-                                 measure_of_association_conf_int_str))
+                                 measure_of_association_conf_int_str,
+                                 measure_of_association_strength_guideline_str))
             ax.set_title(title_str)
         
         plt.subplots_adjust(hspace=h_space_title)
@@ -497,8 +511,7 @@ class ClusterEvalMetricOmnibusTest():
             case ContingencyMeasureAssociationEnum.PEARSON:
                 measure_of_association = self._return_pearsons_c(observed_freq)
             case _:
-                #TODO: find fitting error
-                print('error')
+                raise ValueError(OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{method}')
 
         return measure_of_association
     
@@ -571,7 +584,6 @@ class ClusterEvalMetricOmnibusTest():
                 if measure_of_association == 0:
                     measure_of_association = np.random.uniform(low=0.0, high=0.000001, size=None)
 
-            #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
                 measure_association_fail_dict[method.value] += 1
                 return 0
@@ -604,8 +616,7 @@ class ClusterEvalMetricOmnibusTest():
             case ContingencyMeasureAssociationStrengthGuidelineEnum.LOVAKOV_AGADULLINA_2021:
                 measure_of_association_strength = self._return_lovakov_agadullina_2021_measure_association_contingency_strength(measure_of_association_value)
             case _:
-                #TODO: find fitting error
-                print('error')
+                raise ValueError(OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{strength_guideline_method}')
 
         return measure_of_association_strength
 
@@ -858,8 +869,7 @@ class ClusterEvalMetricOmnibusTest():
             case AOVMeasueAssociationEnum.OMEGA_SQUARED:
                 measure_of_association = self._return_omega_squared(sequence_cluster_df)
             case _:
-                #TODO: find fitting error
-                print('error')
+                raise ValueError(OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{method}')
 
         return measure_of_association
 
@@ -924,7 +934,6 @@ class ClusterEvalMetricOmnibusTest():
             measure_of_association = self._return_measure_association_aov(sequence_cluster_df,
                                                                           method)
 
-            #TODO: maybe find a better way to exclude measures of association when the measure could not be calculated
             if np.isnan(measure_of_association):
                 measure_association_fail_dict[method.value] += 1
                 return 0
@@ -956,8 +965,7 @@ class ClusterEvalMetricOmnibusTest():
             case AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988_F:
                 measure_of_association_strength = self._return_cohen_1988_f_measure_association_aov_strength(measure_of_association_value)
             case _:
-                #TODO: find fitting error
-                print('error')
+                raise ValueError(OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{strength_guideline_method}')
 
         return measure_of_association_strength
     
@@ -1065,7 +1073,7 @@ class ClusterEvalMetricOmnibusTest():
             measure_of_association_conf_int_value_field_name = result.measure_type + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
 
             measure_of_association_result = {measure_of_association_value_field_name: result.measure_value,
-                                             measure_of_association_conf_int_value_field_name: [tuple(map(lambda x: round(x, RESULTS_ROUND_N_DIGITS), result.conf_int))]}
+                                             measure_of_association_conf_int_value_field_name: [tuple(map(lambda x: round(x, OMNIBUS_TEST_RESULTS_ROUND_N_DIGITS), result.conf_int))]}
 
             moa_interpretation_guidelines_result = {}
             moa_interpretation_guidelines = zip(result.interpretation_guideline_methods, result.interpretation_guideline_strength_values)
