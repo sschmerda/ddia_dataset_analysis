@@ -1,5 +1,4 @@
 # constant path elements
-PATH_TO_PLOT_FOLDER = '../plots/'
 PATH_TO_PICKLED_OBJECTS_FOLDER = '../pickled_objects'
 PATH_TO_CLEANED_DATASETS = '../cleaned_datasets/'
 PATH_TO_RESULT_TABLES_PICKLE_FOLDER = 'result_tables'
@@ -778,26 +777,6 @@ CLUSTERING_PARAMETER_TUNING_RANGE_MAX_NAME_STR = 'range_max'
 CLUSTERING_PARAMETER_TUNING_NUMBER_CANDIDATES_NAME_STR = 'n_candidates'
 CLUSTERING_PARAMETER_TUNING_CATEGORICAL_VALUES_NAME_STR = 'categorical_values'
 
-# dimensionality reduction algos
-# umap
-# parameter strings
-CLUSTERING_UMAP_N_COMPONENTS_NAME_STR = 'n_components'
-CLUSTERING_UMAP_N_NEIGHBORS_NAME_STR = 'n_neighbors'
-CLUSTERING_UMAP_MIN_DIST_NAME_STR = 'min_dist'
-CLUSTERING_UMAP_RANDOM_STATE_NAME_STR = 'random_state'
-CLUSTERING_UMAP_VERBOSE_NAME_STR = 'verbose'
-CLUSTERING_UMAP_METRIC_NAME_STR = 'metric'
-
-# clustering algos
-# hdbscan 
-# parameter strings
-CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_NAME_STR = 'min_cluster_size'
-CLUSTERING_HDBSCAN_MIN_SAMPLES_NAME_STR = 'min_samples'
-CLUSTERING_HDBSCAN_CLUSTER_SELECTION_METHOD_NAME_STR = 'cluster_selection_method'
-CLUSTERING_HDBSCAN_GEN_MIN_SPAN_TREE_NAME_STR = 'gen_min_span_tree'
-CLUSTERING_HDBSCAN_METRIC_NAME_STR = 'metric'
-CLUSTERING_HDBSCAN_CORE_DIST_N_JOBS_NAME_STR = 'core_dist_n_jobs'
-
 ###################################################################################################
 
 # result df general 
@@ -896,6 +875,7 @@ OMNIBUS_TESTS_PVAL_PERM_PLOT_VALUE_NAME_STR = 'P-Value Perm'
 OMNIBUS_TESTS_PVAL_PERM_CORRECTED_PLOT_VALUE_NAME_STR = 'P-Value Perm Corr'
 OMNIBUS_TESTS_PVAL_CORRECTION_METHOD_PLOT_VALUE_NAME_STR = 'P-Value Correction Method'
 OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_PLOT_VALUE_NAME_STR = 'Conf Int'
+OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_PLOT_VALUE_NAME_STR = 'MoA_Str_'
 
 # error messages
 OMNIBUS_TESTS_ERROR_NO_TEST_RESULTS_NAME_STR = 'omnibus_test_result_df is empty.\nPerform tests first!'
