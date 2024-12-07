@@ -34,22 +34,6 @@ NUMBER_OF_CORES = -1
 RNG_SEED = 1
 
 ########################################################################################################################
-### sequence distance libraries ###
-########################################################################################################################
-# function needs to take 2 strings as the first 2 arguments and return a numeric distance: seq_dist(string_1, string_2)
-
-# from Levenshtein import distance as distance # second fastest implementation in python(mainly written in C)
-from polyleven import levenshtein as distance # fastest implementation in python(mainly written in C)
-
-# specify positional and keyword arguments for the distance function(if there are any)
-SEQUENCE_DISTANCE_FUNCTION_ARGS = []
-SEQUENCE_DISTANCE_FUNCTION_KWARGS = {}
-
-# specify whether the group field(given the datasets has one) should be ignored when calculating sequence distances.
-# sequence distances will be calculated over the entire length of a user's learning activities in the interactions dataframe.
-SEQUENCE_DISTANCE_IGNORE_GROUPS = False
-
-########################################################################################################################
 ### pandas options ###
 ########################################################################################################################
 
@@ -139,7 +123,7 @@ SEABORN_SUPTITLE_HEIGHT_CM = 2
 
 # facet grid 
 FACET_GRID_SUBPLOTS_H_SPACE = 0.1
-FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE = 1.5
+FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE = 1.6
 
 # color palette type
 SEABORN_COLOR_PALETTE = 'husl'
