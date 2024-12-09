@@ -1,12 +1,12 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .config import *
-from .constants import *
 
 
 def keep_last_repeated_learning_activities(
     interactions: pd.DataFrame,
     group_field: str,
-    user_field: str,
+    user_field: str | None,
     learning_activity_field: str,
     timestamp_field: str,
 ):
@@ -82,7 +82,7 @@ def return_and_plot_evaluation_score_range(
     interactions: pd.DataFrame,
     learning_activity_field: str,
     evaluation_learning_activity_score_field: str,
-    group_field: str,
+    group_field: str | None,
     evaluation_group_score_field: str,
     evaluation_course_score_field: str,
     result_tables: Type[Any],
@@ -217,8 +217,9 @@ def return_and_plot_evaluation_score_range(
             score_minimum = float(eval_score_ranges["score_minimum"].min())
             score_maximum = float(eval_score_ranges["score_maximum"].max())
 
-            print("=" * 45)
+            print(STAR_STRING)
             print(f"{group_name} Evaluation Score Range:")
+            print(STAR_STRING)
             print("")
             print(f"Number of {group_name}s: {number_of_groups}")
             print(f"Number of Unique Score Ranges: {number_of_score_ranges}")
@@ -283,6 +284,7 @@ def return_and_plot_evaluation_score_range(
                 jitter=False,
                 clip_on=False,
                 data=eval_score_ranges_long,
+                orient="h"
             )
             if (group == learning_activity_field) or (group == group_field):
                 g = sns.boxplot(
@@ -298,6 +300,7 @@ def return_and_plot_evaluation_score_range(
                     showbox=False,
                     showcaps=False,
                     data=interactions,
+                    orient="h"
                 )
                 g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
                 plt.show()
@@ -313,6 +316,7 @@ def return_and_plot_evaluation_score_range(
                     showbox=False,
                     showcaps=False,
                     data=interactions,
+                    orient="h"
                 )
                 g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
                 plt.show()
@@ -330,6 +334,7 @@ def return_and_plot_evaluation_score_range(
                     jitter=False,
                     clip_on=False,
                     data=interactions,
+                    orient="h"
                 )
             else:
                 g = sns.stripplot(
@@ -340,6 +345,7 @@ def return_and_plot_evaluation_score_range(
                     jitter=False,
                     clip_on=False,
                     data=interactions,
+                    orient="h"
                 )
 
             if (group == learning_activity_field) or (group == group_field):
@@ -356,8 +362,9 @@ def return_and_plot_evaluation_score_range(
                     showbox=False,
                     showcaps=False,
                     data=interactions,
+                    orient="h"
                 )
-                g.set(xlabel=f"{group_name} Score", ylabel=f"{group_name}")
+                g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
                 plt.show()
             else:
                 g = sns.boxplot(
@@ -371,6 +378,7 @@ def return_and_plot_evaluation_score_range(
                     showbox=False,
                     showcaps=False,
                     data=interactions,
+                    orient="h"
                 )
                 g.set(xlabel=f"{group_name} Score", ylabel=f"{group_name}")
                 plt.show()
@@ -385,6 +393,7 @@ def return_and_plot_evaluation_score_range(
                     errorbar=return_min_and_max,
                     capsize=0.4,
                     join=False,
+                    orient="h"
                 )
                 g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
                 plt.show()
@@ -1222,7 +1231,7 @@ def add_evaluation_group_and_course_fields(
 
 def add_evaluation_fields(
     interactions: pd.DataFrame,
-    group_field: str,
+    group_field: str | None,
     user_field: str,
     learning_activity_field: str,
     timestamp_field: str,
@@ -1331,7 +1340,7 @@ def add_evaluation_fields(
 
 
 def add_evaluation_fields_average(
-    interactions: pd.DataFrame, group_field: str, averaging_func
+    interactions: pd.DataFrame, group_field: str | None, averaging_func
 ) -> pd.DataFrame:
     """Adds average evaluation metrics to the interaction dataframe and returns it. Learning activity evaluation metrics
     will be averaged over groups and the whole course. Group evaluation metrics are averaged over the whole course.
