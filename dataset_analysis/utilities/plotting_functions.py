@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 
 def return_axis_limits(data: ArrayLike,
                        data_is_pct: bool,
@@ -318,8 +318,11 @@ def plot_distribution(data: pd.DataFrame,
                     line_kws={'linewidth': SEABORN_LINE_WIDTH_SINGLE,
                               'alpha': SEABORN_PLOT_OBJECT_ALPHA},
                     alpha=SEABORN_PLOT_OBJECT_ALPHA)
-    for ax in g.axes.flat:
-        ax.lines[0].set_color(SEABORN_LINE_COLOR_RED)
+    try:
+        for ax in g.axes.flat:
+            ax.lines[0].set_color(SEABORN_LINE_COLOR_RED)
+    except:
+        pass
 
     axes = g.axes.flat
     for ax in axes:
