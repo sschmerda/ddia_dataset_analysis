@@ -20,7 +20,7 @@ class ClusterEvalMetricOmnibusTest():
                  parallelize_computation: bool) -> None:
 
         self.dataset_name: str = dataset_name
-        self.interactions: pd.DataFrame = interactions
+        self.interactions: pd.DataFrame = copy.deepcopy(interactions)
         self.sequence_cluster_per_group_df: pd.DataFrame = sequence_cluster_per_group_df
         self.evaluation_metric_field: str = evaluation_metric_field
         self.evaluation_metric_field_is_categorical: bool = evaluation_metric_is_categorical
@@ -342,9 +342,9 @@ class ClusterEvalMetricOmnibusTest():
             self._omnibus_tests_results = (Parallel(n_jobs=NUMBER_OF_CORES)
                                            (delayed(omnibus_test_function)
                                             (group,
-                                             df) for group, df in self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR)))
+                                             df) for group, df in tqdm(self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR))))
         else:
-            self._omnibus_tests_results = [omnibus_test_function(group, df) for group, df in self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR)]
+            self._omnibus_tests_results = [omnibus_test_function(group, df) for group, df in tqdm(self.sequence_cluster_eval_metric_per_group_df.groupby(GROUP_FIELD_NAME_STR))]
 
         test_results_df_list = [res.test_result_df for res in self._omnibus_tests_results]
 
@@ -848,7 +848,7 @@ class ClusterEvalMetricOmnibusTest():
         with localconverter(ro.default_converter + pandas2ri.converter):
             sequence_cluster_df_r = ro.conversion.py2rpy(sequence_cluster_df)
 
-        res = r['aovperm'](ro.Formula(f'{self.evaluation_metric_field} ~ C({CLUSTER_FIELD_NAME_STR})'),
+        res = r['aovperm'](ro.Formula(f'`{self.evaluation_metric_field}` ~ C({CLUSTER_FIELD_NAME_STR})'),
                                       data=sequence_cluster_df_r,
                                       np=OMNIBUS_TESTS_CONTINGENCY_PERMUTATION_N_RESAMPLES)
 

@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 from .validators import *
 from .data_classes import *
 from .plotting_functions import *
@@ -437,7 +437,7 @@ class SequenceDistanceClustersPerGroup():
         self.dataset_name = dataset_name
         self.normalize_distance = normalize_distance
         self.use_unique_sequence_distances = use_unique_sequence_distances
-        self.sequence_distance_analytics = sequence_distance_analytics
+        self.sequence_distance_analytics = copy.deepcopy(sequence_distance_analytics)
         self.cluster_function = cluster_function
         self.dimensionality_reduction_function = dimensionality_reduction_function
         self.cluster_validation_functions = cluster_validation_functions
@@ -454,7 +454,7 @@ class SequenceDistanceClustersPerGroup():
         self.groups = self.sequence_distance_analytics.unique_learning_activity_sequence_stats_per_group[GROUP_FIELD_NAME_STR].unique()
         #TODO: delete
         # self.groups = [12, 13, 15, 22, 31, 36, 37]
-        self.groups = [12, 13, 15]
+        # self.groups = [12, 13, 15]
 
         # cluster results field list
         self._cluster_results_list = [CLUSTERING_CLUSTER_LABELS_NAME_STR, 
@@ -1292,7 +1292,6 @@ class SequenceDistanceClustersPerGroup():
         else:
             params_dict = {}
 
-        #TODO: delete
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', UserWarning)
             dim_reducer = reducer(n_components=2,
