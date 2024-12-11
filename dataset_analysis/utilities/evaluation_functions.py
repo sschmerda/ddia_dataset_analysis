@@ -77,7 +77,6 @@ def keep_last_repeated_learning_activities(
 
     return interactions
 
-
 def return_and_plot_evaluation_score_range(
     interactions: pd.DataFrame,
     learning_activity_field: str,
@@ -172,6 +171,10 @@ def return_and_plot_evaluation_score_range(
                         "median": "score_median",
                     }
                 )
+
+                eval_score_ranges_len = eval_score_ranges.shape[0]
+                eval_score_ranges[group] = list(range(eval_score_ranges_len))
+
                 eval_score_ranges_long = pd.melt(
                     eval_score_ranges,
                     id_vars=[group],
@@ -232,6 +235,18 @@ def return_and_plot_evaluation_score_range(
             print(f"Minimum {group_name} Score: {score_minimum}")
             print(f"Maximum {group_name} Score: {score_maximum}")
 
+            eval_score_ranges_to_plot = eval_score_ranges.copy()
+            eval_score_ranges_to_plot.rename({group: group_name}, axis=1, inplace=True)
+            print('')
+            print(STAR_STRING)
+            print(f'Per {group_name} Ranges:')
+            print(STAR_STRING)
+            print('')
+            print(eval_score_ranges_to_plot.to_string(index=False))
+            print('')
+            print(STAR_STRING)
+            print('')
+
             # scatter
             g = sns.JointGrid(
                 data=eval_score_ranges, x="score_minimum", y="score_maximum"
@@ -271,144 +286,143 @@ def return_and_plot_evaluation_score_range(
 
             median_marker = {"linewidth": 5, "linestyle": "-", "color": "blue"}
 
-            g = sns.barplot(x=lengths, y=groups, left=mins, palette="turbo", orient="h")
-            g = sns.stripplot(
-                x="boundary_value",
-                y=group,
-                order=groups,
-                color="red",
-                s=10,
-                edgecolor="black",
-                alpha=1,
-                linewidth=2,
-                jitter=False,
-                clip_on=False,
-                data=eval_score_ranges_long,
-                orient="h"
-            )
-            if (group == learning_activity_field) or (group == group_field):
-                g = sns.boxplot(
-                    showmeans=True,
-                    meanline=False,
-                    meanprops=mean_marker,
-                    medianprops=median_marker,
-                    whiskerprops={"visible": False},
-                    x=score,
-                    y=group,
-                    order=groups,
-                    showfliers=False,
-                    showbox=False,
-                    showcaps=False,
-                    data=interactions,
-                    orient="h"
-                )
-                g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
-                plt.show()
-            else:
-                g = sns.boxplot(
-                    showmeans=True,
-                    meanline=False,
-                    meanprops=mean_marker,
-                    medianprops=median_marker,
-                    whiskerprops={"visible": False},
-                    x=score,
-                    showfliers=False,
-                    showbox=False,
-                    showcaps=False,
-                    data=interactions,
-                    orient="h"
-                )
+            # pointplot extreme values
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', UserWarning)
+                if (group == learning_activity_field) or (group == group_field):
+                    g = sns.pointplot(
+                        data=interactions,
+                        x=score,
+                        y=group,
+                        order=groups,
+                        errorbar=return_min_and_max,
+                        capsize=0.4,
+                        join=False,
+                        orient="h"
+                    )
+                    g = sns.stripplot(
+                        x="boundary_value",
+                        y=group,
+                        order=groups,
+                        color="red",
+                        s=10,
+                        edgecolor="black",
+                        alpha=1,
+                        linewidth=2,
+                        jitter=False,
+                        clip_on=False,
+                        data=eval_score_ranges_long,
+                        orient="h"
+                    )
+                    g = sns.boxplot(
+                        showmeans=True,
+                        meanline=False,
+                        meanprops=mean_marker,
+                        medianprops=median_marker,
+                        whiskerprops={"visible": False},
+                        x=score,
+                        y=group,
+                        order=groups,
+                        showfliers=False,
+                        showbox=False,
+                        showcaps=False,
+                        data=interactions,
+                        orient="h"
+                    )
+                else:
+                    g = sns.pointplot(
+                        data=interactions,
+                        x=score,
+                        errorbar=return_min_and_max,
+                        capsize=0.4,
+                        join=False,
+                    )
+                    g = sns.stripplot(
+                        x="boundary_value",
+                        color="red",
+                        s=10,
+                        edgecolor="black",
+                        alpha=1,
+                        linewidth=2,
+                        jitter=False,
+                        clip_on=False,
+                        data=eval_score_ranges_long,
+                        orient="h"
+                    )
+                    g = sns.boxplot(
+                        showmeans=True,
+                        meanline=False,
+                        meanprops=mean_marker,
+                        medianprops=median_marker,
+                        whiskerprops={"visible": False},
+                        x=score,
+                        showfliers=False,
+                        showbox=False,
+                        showcaps=False,
+                        data=interactions,
+                        orient="h"
+                    )
                 g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
                 plt.show()
 
-            # barplot with all scores
-            g = sns.barplot(x=lengths, y=groups, left=mins, palette="turbo", orient="h")
-            if (group == learning_activity_field) or (group == group_field):
-                g = sns.stripplot(
-                    x=score,
-                    y=group,
-                    order=groups,
-                    color="white",
-                    edgecolor="black",
-                    linewidth=1.0,
-                    jitter=False,
-                    clip_on=False,
-                    data=interactions,
-                    orient="h"
-                )
-            else:
-                g = sns.stripplot(
-                    x=score,
-                    color="white",
-                    edgecolor="black",
-                    linewidth=1.0,
-                    jitter=False,
-                    clip_on=False,
-                    data=interactions,
-                    orient="h"
-                )
-
-            if (group == learning_activity_field) or (group == group_field):
-                g = sns.boxplot(
-                    showmeans=True,
-                    meanline=False,
-                    meanprops=mean_marker,
-                    medianprops=median_marker,
-                    whiskerprops={"visible": False},
-                    x=score,
-                    y=group,
-                    order=groups,
-                    showfliers=False,
-                    showbox=False,
-                    showcaps=False,
-                    data=interactions,
-                    orient="h"
-                )
-                g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
-                plt.show()
-            else:
-                g = sns.boxplot(
-                    showmeans=True,
-                    meanline=False,
-                    meanprops=mean_marker,
-                    medianprops=median_marker,
-                    whiskerprops={"visible": False},
-                    x=score,
-                    showfliers=False,
-                    showbox=False,
-                    showcaps=False,
-                    data=interactions,
-                    orient="h"
-                )
-                g.set(xlabel=f"{group_name} Score", ylabel=f"{group_name}")
-                plt.show()
-
-            # pointplot
-            if (group == learning_activity_field) or (group == group_field):
-                g = sns.pointplot(
-                    data=interactions,
-                    x=score,
-                    y=group,
-                    order=groups,
-                    errorbar=return_min_and_max,
-                    capsize=0.4,
-                    join=False,
-                    orient="h"
-                )
-                g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
-                plt.show()
-            else:
-                g = sns.pointplot(
-                    data=interactions,
-                    x=score,
-                    errorbar=return_min_and_max,
-                    capsize=0.4,
-                    join=False,
-                )
+            # boxplot containing all values
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore', UserWarning)
+                if (group == learning_activity_field) or (group == group_field):
+                    g = sns.boxplot(
+                        showmeans=True,
+                        meanline=True,
+                        meanprops=mean_marker,
+                        medianprops=median_marker,
+                        x=score,
+                        y=group,
+                        order=groups,
+                        showfliers=False,
+                        showbox=True,
+                        showcaps=True,
+                        data=interactions,
+                        orient="h"
+                    )
+                    g = sns.stripplot(
+                        x=score,
+                        y=group,
+                        order=groups,
+                        color="red",
+                        edgecolor="black",
+                        linewidth=1.0,
+                        jitter=False,
+                        clip_on=False,
+                        data=interactions,
+                        orient="h"
+                    )
+                else:
+                    g = sns.boxplot(
+                        showmeans=True,
+                        meanline=True,
+                        meanprops=mean_marker,
+                        medianprops=median_marker,
+                        x=score,
+                        showfliers=False,
+                        showbox=True,
+                        showcaps=True,
+                        data=interactions,
+                        orient="h"
+                    )
+                    g = sns.stripplot(
+                        x=score,
+                        color="red",
+                        edgecolor="black",
+                        linewidth=1.0,
+                        jitter=False,
+                        clip_on=False,
+                        data=interactions,
+                        orient="h"
+                    )
                 g.set(xlabel=f"{group_name} Score Range", ylabel=f"{group_name}")
                 plt.show()
 
             # score-ranges countplot
+            range_counts_frequency_df["range"] = range_counts_frequency_df["range"].astype(str)
             g = sns.barplot(data=range_counts_frequency_df, x="count", y="range")
             g.set(xlabel=f"{group_name} Count", ylabel=f"{group_name} Score Range")
             plt.show()
