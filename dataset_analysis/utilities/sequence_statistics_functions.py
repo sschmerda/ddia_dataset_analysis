@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 from .plotting_functions import *
 
 class SequenceStatistics():
@@ -209,6 +209,7 @@ class SequenceStatistics():
             A dataframe containing statistics (frequencies and lengths) of learning_activity sequences over user entities grouped by group entities
         """
 
+        dtypes = unique_learning_activity_seq_stats_per_group.dtypes
         column_names = unique_learning_activity_seq_stats_per_group.columns
         concat_list = []
         for _, row in unique_learning_activity_seq_stats_per_group.iterrows():
@@ -221,6 +222,7 @@ class SequenceStatistics():
             learning_activity_seq_stats_per_group = pd.DataFrame([], columns=column_names)
 
         learning_activity_seq_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR] = LEARNING_ACTIVITY_SEQUENCE_TYPE_ALL_SEQ_VALUE_STR
+        learning_activity_seq_stats_per_group = learning_activity_seq_stats_per_group.astype(dtypes)
 
         return learning_activity_seq_stats_per_group
 
