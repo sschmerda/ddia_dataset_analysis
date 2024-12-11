@@ -511,46 +511,48 @@ def plot_stat_scatter_plot_per_group(sequence_stats_per_group_df: pd.DataFrame,
                                           SEABORN_SEQUENCE_FILTER_FACET_GRID_N_COLUMNS)
 
     # relative sequence frequency %
-    g=sns.relplot(sequence_stats_per_group_df,
-                  x=statistic_x,
-                  y=statistic_y,
-                  col=GROUP_FIELD_NAME_STR,
-                  col_wrap=n_cols,
-                  kind='scatter',
-                  height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET,
-                  aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
-                  s=SEABORN_POINT_SIZE_FACET,
-                  alpha=SEABORN_POINT_ALPHA_FACET,
-                  edgecolor=SEABORN_POINT_EDGECOLOR,
-                  linewidth=SEABORN_POINT_LINEWIDTH,
-                  facet_kws=dict(sharex=share_x,
-                                 sharey=share_y,
-                                 xlim=xlim,
-                                 ylim=ylim))
-    g.map_dataframe(sns.regplot,
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', ConvergenceWarning)
+        g=sns.relplot(sequence_stats_per_group_df,
                     x=statistic_x,
                     y=statistic_y,
-                    scatter=False,
-                    robust=True,
-                    ci=None,
-                    line_kws=dict(color=SEABORN_MARKER_COLOR_ORANGE,
-                                  linewidth=SEABORN_LINE_WIDTH_FACET))
-    g.set(xlabel=statistic_x_label,
-          ylabel=statistic_y_label)
-    for ax in g.axes.flatten():
-        ax.tick_params(labelbottom=True)
-    plt.tight_layout()
-    g = add_central_tendency_marker_per_facet(g,
-                                              sequence_stats_per_group_df,
-                                              GROUP_FIELD_NAME_STR,
-                                              statistic_x,
-                                              statistic_y)
-    y_loc = calculate_suptitle_position(g,
-                                        SEABORN_SUPTITLE_HEIGHT_CM)
-    g.figure.suptitle(title, 
-                      fontsize=SEABORN_TITLE_FONT_SIZE,
-                      y=y_loc)
-    plt.show(g);
+                    col=GROUP_FIELD_NAME_STR,
+                    col_wrap=n_cols,
+                    kind='scatter',
+                    height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET,
+                    aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
+                    s=SEABORN_POINT_SIZE_FACET,
+                    alpha=SEABORN_POINT_ALPHA_FACET,
+                    edgecolor=SEABORN_POINT_EDGECOLOR,
+                    linewidth=SEABORN_POINT_LINEWIDTH,
+                    facet_kws=dict(sharex=share_x,
+                                    sharey=share_y,
+                                    xlim=xlim,
+                                    ylim=ylim))
+        g.map_dataframe(sns.regplot,
+                        x=statistic_x,
+                        y=statistic_y,
+                        scatter=False,
+                        robust=True,
+                        ci=None,
+                        line_kws=dict(color=SEABORN_MARKER_COLOR_ORANGE,
+                                    linewidth=SEABORN_LINE_WIDTH_FACET))
+        g.set(xlabel=statistic_x_label,
+            ylabel=statistic_y_label)
+        for ax in g.axes.flatten():
+            ax.tick_params(labelbottom=True)
+        plt.tight_layout()
+        g = add_central_tendency_marker_per_facet(g,
+                                                sequence_stats_per_group_df,
+                                                GROUP_FIELD_NAME_STR,
+                                                statistic_x,
+                                                statistic_y)
+        y_loc = calculate_suptitle_position(g,
+                                            SEABORN_SUPTITLE_HEIGHT_CM)
+        g.figure.suptitle(title, 
+                        fontsize=SEABORN_TITLE_FONT_SIZE,
+                        y=y_loc)
+        plt.show(g);
 
 def plot_stat_hist_plot_per_group(sequence_stats_per_group_df: pd.DataFrame,
                                   statistic: str,
