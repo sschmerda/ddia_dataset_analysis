@@ -1,5 +1,7 @@
 from .standard_import import *
-from .constants import *
+from .constants.constants import *
+from .configs.result_aggregation_config import *
+from .plotting_functions import *
 
 class AggregatedResultTables():
     """A class which upon initialization holds data about summary statistics, sequence summary statistics, the available fields and the score is_correct relationship of 
@@ -382,3 +384,441 @@ class ResultPlots():
                                                                    avg_unique_sequence_distance_per_group_df])
         
         return avg_sequence_distance_per_group_agg_df, avg_unique_sequence_distance_per_group_agg_df
+
+
+class AggregatedResults():
+    """docstring for ClassName."""
+    def __init__(self):
+
+        self._path_to_result_tables = self._return_result_tables_paths()
+
+    @avg_sequence_statistics_per_group_per_dataset_decorator
+    def plot_avg_sequence_statistics_per_group_per_dataset(self) -> None:
+
+        avg_learning_activity_sequence_stats_per_group_per_dataset = self._generate_avg_sequence_stats_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+                    x_axis_lim = return_axis_limits(avg_learning_activity_sequence_stats_per_group_per_dataset[field.value],
+                                                    False,
+                                                    False)
+                    x_axis_ticks = None
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+                    x_axis_lim = return_axis_limits(avg_learning_activity_sequence_stats_per_group_per_dataset[field.value],
+                                                    True,
+                                                    True)
+                    x_axis_ticks = np.arange(0, 1.1, 0.1)
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                     SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+                    x_axis_lim = return_axis_limits(avg_learning_activity_sequence_stats_per_group_per_dataset[field.value],
+                                                    True,
+                                                    False)
+                    x_axis_ticks = np.arange(0, 110, 10)
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            # boxplot
+            g = sns.boxplot(
+                            avg_learning_activity_sequence_stats_per_group_per_dataset, 
+                            x=field.value, 
+                            y=DATASET_NAME_FIELD_NAME_STR, 
+                            hue=DATASET_NAME_FIELD_NAME_STR,
+                            palette=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE,
+                            showfliers=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_LINE_WIDTH,
+                            width=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_BOX_WIDTH,
+                            whis=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_BOX_WHISKERS,
+                            showmeans=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_MEANS,
+                            meanprops=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_MARKER,
+                           )
+            # strip or swarmplot
+            g = sns.swarmplot(
+                              avg_learning_activity_sequence_stats_per_group_per_dataset, 
+                              x=field.value, 
+                              y=DATASET_NAME_FIELD_NAME_STR, 
+                              size=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_SIZE, 
+                              color=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_COLOR,
+                              alpha=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_ALPHA,
+                              edgecolor=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_EDGECOLOR,
+                              linewidth=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_LINEWIDTH,
+                             )
+            g.set(
+                xlabel=field.value,
+                ylabel='',
+                xlim=x_axis_lim,
+                )
+            plt.xticks(x_axis_ticks)
+            plt.tight_layout()
+            plt.savefig(
+                        f'{PATH_TO_RESULT_PLOTS}/{AVG_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @summary_sequence_statistics_per_group_per_dataset_decorator
+    def plot_summary_sequence_statistics_per_group_per_dataset(self) -> None:
+
+        summary_stats_per_group_per_dataset = self._generate_summary_sequence_stats_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_RAW
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(summary_stats_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            # TODO: set new statistcs variable?
+            g = sns.relplot(summary_stats_per_group_per_dataset,
+                            x=LEARNING_ACTIVITY_SEQUENCE_DESCRIPTIVE_STATISTIC_NAME_STR,
+                            y=field.value,
+                            hue=GROUP_FIELD_NAME_STR,
+                            col=DATASET_NAME_FIELD_NAME_STR,
+                            col_wrap=n_cols,
+                            height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                            aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                            kind=SUMMARY_SEQUENCE_STATISTICS_KIND,
+                            legend=SUMMARY_SEQUENCE_STATISTICS_PLOT_LEGEND,
+                            linewidth=SUMMARY_SEQUENCE_STATISTICS_LINE_WIDTH,
+                            markers=SUMMARY_SEQUENCE_STATISTICS_PLOT_MARKERS,
+                            marker=SUMMARY_SEQUENCE_STATISTICS_MARKER_TYPE,
+                            markersize=SUMMARY_SEQUENCE_STATISTICS_MARKER_SIZE,
+                            markerfacecolor=SUMMARY_SEQUENCE_STATISTICS_MARKER_FACECOLOR,
+                            markeredgecolor=SUMMARY_SEQUENCE_STATISTICS_MARKER_EDGECOLOR,
+                            markeredgewidth=SUMMARY_SEQUENCE_STATISTICS_MARKER_EDGEWIDTH,
+                            alpha=SUMMARY_SEQUENCE_STATISTICS_MARKER_ALPHA,
+                            facet_kws=dict(sharex=share_x,
+                                           sharey=share_y)
+                        )
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, summary_stats_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                y_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
+                    color_dict = dict(zip(groups, color_palette))
+
+                    labels = [int(tick.get_text()) for tick in ax.get_yticklabels()]
+
+                    for box, group in zip(ax.patches, labels):
+                        box.set_facecolor(color_dict[group])
+                else:
+                    for box, color in zip(ax.patches, color_palette):
+                        box.set_facecolor(color)
+
+                ax.spines['top'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_LEFT)
+                ax.spines['right'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+
+    def _return_result_tables_paths(self) -> list[str]:
+
+        path_to_result_tables_dir = Path(PATH_TO_PICKLED_OBJECTS_FOLDER) / PATH_TO_RESULT_TABLES_PICKLE_FOLDER
+        extension = '.pickle'
+        path_to_result_tables = [file for file in path_to_result_tables_dir.rglob(f'*{extension}')]
+
+        return path_to_result_tables
+    
+    def _generate_avg_sequence_stats_per_group_per_dataset_df(self) -> pd.DataFrame:
+
+        fields_to_plot = [field.value for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST]
+
+        avg_learning_activity_sequence_stats_per_group_df_list = []
+        for file_path in self._path_to_result_tables:
+
+            with open(file_path, 'rb') as f:
+                result_table = pickle.load(f)
+            
+            learning_activity_sequence_stats_per_group = result_table.learning_activity_sequence_stats_per_group
+            avg_learning_activity_sequence_stats_per_group = (learning_activity_sequence_stats_per_group
+                                                              .groupby([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])
+                                                              [fields_to_plot].agg(np.mean))
+
+            avg_learning_activity_sequence_stats_per_group = avg_learning_activity_sequence_stats_per_group.reset_index()
+
+            avg_learning_activity_sequence_stats_per_group_df_list.append(avg_learning_activity_sequence_stats_per_group)
+
+        avg_learning_activity_sequence_stats_per_group_per_dataset = pd.concat(avg_learning_activity_sequence_stats_per_group_df_list)
+        avg_learning_activity_sequence_stats_per_group_per_dataset.sort_values([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR], inplace=True)
+    
+        return avg_learning_activity_sequence_stats_per_group_per_dataset 
+
+    def _generate_summary_sequence_stats_per_group_per_dataset_df(self) -> pd.DataFrame:
+
+        # helper functions for quartiles 
+        def first_quartile(array):
+            return np.quantile(array, 0.25)
+        def third_quartile(array):
+            return np.quantile(array, 0.75)
+
+        fields_to_plot_list = [field.value for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST]
+
+        summary_stats_per_group_list= []
+        for file_path in self._path_to_result_tables:
+
+            with open(file_path, 'rb') as f:
+                result_table = pickle.load(f)
+
+                summary_statistic_per_field_long_list = []
+                for field in fields_to_plot_list:
+
+                    summary_statistic_per_field = (result_table.learning_activity_sequence_stats_per_group
+                                                   .groupby([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])[field]
+                                                   .agg([min, max, np.median, first_quartile, third_quartile])
+                                                   .rename(columns={'min': LEARNING_ACTIVITY_SEQUENCE_MIN_NAME_STR, 
+                                                                    'median': LEARNING_ACTIVITY_SEQUENCE_MEDIAN_NAME_STR, 
+                                                                    'max': LEARNING_ACTIVITY_SEQUENCE_MAX_NAME_STR,
+                                                                    'first_quartile': LEARNING_ACTIVITY_SEQUENCE_FIRST_QUARTILE_NAME_STR,
+                                                                    'third_quartile': LEARNING_ACTIVITY_SEQUENCE_THIRD_QUARTILE_NAME_STR})
+                                                   .reset_index())
+
+                    field_list = [DATASET_NAME_FIELD_NAME_STR, 
+                                  GROUP_FIELD_NAME_STR, 
+                                  LEARNING_ACTIVITY_SEQUENCE_MIN_NAME_STR, 
+                                  LEARNING_ACTIVITY_SEQUENCE_FIRST_QUARTILE_NAME_STR,
+                                  LEARNING_ACTIVITY_SEQUENCE_MEDIAN_NAME_STR, 
+                                  LEARNING_ACTIVITY_SEQUENCE_THIRD_QUARTILE_NAME_STR,
+                                  LEARNING_ACTIVITY_SEQUENCE_MAX_NAME_STR]
+
+                    summary_statistic_per_field_long = pd.melt(summary_statistic_per_field[field_list], 
+                                                               id_vars=[DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR],
+                                                               var_name=LEARNING_ACTIVITY_SEQUENCE_DESCRIPTIVE_STATISTIC_NAME_STR,
+                                                               value_name=field)
+                    sort_list = [DATASET_NAME_FIELD_NAME_STR, 
+                                 GROUP_FIELD_NAME_STR]
+                    summary_statistic_per_field_long.sort_values(by=sort_list,
+                                                                 inplace=True)
+
+                    summary_statistic_per_field_long_list.append(summary_statistic_per_field_long)
+            
+            merge_field_list = [DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, LEARNING_ACTIVITY_SEQUENCE_DESCRIPTIVE_STATISTIC_NAME_STR]
+            summary_stats_per_group = reduce(lambda left, right: pd.merge(left=left, 
+                                                                          right=right, 
+                                                                          how='inner', 
+                                                                          on=merge_field_list), summary_statistic_per_field_long_list)
+            summary_stats_per_group_list.append(summary_stats_per_group)
+
+        summary_stats_per_group_per_dataset = pd.concat(summary_stats_per_group_list)
+        summary_stats_per_group_per_dataset.sort_values([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR], inplace=True)
+
+        return summary_stats_per_group_per_dataset
+
+    def _generate_sequence_statistics_distribtion_per_group_per_dataset_df(self) -> pd.DataFrame:
+
+        fields_to_plot = [field.value for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST]
+        field_list = [DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, *fields_to_plot]
+
+        learning_activity_sequence_stats_per_group_df_list = []
+        for file_path in self._path_to_result_tables:
+
+            with open(file_path, 'rb') as f:
+                result_table = pickle.load(f)
+            
+            learning_activity_sequence_stats_per_group = result_table.learning_activity_sequence_stats_per_group[field_list]
+
+            learning_activity_sequence_stats_per_group_df_list.append(learning_activity_sequence_stats_per_group)
+
+        summary_stats_per_group_per_dataset = pd.concat(learning_activity_sequence_stats_per_group_df_list)
+        summary_stats_per_group_per_dataset.sort_values([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR], inplace=True)
+
+        return summary_stats_per_group_per_dataset
+    
+    def _sort_groups_by_metric(self,
+                               data: pd.DataFrame,
+                               sequence_statistic: str) -> pd.DataFrame:
+
+        data = data.copy()
+
+        match SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC:
+            case SequenceStatisticsDistributionBoxplotSortMetric.MEAN:
+                sort_metric = np.mean
+
+            case SequenceStatisticsDistributionBoxplotSortMetric.MEDIAN:
+                sort_metric = np.median
+
+            case SequenceStatisticsDistributionBoxplotSortMetric.MAX:
+                sort_metric = np.max
+
+            case SequenceStatisticsDistributionBoxplotSortMetric.MIN:
+                sort_metric = np.min
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC}')
+
+        sort_metric_values = data.groupby([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])[sequence_statistic]\
+                                 .agg(sort_metric)\
+                                 .reset_index()
+
+        sort_metric_values.rename({sequence_statistic: SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.name}, 
+                                  axis=1, 
+                                  inplace=True)
+
+        sort_metric_values.sort_values(by=[DATASET_NAME_FIELD_NAME_STR, SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.name], inplace=True, ascending=False)
+
+        data[GROUP_FIELD_NAME_STR] = pd.Categorical(data[GROUP_FIELD_NAME_STR], categories=sort_metric_values[GROUP_FIELD_NAME_STR], ordered=True)
+        data.sort_values(by=GROUP_FIELD_NAME_STR, inplace=True)
+
+        return data
