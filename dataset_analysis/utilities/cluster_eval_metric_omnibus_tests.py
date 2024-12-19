@@ -624,13 +624,13 @@ class ClusterEvalMetricOmnibusTest():
                                                                     measure_of_association_value: float) -> str:
         
         if measure_of_association_value < 0.1:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
         elif measure_of_association_value < 0.3:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
         elif measure_of_association_value < 0.5:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
         else:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
         
         return moa_strength
 
@@ -638,13 +638,13 @@ class ClusterEvalMetricOmnibusTest():
                                                                               measure_of_association_value: float) -> str:
         
         if measure_of_association_value < 0.1:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
         elif measure_of_association_value < 0.2:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
         elif measure_of_association_value < 0.3:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
         else:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
 
         return moa_strength
 
@@ -652,17 +652,17 @@ class ClusterEvalMetricOmnibusTest():
                                                                           measure_of_association_value: float) -> str:
         
         if measure_of_association_value < 0.05:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_TINY_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.TINY.value
         if measure_of_association_value < 0.1:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
         elif measure_of_association_value < 0.2:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
         elif measure_of_association_value < 0.3:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
         elif measure_of_association_value < 0.4:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
         else:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_LARGE.value
 
         return moa_strength
 
@@ -670,13 +670,13 @@ class ClusterEvalMetricOmnibusTest():
                                                                                  measure_of_association_value: float) -> str:
         
         if measure_of_association_value < 0.12:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
         elif measure_of_association_value < 0.24:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
         elif measure_of_association_value < 0.41:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
         else:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
 
         return moa_strength
                             
@@ -973,13 +973,13 @@ class ClusterEvalMetricOmnibusTest():
                                                             measure_of_association_value: float) -> str:
         
         if measure_of_association_value < 0.0099:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
         elif measure_of_association_value < 0.0588:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
         elif measure_of_association_value < 0.1379:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
         else:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
         
         return moa_strength
 
@@ -987,13 +987,13 @@ class ClusterEvalMetricOmnibusTest():
                                                               measure_of_association_value: float) -> str:
         
         if measure_of_association_value < 0.10:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_VERY_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
         elif measure_of_association_value < 0.25:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_SMALL_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
         elif measure_of_association_value < 0.4:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_MEDIUM_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
         else:
-            moa_strength = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_LARGE_VALUE_STR
+            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
         
         return moa_strength
 
