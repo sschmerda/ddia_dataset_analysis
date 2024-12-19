@@ -1,7 +1,7 @@
 from .standard_import import *
+from .constants.constants import *
 from .preprocessing_functions import *
 from .html_style_functions import *
-from .constants import *
 
 def calculate_sparsity(index: pd.Series, 
                        column: pd.Series) -> float:
@@ -57,7 +57,7 @@ class ResultTables():
         A dataframe containing statistics for unique sequences per group 
     learning_activity_sequence_stats_per_group : pd.DataFrame
         A dataframe containing statistics for all sequences per group 
-    best_cluster_results_per_group_df : pd.DataFrame
+    cluster_results_per_group_df : pd.DataFrame
         A dataframe containing parameters and cluster statistics for the optimal cluster results per group.
     sequence_cluster_per_group_df : pd.DataFrame
         A dataframe containing sequence-cluster relation information per group 
@@ -683,7 +683,7 @@ class ResultTables():
         try:
             score_is_correct_rel_df = self.score_is_correct_rel_df.copy().transpose()
 
-            soup = BeautifulSoup(score_is_correct_rel_df .to_html(), "html.parser")
+            soup = BeautifulSoup(score_is_correct_rel_df.to_html(), "html.parser")
 
             # standardized table formatting
             apply_html_table_formatting(soup)
