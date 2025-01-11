@@ -423,6 +423,18 @@ class AggregatedResults():
                                                     False)
                     x_axis_ticks = np.arange(0, 110, 10)
 
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                    x_axis_lim = return_axis_limits(avg_learning_activity_sequence_stats_per_group_per_dataset[field.value],
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                    x_axis_lim = return_axis_limits(avg_learning_activity_sequence_stats_per_group_per_dataset[field.value],
+                                                    True,
+                                                    True)
+                    x_axis_ticks = np.arange(0, 1.1, 0.1)
+
                 case _:
                     raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
 
@@ -433,12 +445,14 @@ class AggregatedResults():
                             y=DATASET_NAME_FIELD_NAME_STR, 
                             hue=DATASET_NAME_FIELD_NAME_STR,
                             palette=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE,
+                            saturation=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION,
                             showfliers=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_OUTLIERS,
                             linewidth=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_LINE_WIDTH,
                             width=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_BOX_WIDTH,
                             whis=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_BOX_WHISKERS,
                             showmeans=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_MEANS,
                             meanprops=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_MARKER,
+                            saturation=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION,
                            )
             # strip or swarmplot
             g = sns.swarmplot(
@@ -491,6 +505,13 @@ class AggregatedResults():
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
 
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+
                 case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
                         SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
 
@@ -498,6 +519,61 @@ class AggregatedResults():
                     statistic_is_ratio = False
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE | SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
 
                 case _:
                     raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
@@ -522,6 +598,14 @@ class AggregatedResults():
                             markersize=SUMMARY_SEQUENCE_STATISTICS_MARKER_SIZE,
                             markerfacecolor=SUMMARY_SEQUENCE_STATISTICS_MARKER_FACECOLOR,
                             markeredgecolor=SUMMARY_SEQUENCE_STATISTICS_MARKER_EDGECOLOR,
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
                             markeredgewidth=SUMMARY_SEQUENCE_STATISTICS_MARKER_EDGEWIDTH,
                             alpha=SUMMARY_SEQUENCE_STATISTICS_MARKER_ALPHA,
                             facet_kws=dict(sharex=share_x,
@@ -530,10 +614,224 @@ class AggregatedResults():
 
             for ax, (facet_val, facet_data) in zip(g.axes.flat, summary_stats_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
 
-                y_axis_lim = return_axis_limits(facet_data[field.value],
+                            hue=hue_var,
                                                 statistic_is_pct,
                                                 statistic_is_ratio)
                 ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
 
                 n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
 
@@ -610,6 +908,7734 @@ class AggregatedResults():
                     data = self._sort_groups_by_metric(data,
                                                        field.value)
                 
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=hue_var,
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            saturation=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION,
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            saturation=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION,
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+            if include_unique_sequences:
+                g.add_legend(
+                            title=LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR,
+                            frameon=True,
+                            bbox_to_anchor=(0.98, 0.5), 
+                            loc='center left')
+
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            if include_unique_sequences:
+                g.add_legend(
+                            title=LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR,
+                            frameon=True,
+                            bbox_to_anchor=(0.98, 0.5), 
+                            loc='center left')
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+                if include_unique_sequences:
+                    pass
+                else:
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                if include_unique_sequences:
+                    pass
+                else:
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                    n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                    n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+                    color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                    color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                      desat=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION, 
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                      desat=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION, 
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                      n_colors=n_groups)
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                      n_colors=n_groups)
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                    if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                        groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
+                        color_dict = dict(zip(groups, color_palette))
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+
+                    if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                        groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
+                        color_dict = dict(zip(groups, color_palette))
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
+                    color_dict = dict(zip(groups, color_palette))
+                        labels = [int(tick.get_text()) for tick in ax.get_yticklabels()]
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
+                    color_dict = dict(zip(groups, color_palette))
+
+                        labels = [int(tick.get_text()) for tick in ax.get_yticklabels()]
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+                sns.boxplot(
+                            data=data, 
+                            x=field.value,
+                            y=GROUP_FIELD_NAME_STR,
+                            hue=GROUP_FIELD_NAME_STR,
+                            orient=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_ORIENTATION,
+                            palette=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                            showfliers=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS,
+                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LINE_WIDTH,
+                            width=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WIDTH,
+                            whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
+                            showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
+                            meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
+                            **kwargs)
+
+            g = sns.FacetGrid(sequence_statistics_per_group_per_dataset,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y,
+            )
+            g.map_dataframe(plot_boxplot)
+
+            for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_statistics_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
+                    color_dict = dict(zip(groups, color_palette))
+
+                    labels = [int(tick.get_text()) for tick in ax.get_yticklabels()]
+                        for box, group in zip(ax.patches, labels):
+                            box.set_facecolor(color_dict[group])
+                    else:
+                        for box, color in zip(ax.patches, color_palette):
+                            box.set_facecolor(color)
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                ax.set_ylim(*y_axis_lim)
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
+
+                n_groups = facet_data[GROUP_FIELD_NAME_STR].nunique()
+
+                color_palette = sns.color_palette(SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE, 
+                                                  n_colors=n_groups)
+                
+                for line, color in zip(ax.lines, color_palette):
+                    line.set_color(color)
+                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
+
+                ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
+                ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
+
+            for ax in g.axes.flatten():
+                ax.tick_params(labelbottom=True)
+            plt.tight_layout()
+            plt.savefig(f'{PATH_TO_RESULT_PLOTS}/{SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME}{field}.{SAVE_FIGURE_IMAGE_FORMAT}', 
+                        dpi=SAVE_FIGURE_DPI,
+                        format=SAVE_FIGURE_IMAGE_FORMAT,
+                        bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+            plt.show(g);
+
+    @sequence_statistics_distribution_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_per_group_per_dataset(self) -> None:
+
+        sequence_statistics_per_group_per_dataset = self._generate_sequence_statistics_distribtion_per_group_per_dataset_df()
+
+        for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+
+            n_cols = set_facet_grid_column_number(sequence_statistics_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_boxplot(data, **kwargs):
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field.value)
+                
+                if include_unique_sequences:
+                    hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
+                else:
+                    hue_var = GROUP_FIELD_NAME_STR
+
                 sns.boxplot(
                             data=data, 
                             x=field.value,
@@ -653,11 +8679,11 @@ class AggregatedResults():
 
                     labels = [int(tick.get_text()) for tick in ax.get_yticklabels()]
 
-                    for box, group in zip(ax.patches, labels):
-                        box.set_facecolor(color_dict[group])
-                else:
-                    for box, color in zip(ax.patches, color_palette):
-                        box.set_facecolor(color)
+                        for box, group in zip(ax.patches, labels):
+                            box.set_facecolor(color_dict[group])
+                    else:
+                        for box, color in zip(ax.patches, color_palette):
+                            box.set_facecolor(color)
 
                 ax.spines['top'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_TOP)
                 ax.spines['bottom'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_BOTTOM)
