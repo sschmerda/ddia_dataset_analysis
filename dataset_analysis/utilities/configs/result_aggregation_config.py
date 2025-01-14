@@ -243,3 +243,50 @@ SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO = True
 SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO = False
 SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW = True
 SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW = False
+
+
+########################################################################################################################
+### plot_sequence_sequence_count_per_group_per_dataset options ###
+########################################################################################################################
+
+# plot name
+SEQUENCE_COUNT_PLOT_NAME = 'sequence_count'
+
+# plot decorator
+def sequence_count_per_group_per_dataset_decorator(func):
+    """A decorator to apply temporary Seaborn settings."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        axes_style_rc_dict = {'axes.grid': True,
+                              'font.family': ['Arial']}
+        rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI}
+
+        with sns.axes_style('ticks', rc=axes_style_rc_dict),\
+             sns.plotting_context(context='paper', font_scale=1, rc={}),\
+             plt.rc_context(rc_context_dict):
+
+             return func(*args, **kwargs)
+    return wrapper
+
+# scatterplot config
+SEQUENCE_COUNT_KIND = 'scatter'
+SEQUENCE_COUNT_PLOT_LEGEND = False
+# marker
+SEQUENCE_COUNT_MARKER_SIZE = 150
+SEQUENCE_COUNT_MARKER_FACECOLOR = 'red'
+SEQUENCE_COUNT_MARKER_EDGECOLOR = 'black'
+SEQUENCE_COUNT_MARKER_EDGEWIDTH = 1
+SEQUENCE_COUNT_MARKER_ALPHA = 0.7
+# 45 degree line
+SEQUENCE_COUNT_45_DEGREE_LINE_ALPHA = 1
+SEQUENCE_COUNT_45_DEGREE_LINE_WIDTH = 2
+SEQUENCE_COUNT_45_DEGREE_LINE_COLOR = 'orange'
+# spines
+SEQUENCE_COUNT_SHOW_TOP = False
+SEQUENCE_COUNT_SHOW_BOTTOM = True
+SEQUENCE_COUNT_SHOW_LEFT = True
+SEQUENCE_COUNT_SHOW_RIGHT = False
+# axes
+SEQUENCE_COUNT_SHAREX = False
+SEQUENCE_COUNT_SHAREY = False
