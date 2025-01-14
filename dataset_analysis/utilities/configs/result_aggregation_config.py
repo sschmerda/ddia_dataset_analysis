@@ -54,8 +54,13 @@ class SequenceStatisticsDistributionBoxplotSortMetric(Enum):
                                            SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE]
 
 ########################################################################################################################
-### figure plot options ###
+### sequence statistics options ###
 ########################################################################################################################
+
+# fields to plot
+SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST = [SequenceStatisticsPlotFields.SEQUENCE_LENGTH,
+                                           SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ,
+                                           SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES,
                                            SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE,
                                            SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE]
 
@@ -71,6 +76,8 @@ def avg_sequence_statistics_per_group_per_dataset_decorator(func):
     """A decorator to apply temporary Seaborn settings."""
 
     @wraps(func)
+    def wrapper(*args, **kwargs):
+        axes_style_rc_dict = {'axes.spines.left': False,
                               'axes.spines.bottom': True,
                               'axes.spines.right': False,
                               'axes.spines.top': False,
@@ -83,22 +90,6 @@ def avg_sequence_statistics_per_group_per_dataset_decorator(func):
         with sns.axes_style('ticks', rc=axes_style_rc_dict),\
              sns.plotting_context(context='paper', font_scale=1.5, rc={}),\
              plt.rc_context(rc_context_dict):
-                           'patch.edgecolor': 'black'}
-
-        with sns.axes_style('ticks', rc=axes_style_rc_dict),\
-             sns.plotting_context(context='paper', font_scale=1.5, rc={}),\
-             plt.rc_context(rc_context_dict):
-# color saturation
-AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION = 0.75
-# color saturation
-AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION = 0.75
-                           'patch.edgecolor': 'black'}
-
-        with sns.axes_style('ticks', rc=axes_style_rc_dict),\
-             sns.plotting_context(context='paper', font_scale=1.5, rc={}),\
-             plt.rc_context(rc_context_dict):
-# color saturation
-AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION = 0.75
 
              return func(*args, **kwargs)
     return wrapper
@@ -108,18 +99,6 @@ AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE = SEABORN_COLOR_PA
 # AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE ='vlag'
 # color saturation
 AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION = 0.75
-
-             return func(*args, **kwargs)
-    return wrapper
-
-# boxplot color palette
-AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE = SEABORN_COLOR_PALETTE
-# AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE ='vlag'
-    return wrapper
-
-# boxplot color palette
-AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE = SEABORN_COLOR_PALETTE
-# AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE ='vlag'
 
 # boxplot config
 AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_OUTLIERS = False
@@ -151,6 +130,10 @@ SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME = 'summary_sequence_statistics_'
 # plot decorator
 def summary_sequence_statistics_per_group_per_dataset_decorator(func):
     """A decorator to apply temporary Seaborn settings."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        axes_style_rc_dict = {'axes.grid': True,
                               'font.family': ['Arial']}
         rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI}
 
@@ -180,7 +163,6 @@ SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP = False
 SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM = True
 SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT = True
 SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT = False
-SEQUENCE_STATISTICS_DISTRIBUTION_NON_UNIQUE_UNIQUE_SPLIT_BOXPLOT_PLOT_NAME = 'sequence_statistics_distribution_non_unique_unique_split_'
 # axes
 SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT = False
 SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT = True
@@ -196,12 +178,6 @@ SUMMARY_SEQUENCE_STATISTICS_SHAREY_RAW = True
 # plot name
 SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_NAME = 'sequence_statistics_distribution_'
 SEQUENCE_STATISTICS_DISTRIBUTION_NON_UNIQUE_UNIQUE_SPLIT_BOXPLOT_PLOT_NAME = 'sequence_statistics_distribution_non_unique_unique_split_'
-########################################################################################################################
-
-# plot name
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_NAME = 'sequence_statistics_distribution_'
-# plot name
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_NAME = 'sequence_statistics_distribution_'
 
 # plot decorator
 def sequence_statistics_distribution_per_group_per_dataset_decorator(func):
@@ -212,15 +188,6 @@ def sequence_statistics_distribution_per_group_per_dataset_decorator(func):
         axes_style_rc_dict = {'axes.grid': True,
                               'font.family': ['Arial']}
         rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI}
-    def wrapper(*args, **kwargs):
-        axes_style_rc_dict = {'axes.grid': True,
-                              'font.family': ['Arial']}
-        rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI}
-# color saturation
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION = 0.75
-        rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI}
-# color saturation
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION = 0.75
 
         with sns.axes_style('ticks', rc=axes_style_rc_dict),\
              sns.plotting_context(context='paper', font_scale=1, rc={}),\
@@ -228,18 +195,6 @@ SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION = 0.75
 
              return func(*args, **kwargs)
     return wrapper
-
-
-             return func(*args, **kwargs)
-    return wrapper
-
-# boxplot color palette
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE = SEABORN_COLOR_PALETTE
-
-    return wrapper
-
-# boxplot color palette
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE = SEABORN_COLOR_PALETTE
 
 # boxplot config
 SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_OUTLIERS = True
@@ -258,6 +213,7 @@ SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER = {'marker':'o',
                                                    'zorder': 30}
 # boxplot sort order
 SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES = False
+SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC = SequenceStatisticsDistributionBoxplotSortMetric.MEDIAN
 # spines
 SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_TOP = False
 SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_BOTTOM = True
