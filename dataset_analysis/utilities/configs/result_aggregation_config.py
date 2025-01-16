@@ -34,6 +34,10 @@ RESULT_AGGREGATION_FACET_GRID_HEIGHT = RESULT_AGGREGATION_FIG_SIZE_WIDTH_INCH/(R
 ### option enums ###
 ########################################################################################################################
 
+class SequenceStatisticsAveragingMethod(Enum):
+    MEAN = AVG_SEQUENCE_STATISTICS_AVERAGING_METHOD_MEAN
+    MEDIAN = AVG_SEQUENCE_STATISTICS_AVERAGING_METHOD_MEDIAN
+    
 class SequenceStatisticsPlotFields(Enum):
     SEQUENCE_LENGTH = LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR
     PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ = LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR
@@ -41,20 +45,24 @@ class SequenceStatisticsPlotFields(Enum):
     MEAN_NORMALIZED_SEQUENCE_DISTANCE = LEARNING_ACTIVITY_MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR
     MEDIAN_NORMALIZED_SEQUENCE_DISTANCE = LEARNING_ACTIVITY_MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR
 
-class SequenceStatisticsDistributionBoxplotSortMetric(Enum):
-    MEAN = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC_MEAN
-    MEDIAN = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC_MEDIAN
-    MAX = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC_MAX
-    MIN = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC_MIN
+class UniqueSequenceFrequencyStatisticsPlotFields(Enum):
+    SEQUENCE_FREQUENCY = LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR
+    RELATIVE_SEQUENCE_FREQUENCY = LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR
+
+class BoxplotSortMetric(Enum):
+    MEAN = BOXPLOT_SORT_METRIC_MEAN
+    MEDIAN = BOXPLOT_SORT_METRIC_MEDIAN
+    MAX = BOXPLOT_SORT_METRIC_MAX
+    MIN = BOXPLOT_SORT_METRIC_MIN
+
+class OmnibusTestResultPValueKind(Enum):
+    PVAL = OMNIBUS_TESTS_PVAL_FIELD_NAME_STR
+    PVAL_PERM = OMNIBUS_TESTS_PERM_PVAL_FIELD_NAME_STR
+    PVAL_R = OMNIBUS_TESTS_R_PVAL_FIELD_NAME_STR
+    PVAL_PERM_R = OMNIBUS_TESTS_R_PERM_PVAL_FIELD_NAME_STR
 
 ########################################################################################################################
-### figure save options ###
-                                           SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE,
-                                           SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE]
-                                           SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE]
-
-########################################################################################################################
-### sequence statistics options ###
+### sequence statistics plot fields ###
 ########################################################################################################################
 
 # fields to plot
@@ -64,12 +72,20 @@ SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST = [SequenceStatisticsPlotFields.SEQUENCE
                                            SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE,
                                            SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE]
 
+UNIQUE_SEQUENCE_FREQUENCY_STATISTICS_FIELDS_TO_PLOT_LIST = [UniqueSequenceFrequencyStatisticsPlotFields.SEQUENCE_FREQUENCY,
+                                                            UniqueSequenceFrequencyStatisticsPlotFields.RELATIVE_SEQUENCE_FREQUENCY]
+
 ########################################################################################################################
 ### plot_avg_sequence_statistics_per_group_per_dataset options ###
 ########################################################################################################################
 
+# averaging method
+AVG_SEQUENCE_STATISTICS_AVERAGING_METHOD = SequenceStatisticsAveragingMethod.MEAN
+
 # plot name
 AVG_SEQUENCE_STATISTICS_PLOT_NAME = 'average_sequence_statistics_'
+# axis labels
+AVG_SEQUENCE_STATISTICS_X_LABEL_SUFFIX = f' per {GROUP_FIELD_NAME_STR}' 
 
 # plot decorator
 def avg_sequence_statistics_per_group_per_dataset_decorator(func):
@@ -213,7 +229,7 @@ SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER = {'marker':'o',
                                                    'zorder': 30}
 # boxplot sort order
 SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES = False
-SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC = SequenceStatisticsDistributionBoxplotSortMetric.MEDIAN
+SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC = BoxplotSortMetric.MEDIAN
 # spines
 SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_TOP = False
 SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_BOTTOM = True
@@ -270,5 +286,6 @@ SEQUENCE_COUNT_SHOW_BOTTOM = True
 SEQUENCE_COUNT_SHOW_LEFT = True
 SEQUENCE_COUNT_SHOW_RIGHT = False
 # axes
+# no sharey because y will alwyas be shared when x is shared to keep square aspect ratio
 SEQUENCE_COUNT_SHAREX = False
-SEQUENCE_COUNT_SHAREY = False
+
