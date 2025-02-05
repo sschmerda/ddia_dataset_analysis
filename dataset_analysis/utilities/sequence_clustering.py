@@ -896,7 +896,8 @@ class SequenceDistanceClustersPerGroup():
                             alpha=SEABORN_POINT_ALPHA_FACET_CLUSTER_2D,
                             s=SEABORN_POINT_SIZE_FACET_CLUSTER_2D)
             g.add_legend(title=CLUSTER_FIELD_NAME_STR,
-                         frameon=True)
+                         frameon=True,
+                         markerscale=2)
             sns.move_legend(g, "upper left", bbox_to_anchor=(1.01, 0.75))
             g.set(xlabel=CLUSTERING_2D_PLOT_X_AXIS_LABEL_NAME_STR, 
                   ylabel=CLUSTERING_2D_PLOT_Y_AXIS_LABEL_NAME_STR)
