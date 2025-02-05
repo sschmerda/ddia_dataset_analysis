@@ -894,7 +894,8 @@ class SequenceDistanceClustersPerGroup():
                             hue=CLUSTER_FIELD_NAME_STR,
                             palette=return_color_palette(max_n_clusters),
                             alpha=SEABORN_POINT_ALPHA_FACET_CLUSTER_2D,
-                            s=SEABORN_POINT_SIZE_FACET_CLUSTER_2D)
+                            s=SEABORN_POINT_SIZE_FACET_CLUSTER_2D,
+                            edgecolor=SEABORN_POINT_EDGECOLOR)
             g.add_legend(title=CLUSTER_FIELD_NAME_STR,
                          frameon=True,
                          markerscale=2)
