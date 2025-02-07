@@ -101,6 +101,8 @@ EVALUATION_COURSE_SCORE_MAXIMUM_IN_DATASET_DOCU = None
 
 OMNIBUS_TESTS_EVAlUATION_METRIC_NAME_STR = EVALUATION_GROUP_IS_CORRECT_FIELD_NAME_STR
 OMNIBUS_TESTS_EVAlUATION_METRIC_IS_CATEGORICAL_NAME_STR = True
+OMNIBUS_TESTS_EVAlUATION_METRIC_IS_PCT_NAME_STR = False
+OMNIBUS_TESTS_EVAlUATION_METRIC_IS_RATIO_NAME_STR = False
 
 ########################################################################################################################
 ### pickle paths and file names ###
