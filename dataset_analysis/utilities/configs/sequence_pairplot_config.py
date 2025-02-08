@@ -1,15 +1,69 @@
 from ..standard_import import *
+from ..constants import *
 from .general_config import *
 
 ########################################################################################################################
-### figure plot options ###
+### option enums ###
 ########################################################################################################################
 
+class PairplotFieldsToPlot(Enum):
+    PCT_REPEATED_LEARNING_ACTIVITIES = LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR
+    NUMBER_REPEATED_LEARNING_ACTIVITIES = LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_NAME_STR
+    PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP = LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR
+    NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP = LEARNING_ACTIVITY_SEQUENCE_NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR
+    SEQUENCE_LENGTH = LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR
+    MEAN_SEQUENCE_DISTANCE = LEARNING_ACTIVITY_MEAN_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR
+    MEAN_NORMALIZED_SEQUENCE_DISTANCE = LEARNING_ACTIVITY_MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR
+
+def return_plot_field_data_kind(plot_field: PairplotFieldsToPlot) -> Tuple[bool, bool]:
+    match plot_field:
+        case PairplotFieldsToPlot.PCT_REPEATED_LEARNING_ACTIVITIES:
+            return (True, False)
+        case PairplotFieldsToPlot.NUMBER_REPEATED_LEARNING_ACTIVITIES:
+            return (False, False)
+        case PairplotFieldsToPlot.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP:
+            return (True, False)
+        case PairplotFieldsToPlot.NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP:
+            return (False, False)
+        case PairplotFieldsToPlot.SEQUENCE_LENGTH:
+            return (False, False)
+        case PairplotFieldsToPlot.MEAN_SEQUENCE_DISTANCE:
+            return (False, False)
+        case PairplotFieldsToPlot.MEAN_NORMALIZED_SEQUENCE_DISTANCE:
+            return (True, True)
+        case _:
+            raise ValueError(PAIRPLOT_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{plot_field}')
+
+########################################################################################################################
+###  fields to plot options ###
+########################################################################################################################
+
+PAIRPLOT_FIELDS_TO_PLOT_LIST = [PairplotFieldsToPlot.PCT_REPEATED_LEARNING_ACTIVITIES,
+                                PairplotFieldsToPlot.NUMBER_REPEATED_LEARNING_ACTIVITIES,
+                                PairplotFieldsToPlot.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP,
+                                PairplotFieldsToPlot.NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP,
+                                PairplotFieldsToPlot.SEQUENCE_LENGTH,
+                                PairplotFieldsToPlot.MEAN_SEQUENCE_DISTANCE,
+                                PairplotFieldsToPlot.MEAN_NORMALIZED_SEQUENCE_DISTANCE]
+
+########################################################################################################################
+###  fields to plot options ###
+########################################################################################################################
+
+PAIRPLOT_EXCLUDE_NON_CLUSTERED = False
+PAIRPLOT_SET_AXIS_LIM_FOR_DTYPE = True 
+PAIRPLOT_ADD_CENTRAL_TENDENCY_MARKERS = True
+
+########################################################################################################################
+### facet grid sizing options ###
+########################################################################################################################
+
+PAIRPLOT_FACET_GRID_ASPECT = 1
+PAIRPLOT_FACET_GRID_HEIGHT = 3
 PAIRPLOT_FIG_SIZE_DPI = 100
-PAIRPLOT_COLOR_PALETTE = SEABORN_COLOR_PALETTE
 
 ########################################################################################################################
-### plot_pairplot options ###
+### style options ###
 ########################################################################################################################
 
 def pairplot_decorator(func):
@@ -27,3 +81,53 @@ def pairplot_decorator(func):
 
              return func(*args, **kwargs)
     return wrapper
+
+########################################################################################################################
+### plot elements options ###
+########################################################################################################################
+
+PAIRPLOT_COLOR_PALETTE = SEABORN_COLOR_PALETTE
+
+PAIRPLOT_SCATTER_POINT_SIZE = 25
+PAIRPLOT_SCATTER_POINT_ALPHA = 0.8
+PAIRPLOT_SCATTER_POINT_EDGECOLOR = 'black'
+
+PAIRPLOT_STRIPPLOT_POINT_SIZE = 5
+PAIRPLOT_STRIPPLOT_POINT_ALPHA = 0.8
+PAIRPLOT_STRIPPLOT_POINT_LINEWIDTH = 0.35
+PAIRPLOT_STRIPPLOT_POINT_EDGECOLOR = 'black'
+
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_SIZE_OUTER = 300
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_LINEWIDTH_OUTER = 1.8
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_EDGECOLOR_OUTER = 'white'
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_SIZE_INNER = 150
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_LINEWIDTH_INNER = 1.4
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_EDGECOLOR_INNER = 'black'
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_ALPHA = 1
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_COLOR = 'red'
+PAIRPLOT_CENTRAL_TENDENCY_MARKER_KIND = '*'
+
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_SIZE_OUTER = 80
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_LINEWIDTH_OUTER = 1.8
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_EDGECOLOR_OUTER = 'white'
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_SIZE_INNER = 40
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_LINEWIDTH_INNER = 1.4 
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_EDGECOLOR_INNER = 'black'
+PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_KIND = 'D'
+
+########################################################################################################################
+### subplot plot axes options ###
+########################################################################################################################
+
+PAIRPLOT_X_LABEL_ROTATION = 90
+PAIRPLOT_Y_LABEL_ROTATION = 0
+PAIRPLOT_X_LABEL_PAD = 0
+PAIRPLOT_Y_LABEL_PAD = 160
+
+########################################################################################################################
+### subplot header options ###
+########################################################################################################################
+
+PAIRPLOT_HEADER_FONTSIZE = 15
+PAIRPLOT_PEARSON_CORRELATION_ROUND_DIGITS = 2
+PAIRPLOT_PEARSON_CORRELATION_P_VALUE_ROUND_DIGITS = 3

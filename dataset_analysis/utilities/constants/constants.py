@@ -826,6 +826,13 @@ OMNIBUS_TESTS_ERROR_EVAL_METRIC_NOT_CATEGORICAL_NAME_STR = 'Evaluation metric ne
 OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = 'Not a valid member of enum: '
 
 ###################################################################################################
+# pairplot
+PAIRPLOT_TITLE_STR = f'Pairplot of Analysis-Relevant Variables Subdivided by {CLUSTER_FIELD_NAME_STR}s for each {GROUP_FIELD_NAME_STR}'
+
+# errors
+PAIRPLOT_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = f'Not a valid member of enum: '
+
+###################################################################################################
 # monitoring
 MONITORING_OBJECT_NAME_FIELD_NAME_STR = 'Object'
 MONITORING_MEGABYTE_FIELD_NAME_STR = 'Size in MB'

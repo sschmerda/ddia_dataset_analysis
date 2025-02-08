@@ -12,6 +12,7 @@ class LearningActivitySequencePairplot():
                  result_tables: ResultTables,
                  exclude_non_clustered: bool,
                  set_axis_lim_for_dtype: bool,
+                 add_central_tendency_markers: bool,
                  evaluation_metric_field: str,
                  evaluation_metric_is_categorical: bool,
                  evaluation_metric_is_pct: bool,
@@ -21,28 +22,15 @@ class LearningActivitySequencePairplot():
         self.learning_activity_sequence_stats_per_group: pd.DataFrame = result_tables.learning_activity_sequence_stats_per_group.copy()
         self.exclude_non_clustered: bool = exclude_non_clustered
         self.set_axis_lim_for_dtype: bool = set_axis_lim_for_dtype
+        self.add_central_tendency_markers: bool = add_central_tendency_markers
         self.evaluation_metric_field: str = evaluation_metric_field
         self.evaluation_metric_is_categorical: bool = evaluation_metric_is_categorical
         self.evaluation_metric_is_pct: bool = evaluation_metric_is_pct
         self.evaluation_metric_pct_is_ratio: bool = evaluation_metric_pct_is_ratio
 
         self._fields = [GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, CLUSTER_FIELD_NAME_STR, SEQUENCE_ID_FIELD_NAME_STR]
-        self._fields_to_plot = [LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR,
-                                LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_NAME_STR,
-                                LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR,
-                                LEARNING_ACTIVITY_SEQUENCE_NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR,
-                                LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
-                                LEARNING_ACTIVITY_MEAN_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR,
-                                LEARNING_ACTIVITY_MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR,
-                                self.evaluation_metric_field]
-        self._fields_to_plot_axis_lim_cat = [(True, False),
-                                             (False, False),
-                                             (True, False),
-                                             (False, False),
-                                             (False, False),
-                                             (False, False),
-                                             (True, True),
-                                             (self.evaluation_metric_is_pct, self.evaluation_metric_pct_is_ratio)]
+        self._fields_to_plot = self._return_fields_to_plot(PAIRPLOT_FIELDS_TO_PLOT_LIST) + [self.evaluation_metric_field]
+        self._fields_to_plot_axis_lim_cat = self._return_fields_to_plot_data_kind(PAIRPLOT_FIELDS_TO_PLOT_LIST) + [(self.evaluation_metric_is_pct, self.evaluation_metric_pct_is_ratio)]
         self._fields_to_keep = self._fields + self._fields_to_plot
 
         self._merge_fields = [GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, self.evaluation_metric_field]
@@ -51,14 +39,13 @@ class LearningActivitySequencePairplot():
     def plot_pairplot(self) -> None:
 
         print(DASH_STRING)
-        print(f'Pairplot of Analysis-Relevant Variables Subdivided by {CLUSTER_FIELD_NAME_STR}s for each {GROUP_FIELD_NAME_STR}')
+        print(PAIRPLOT_TITLE_STR)
         print(DASH_STRING)
         print('')
 
         seq_stats_data = self._generate_plotting_df()
 
-        color_palette = self._return_color_palette(seq_stats_data,
-                                                   SEABORN_COLOR_PALETTE)
+        n_clusters_all_groups = seq_stats_data.loc[seq_stats_data[CLUSTER_FIELD_NAME_STR] != -1, :][CLUSTER_FIELD_NAME_STR].nunique()
 
         for group, df in seq_stats_data.groupby(GROUP_FIELD_NAME_STR):
 
@@ -67,21 +54,36 @@ class LearningActivitySequencePairplot():
             print(STAR_STRING)
 
             n_plot_fields = len(self._fields_to_plot)
+            number_clusters_within_group = df.loc[df[CLUSTER_FIELD_NAME_STR] != -1, :][CLUSTER_FIELD_NAME_STR].nunique()
 
-            color_palette_new = color_palette[:df[CLUSTER_FIELD_NAME_STR].nunique()]
+            if self.exclude_non_clustered:
+                df = df.loc[df[CLUSTER_FIELD_NAME_STR] != -1, :]
+                color_palette = self._return_color_palette(n_clusters_all_groups,
+                                                           PAIRPLOT_COLOR_PALETTE)
+                color_palette = color_palette[:number_clusters_within_group]
+            else:
+                if -1 in df[CLUSTER_FIELD_NAME_STR].unique():
+                    color_palette = self._return_color_palette(n_clusters_all_groups,
+                                                               PAIRPLOT_COLOR_PALETTE)
+                    color_palette.insert(0, (0,0,0))
+                    color_palette = color_palette[:number_clusters_within_group + 1]
+                else:
+                    color_palette = self._return_color_palette(n_clusters_all_groups,
+                                                               PAIRPLOT_COLOR_PALETTE)
+                    color_palette = color_palette[:number_clusters_within_group]
+
 
             g = sns.pairplot(df,
                              vars=self._fields_to_plot,
                              hue=CLUSTER_FIELD_NAME_STR,
                              kind='scatter',
                              corner=False,
-                             height=SEABORN_FIGURE_LEVEL_HEIGHT_SQUARE_FACET,
-                             aspect=SEABORN_FIGURE_LEVEL_ASPECT_SQUARE,
-                             palette=color_palette_new,
-                             plot_kws=dict(
-                                            s=SEABORN_POINT_SIZE_FACET_CLUSTER_2D,
-                                            alpha=SEABORN_POINT_ALPHA_FACET_CLUSTER_2D,
-                                            edgecolor=SEABORN_POINT_EDGECOLOR))
+                             height=PAIRPLOT_FACET_GRID_HEIGHT,
+                             aspect=PAIRPLOT_FACET_GRID_ASPECT,
+                             palette=color_palette,
+                             plot_kws=dict(s=PAIRPLOT_SCATTER_POINT_SIZE,
+                                           alpha=PAIRPLOT_SCATTER_POINT_ALPHA,
+                                           edgecolor=PAIRPLOT_SCATTER_POINT_EDGECOLOR))
 
             central_tendencies_per_cluster_df = df.groupby(CLUSTER_FIELD_NAME_STR)[self._fields_to_plot].agg(np.mean).reset_index()
             central_tendencies_df = df.groupby(GROUP_FIELD_NAME_STR)[self._fields_to_plot].agg(np.mean).reset_index()
@@ -117,7 +119,7 @@ class LearningActivitySequencePairplot():
                                                  self._fields_to_plot[column],
                                                  self._fields_to_plot[-1],
                                                  ax,
-                                                 color_palette_new,
+                                                 color_palette,
                                                  'h')
 
                         if (column == (n_plot_fields - 1)) and (column != row):
@@ -125,55 +127,56 @@ class LearningActivitySequencePairplot():
                                                  self._fields_to_plot[-1],
                                                  self._fields_to_plot[row],
                                                  ax,
-                                                 color_palette_new,
+                                                 color_palette,
                                                  'v')
                     # plot central tendency markers
-                    if self.evaluation_metric_is_categorical:
-                        if (column != (n_plot_fields - 1)) and (row != (n_plot_fields - 1)) and (column != row):
-                            self._add_central_tendency_marker_per_cluster_scatter(central_tendencies_per_cluster_df,
-                                                                                  self._fields_to_plot[column],
-                                                                                  self._fields_to_plot[row],
-                                                                                  ax,
-                                                                                  color_palette_new)
-                            self._add_central_tendency_marker_scatter(central_tendencies_df,
-                                                                      self._fields_to_plot[column],
-                                                                      self._fields_to_plot[row],
-                                                                      ax)
-
-                        if (row == (n_plot_fields - 1)) and (column != row):
-                            self._add_central_tendency_marker_per_cluster_stripplot(central_tendencies_per_cluster_df_categorical,
+                    if self.add_central_tendency_markers:
+                        if self.evaluation_metric_is_categorical:
+                            if (column != (n_plot_fields - 1)) and (row != (n_plot_fields - 1)) and (column != row):
+                                self._add_central_tendency_marker_per_cluster_scatter(central_tendencies_per_cluster_df,
                                                                                     self._fields_to_plot[column],
-                                                                                    self._fields_to_plot[-1],
-                                                                                    ax,
-                                                                                    color_palette_new)
-                            self._add_central_tendency_marker_stripplot(central_tendencies_df_categorical,
-                                                                        self._fields_to_plot[column],
-                                                                        self._fields_to_plot[-1],
-                                                                        ax)
-                                                                        
-                        if (column == (n_plot_fields - 1)) and (column != row):
-                            self._add_central_tendency_marker_per_cluster_stripplot(central_tendencies_per_cluster_df_categorical,
-                                                                                    self._fields_to_plot[-1],
                                                                                     self._fields_to_plot[row],
                                                                                     ax,
-                                                                                    color_palette_new)
-                            self._add_central_tendency_marker_stripplot(central_tendencies_df_categorical,
-                                                                        self._fields_to_plot[-1],
+                                                                                    color_palette)
+                                self._add_central_tendency_marker_scatter(central_tendencies_df,
+                                                                        self._fields_to_plot[column],
                                                                         self._fields_to_plot[row],
                                                                         ax)
-                                                                        
 
-                    else:
-                        if (column != row):
-                            self._add_central_tendency_marker_per_cluster_scatter(central_tendencies_per_cluster_df,
-                                                                                  self._fields_to_plot[column],
-                                                                                  self._fields_to_plot[row],
-                                                                                  ax,
-                                                                                  color_palette_new)
-                            self._add_central_tendency_marker_scatter(central_tendencies_df,
-                                                                      self._fields_to_plot[column],
-                                                                      self._fields_to_plot[row],
-                                                                      ax)
+                            if (row == (n_plot_fields - 1)) and (column != row):
+                                self._add_central_tendency_marker_per_cluster_stripplot(central_tendencies_per_cluster_df_categorical,
+                                                                                        self._fields_to_plot[column],
+                                                                                        self._fields_to_plot[-1],
+                                                                                        ax,
+                                                                                        color_palette)
+                                self._add_central_tendency_marker_stripplot(central_tendencies_df_categorical,
+                                                                            self._fields_to_plot[column],
+                                                                            self._fields_to_plot[-1],
+                                                                            ax)
+                                                                            
+                            if (column == (n_plot_fields - 1)) and (column != row):
+                                self._add_central_tendency_marker_per_cluster_stripplot(central_tendencies_per_cluster_df_categorical,
+                                                                                        self._fields_to_plot[-1],
+                                                                                        self._fields_to_plot[row],
+                                                                                        ax,
+                                                                                        color_palette)
+                                self._add_central_tendency_marker_stripplot(central_tendencies_df_categorical,
+                                                                            self._fields_to_plot[-1],
+                                                                            self._fields_to_plot[row],
+                                                                            ax)
+                                                                            
+
+                        else:
+                            if (column != row):
+                                self._add_central_tendency_marker_per_cluster_scatter(central_tendencies_per_cluster_df,
+                                                                                    self._fields_to_plot[column],
+                                                                                    self._fields_to_plot[row],
+                                                                                    ax,
+                                                                                    color_palette)
+                                self._add_central_tendency_marker_scatter(central_tendencies_df,
+                                                                        self._fields_to_plot[column],
+                                                                        self._fields_to_plot[row],
+                                                                        ax)
                     # set axis limits
                     if self.set_axis_lim_for_dtype:
                         if self.evaluation_metric_is_categorical:
@@ -221,7 +224,7 @@ class LearningActivitySequencePairplot():
             plt.tight_layout()
             plt.show()
 
-    def _generate_plotting_df(self) -> None:
+    def _generate_plotting_df(self) -> pd.DataFrame:
 
         plotting_df_list = []
         for (_, _), df in self.learning_activity_sequence_stats_per_group.groupby([GROUP_FIELD_NAME_STR, SEQUENCE_ID_FIELD_NAME_STR]):
@@ -240,9 +243,6 @@ class LearningActivitySequencePairplot():
                                         how='left')
 
         plotting_df = plotting_df[self._fields_to_keep]
-
-        if self.exclude_non_clustered:
-            plotting_df = plotting_df[plotting_df[CLUSTER_FIELD_NAME_STR] != -1]
 
         return plotting_df
     
@@ -264,10 +264,10 @@ class LearningActivitySequencePairplot():
                       orient=orient,
                       jitter=True,
                       palette=palette,
-                      s=5,
-                      alpha=SEABORN_POINT_ALPHA_FACET_CLUSTER_2D,
-                      linewidth=0.35,
-                      edgecolor=SEABORN_POINT_EDGECOLOR,
+                      s=PAIRPLOT_STRIPPLOT_POINT_SIZE,
+                      alpha=PAIRPLOT_STRIPPLOT_POINT_ALPHA,
+                      linewidth=PAIRPLOT_STRIPPLOT_POINT_LINEWIDTH,
+                      edgecolor=PAIRPLOT_STRIPPLOT_POINT_EDGECOLOR,
                       legend=False,
                       ax=ax)
 
@@ -280,12 +280,12 @@ class LearningActivitySequencePairplot():
         sns.scatterplot(data=central_tendencies_df,
                         x=x_var, 
                         y=y_var,
-                        s=300,
-                        linewidth=1.8,
-                        alpha=SEABORN_MARKER_ALPHA,
-                        color='red',
-                        edgecolor='white',
-                        marker='*',
+                        s=PAIRPLOT_CENTRAL_TENDENCY_MARKER_SIZE_OUTER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_MARKER_LINEWIDTH_OUTER,
+                        alpha=PAIRPLOT_CENTRAL_TENDENCY_MARKER_ALPHA,
+                        color=PAIRPLOT_CENTRAL_TENDENCY_MARKER_COLOR,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_MARKER_EDGECOLOR_OUTER,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_MARKER_KIND,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -293,12 +293,12 @@ class LearningActivitySequencePairplot():
         sns.scatterplot(data=central_tendencies_df,
                         x=x_var, 
                         y=y_var,
-                        s=150,
-                        linewidth=1.4,
-                        alpha=SEABORN_MARKER_ALPHA,
-                        color='red',
-                        edgecolor='black',
-                        marker='*',
+                        s=PAIRPLOT_CENTRAL_TENDENCY_MARKER_SIZE_INNER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_MARKER_LINEWIDTH_INNER,
+                        alpha=PAIRPLOT_CENTRAL_TENDENCY_MARKER_ALPHA,
+                        color=PAIRPLOT_CENTRAL_TENDENCY_MARKER_COLOR,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_MARKER_EDGECOLOR_INNER,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_MARKER_KIND,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -314,11 +314,11 @@ class LearningActivitySequencePairplot():
                         x=x_var, 
                         y=y_var,
                         hue=CLUSTER_FIELD_NAME_STR, 
-                        s=80,
+                        s=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_SIZE_OUTER,
                         palette=palette,
-                        marker='D',
-                        edgecolor='white',
-                        linewidth=1.8,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_KIND,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_EDGECOLOR_OUTER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_LINEWIDTH_OUTER,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -327,11 +327,11 @@ class LearningActivitySequencePairplot():
                         x=x_var, 
                         y=y_var,
                         hue=CLUSTER_FIELD_NAME_STR, 
-                        s=40,
+                        s=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_SIZE_INNER,
                         palette=palette,
-                        marker='D',
-                        edgecolor='black',
-                        linewidth=1.4,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_KIND,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_EDGECOLOR_INNER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_LINEWIDTH_INNER,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -345,12 +345,12 @@ class LearningActivitySequencePairplot():
         sns.scatterplot(data=central_tendencies_df,
                         x=x_var, 
                         y=y_var,
-                        s=300,
-                        linewidth=1.8,
-                        alpha=SEABORN_MARKER_ALPHA,
-                        color='red',
-                        edgecolor='white',
-                        marker='*',
+                        s=PAIRPLOT_CENTRAL_TENDENCY_MARKER_SIZE_OUTER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_MARKER_LINEWIDTH_OUTER,
+                        alpha=PAIRPLOT_CENTRAL_TENDENCY_MARKER_ALPHA,
+                        color=PAIRPLOT_CENTRAL_TENDENCY_MARKER_COLOR,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_MARKER_EDGECOLOR_OUTER,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_MARKER_KIND,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -358,12 +358,12 @@ class LearningActivitySequencePairplot():
         sns.scatterplot(data=central_tendencies_df,
                         x=x_var, 
                         y=y_var,
-                        s=150,
-                        linewidth=1.4,
-                        alpha=SEABORN_MARKER_ALPHA,
-                        color='red',
-                        edgecolor='black',
-                        marker='*',
+                        s=PAIRPLOT_CENTRAL_TENDENCY_MARKER_SIZE_INNER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_MARKER_LINEWIDTH_INNER,
+                        alpha=PAIRPLOT_CENTRAL_TENDENCY_MARKER_ALPHA,
+                        color=PAIRPLOT_CENTRAL_TENDENCY_MARKER_COLOR,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_MARKER_EDGECOLOR_INNER,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_MARKER_KIND,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -379,11 +379,11 @@ class LearningActivitySequencePairplot():
                         x=x_var, 
                         y=y_var,
                         hue=CLUSTER_FIELD_NAME_STR, 
-                        s=80,
+                        s=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_SIZE_OUTER,
                         palette=palette,
-                        marker='D',
-                        edgecolor='white',
-                        linewidth=1.8,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_KIND,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_EDGECOLOR_OUTER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_LINEWIDTH_OUTER,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -392,11 +392,11 @@ class LearningActivitySequencePairplot():
                         x=x_var, 
                         y=y_var,
                         hue=CLUSTER_FIELD_NAME_STR, 
-                        s=40,
+                        s=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_SIZE_INNER,
                         palette=palette,
-                        marker='D',
-                        edgecolor='black',
-                        linewidth=1.4,
+                        marker=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_KIND,
+                        edgecolor=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_EDGECOLOR_INNER,
+                        linewidth=PAIRPLOT_CENTRAL_TENDENCY_PER_CLUSTER_MARKER_LINEWIDTH_INNER,
                         legend=False,
                         zorder=100,
                         ax=ax)
@@ -404,8 +404,8 @@ class LearningActivitySequencePairplot():
     def _rotate_axis_label(self,
                            ax: matplotlib.axes.Axes) -> None:
 
-        ax.set_xlabel(ax.get_xlabel(), rotation=90)  
-        ax.set_ylabel(ax.get_ylabel(), rotation=0, labelpad=160)
+        ax.set_xlabel(ax.get_xlabel(), rotation=PAIRPLOT_X_LABEL_ROTATION, labelpad=PAIRPLOT_X_LABEL_PAD)  
+        ax.set_ylabel(ax.get_ylabel(), rotation=PAIRPLOT_Y_LABEL_ROTATION, labelpad=PAIRPLOT_Y_LABEL_PAD)
     
     def _add_correlation_header(self,
                                 df: pd.DataFrame,
@@ -417,17 +417,26 @@ class LearningActivitySequencePairplot():
         y = df[self._fields_to_plot].iloc[:, column] 
 
         result = sp.stats.pearsonr(x, y)
-        r = round(result.statistic, 2)
-        p = round(result.pvalue, 3)
+        r = round(result.statistic, PAIRPLOT_PEARSON_CORRELATION_ROUND_DIGITS)
+        p = round(result.pvalue, PAIRPLOT_PEARSON_CORRELATION_P_VALUE_ROUND_DIGITS)
 
-        ax.set_title(f'r = {r} p = {p}', fontsize=15)
+        ax.set_title(f'r = {r} p = {p}', fontsize=PAIRPLOT_HEADER_FONTSIZE)
 
     def _return_color_palette(self,
-                              data: pd.DataFrame,
+                              n_groups: int,
                               palette: str) -> Iterable[Tuple[float]]:
-
-        n_groups = data[CLUSTER_FIELD_NAME_STR].nunique()
 
         color_palette = sns.color_palette(palette,
                                           n_colors=n_groups)
         return color_palette
+    
+    def _return_fields_to_plot(self,
+                               fields_to_plot: List[PairplotFieldsToPlot]) -> List[str]:
+
+        return [field.value for field in fields_to_plot]
+    
+    def _return_fields_to_plot_data_kind(self,
+                                         fields_to_plot: List[PairplotFieldsToPlot]) -> List[Tuple[bool, bool]]:
+
+        return [return_plot_field_data_kind(field) for field in fields_to_plot]
+
