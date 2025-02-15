@@ -174,6 +174,8 @@ class ClusterEvalMetricOmnibusTest():
                                   OMNIBUS_TESTS_CONTINGENCY_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_PLOT_INCLUDE,
                                   FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
 
+        self._adjust_axis_labels(g)
+
         plt.show(g)
 
     def _plot_cluster_eval_metric_boxplot(self) -> None:
@@ -202,6 +204,8 @@ class ClusterEvalMetricOmnibusTest():
                                   OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_PLOT_INCLUDE,
                                   OMNIBUS_TESTS_AOV_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_PLOT_INCLUDE,
                                   FACET_GRID_SUBPLOTS_H_SPACE_SQUARE_WITH_TITLE)
+        
+        self._adjust_axis_labels(g)
 
         plt.show(g)
 
@@ -218,7 +222,63 @@ class ClusterEvalMetricOmnibusTest():
                     widths=widths,
                     showmeans=True, 
                     meanprops=marker_config_eval_metric_mean)
+
+    def _adjust_axis_labels(self,
+                            g: FacetGrid) -> None:
         
+        for ax in g.axes.flat:
+
+            if OMNIBUS_TESTS_ADJUST_X_LABEL:
+
+                y_label = ax.get_xlabel()
+            
+                y_label = self._transform_label(y_label,
+                                                OMNIBUS_TESTS_X_LABEL_SPLIT_STRING,
+                                                OMNIBUS_TESTS_X_LABEL_WORDS_PER_LINE_THRESHOLD_COUNT)
+
+                ax.set_xlabel(y_label, 
+                              va='bottom',
+                              rotation=OMNIBUS_TESTS_X_LABEL_ROTATION, 
+                              labelpad=OMNIBUS_TESTS_X_LABEL_VERTICAL_PADDING)  
+
+            if OMNIBUS_TESTS_ADJUST_Y_LABEL:
+
+                y_label = ax.get_ylabel()
+            
+                y_label = self._transform_label(y_label,
+                                                OMNIBUS_TESTS_Y_LABEL_SPLIT_STRING,
+                                                OMNIBUS_TESTS_Y_LABEL_WORDS_PER_LINE_THRESHOLD_COUNT)
+
+                ax.set_ylabel(y_label, 
+                              ha='right',
+                              rotation=OMNIBUS_TESTS_Y_LABEL_ROTATION, 
+                              labelpad=OMNIBUS_TESTS_Y_LABEL_RIGHT_PADDING)  
+
+    def _transform_label(self,
+                         label: str,
+                         split_by_str: str,
+                         words_per_line: int) -> str:
+
+        n_words_label = len(label.split(split_by_str))
+
+        if n_words_label > words_per_line:
+
+            label_words = label.split(split_by_str)
+
+            label = ''
+            for n, word in enumerate(label_words):
+
+                if n == 0:
+                    label += word
+                elif n % words_per_line == 0:
+                    word = '\n' + word
+                    label += word
+                else:
+                    word = split_by_str + word
+                    label += word
+        
+        return label
+            
     def _add_plot_data_title(self,
                              sns_plot,
                              p_value_correction_method: PValueCorrectionEnum,

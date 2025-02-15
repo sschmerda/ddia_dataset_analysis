@@ -108,3 +108,18 @@ OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL = 0.95
 OMNIBUS_TESTS_BOOTSTRAPPING_ALTERNATIVE = 'two-sided'
 OMNIBUS_TESTS_BOOTSTRAPPING_METHOD = 'bca' # one in [‘percentile’, ‘basic’, ‘bca’]
 
+########################################################################################################################
+### plot aesthetics options ###
+########################################################################################################################
+
+OMNIBUS_TESTS_ADJUST_Y_LABEL = True
+OMNIBUS_TESTS_Y_LABEL_SPLIT_STRING = ' '
+OMNIBUS_TESTS_Y_LABEL_WORDS_PER_LINE_THRESHOLD_COUNT = 3
+OMNIBUS_TESTS_Y_LABEL_RIGHT_PADDING = 25
+OMNIBUS_TESTS_Y_LABEL_ROTATION = 0
+
+OMNIBUS_TESTS_ADJUST_X_LABEL = False
+OMNIBUS_TESTS_X_LABEL_SPLIT_STRING = ' '
+OMNIBUS_TESTS_X_LABEL_WORDS_PER_LINE_THRESHOLD_COUNT = 5
+OMNIBUS_TESTS_X_LABEL_VERTICAL_PADDING = 30
+OMNIBUS_TESTS_X_LABEL_ROTATION = 0
