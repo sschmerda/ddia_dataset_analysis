@@ -237,7 +237,7 @@ class ClusterEvalMetricOmnibusTest():
                                                 OMNIBUS_TESTS_X_LABEL_WORDS_PER_LINE_THRESHOLD_COUNT)
 
                 ax.set_xlabel(y_label, 
-                              va='bottom',
+                              va='top',
                               rotation=OMNIBUS_TESTS_X_LABEL_ROTATION, 
                               labelpad=OMNIBUS_TESTS_X_LABEL_VERTICAL_PADDING)  
 
