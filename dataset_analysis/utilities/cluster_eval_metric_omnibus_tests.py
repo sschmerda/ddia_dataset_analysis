@@ -238,6 +238,7 @@ class ClusterEvalMetricOmnibusTest():
 
                 ax.set_xlabel(y_label, 
                               va='top',
+                              ma='center',
                               rotation=OMNIBUS_TESTS_X_LABEL_ROTATION, 
                               labelpad=OMNIBUS_TESTS_X_LABEL_VERTICAL_PADDING)  
 
@@ -251,6 +252,7 @@ class ClusterEvalMetricOmnibusTest():
 
                 ax.set_ylabel(y_label, 
                               ha='right',
+                              ma='center',
                               rotation=OMNIBUS_TESTS_Y_LABEL_ROTATION, 
                               labelpad=OMNIBUS_TESTS_Y_LABEL_RIGHT_PADDING)  
 
