@@ -1,4 +1,5 @@
 from .general_config import *
+from .omnibus_tests_config import *
 from ..constants.constants import *
 from ..standard_import import *
 from ..plotting_functions import *
@@ -17,7 +18,7 @@ SAVE_FIGURE_BBOX_INCHES = 'tight'
 
 RESULT_AGGREGATION_FIG_SIZE_WIDTH_INCH = 16
 RESULT_AGGREGATION_FIG_SIZE_HEIGHT_INCH = 8
-RESULT_AGGREGATION_FIG_SIZE_DPI = 300
+RESULT_AGGREGATION_FIG_SIZE_DPI = 150
 RESULT_AGGREGATION_COLOR_PALETTE = SEABORN_COLOR_PALETTE
 RESULT_AGGREGATION_COLOR_SATURATION = 0.75
 
@@ -289,3 +290,47 @@ SEQUENCE_COUNT_SHOW_RIGHT = False
 # no sharey because y will alwyas be shared when x is shared to keep square aspect ratio
 SEQUENCE_COUNT_SHAREX = False
 
+########################################################################################################################
+### html tables options ###
+########################################################################################################################
+
+RESULT_AGGREGATION_STYLE_HTML_TABLE = True
+
+########################################################################################################################
+### omnibus test result table test options ###
+########################################################################################################################
+
+# p-value kind
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_KIND = OmnibusTestResultPValueKind.PVAL
+
+# p-value correction
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_CORRECT_P_VALUES = True
+
+# p-value correction method
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_CORRECTION_METHOD = PValueCorrectionEnum.FDR_BY
+
+# measure of association type
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY = ContingencyMeasureAssociationEnum.CRAMER_BIAS_CORRECTED
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV = AOVMeasueAssociationEnum.OMEGA_SQUARED
+
+# measure of association strength guideline
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_CONTINGENCY = ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_AOV = AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988
+
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES = [MeasureAssociationStrengthValuesEnum.VERY_SMALL.value,
+                                                              MeasureAssociationStrengthValuesEnum.SMALL.value,
+                                                              MeasureAssociationStrengthValuesEnum.MEDIUM.value,
+                                                              MeasureAssociationStrengthValuesEnum.LARGE.value]
+
+# result aggregation omnibus test result table field names
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_EVAlUATION_FIELD_IS_CATEGORICAL_DISPLAY_FIELD = f'{CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR} Is Categorical'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_EVAlUATION_FIELD_TYPE_DISPLAY_FIELD = f'{CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR}'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_DISPLAY_FIELD = f'# {GROUP_FIELD_NAME_STR}s'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD = f'# (%) of {GROUP_FIELD_NAME_STR}s with Significant Differences in {CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR} between {CLUSTER_FIELD_NAME_STR}'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_VERY_SMALL_EFFECT_SIZE_DISPLAY_FIELD = f"# (%) of Significant {GROUP_FIELD_NAME_STR}s with {' '.join(i.capitalize() for i in MeasureAssociationStrengthValuesEnum.VERY_SMALL.value.split('_'))} Effect Size"
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_SMALL_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.SMALL.value.capitalize()} Effect Size'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_MEDIUM_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.MEDIUM.value.capitalize()} Effect Size'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_LARGE_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.LARGE.value.capitalize()} Effect Size'
+
+# table decimal places
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_ROUND_DECIMAL_POINTS = 1
