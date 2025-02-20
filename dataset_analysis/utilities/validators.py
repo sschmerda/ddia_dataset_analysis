@@ -46,7 +46,7 @@ def check_if_not_empty(value: Any,
                   pd.DataFrame):
         is_empty = value.empty
     elif isinstance(value, 
-                  np.ndarray):
+                    np.ndarray):
         is_empty = (value.size == 0)
     else:
         is_empty = (len(value) == 0)
@@ -58,3 +58,12 @@ def check_if_not_empty(value: Any,
         raise ValueError(f'Value was empty!' + f'{message_str}')
     
     return True
+
+def check_iterable(iterable: Iterable[int],
+                   expected_type: type) -> None:
+
+    if not isinstance(iterable, Iterable):
+        raise TypeError(f'Expected an iterable but got {type(iterable).__name__}!')
+    
+    if not all((isinstance(i, expected_type) for i in iterable)):
+        raise TypeError(f'An element of the iterable was no of type {expected_type.__name__}!')
