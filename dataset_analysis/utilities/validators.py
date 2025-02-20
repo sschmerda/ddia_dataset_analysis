@@ -69,4 +69,4 @@ def check_iterable(iterable: Iterable[int],
         raise TypeError(f'Iterable is empty!')
     
     if not all((isinstance(i, expected_type) for i in iterable)):
-        raise TypeError(f'An element of the iterable was no of type {expected_type.__name__}!')
+        raise TypeError(f'An element of the iterable was not of type {expected_type.__name__}!')
