@@ -827,10 +827,19 @@ OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = 'Not a valid member of enum
 
 ###################################################################################################
 # pairplot
-PAIRPLOT_TITLE_STR = f'Pairplot of Analysis-Relevant Variables Subdivided by {CLUSTER_FIELD_NAME_STR}s for each {GROUP_FIELD_NAME_STR}'
+PAIRPLOT_PER_GROUP_PER_CLUSTER_TITLE_STR = f'Pairplot of Analysis-Relevant Variables Subdivided by {CLUSTER_FIELD_NAME_STR}s for each {GROUP_FIELD_NAME_STR}'
+PAIRPLOT_PER_GROUP_TITLE_STR = f'Pairplot of Analysis-Relevant Variables Subdivided by {GROUP_FIELD_NAME_STR}'
+PAIRPLOT_VARIABLE_RELATIONSHIP = 'all_group'
+PAIRPLOT_VARIABLE_RELATIONSHIP_PER_GROUP = 'per_group'
+PAIRPLOT_VARIABLE_RELATIONSHIP_PER_GROUP_PER_CLUSTER = 'per_group_per_cluster'
+PAIRPLOT_X_VAR_FIELD_NAME_STR = 'x'
+PAIRPLOT_Y_HAT_VAR_FIELD_NAME_STR = 'y_hat'
 
 # errors
+PAIRPLOT_ERROR_RETURN_VARIABLE_RELATIONSHIP_NAME_STR = f'If cluster is not None, group needs to be not None!'
+PAIRPLOT_ERROR_NON_SLOPE_NO_UNIQUE_X_VALUE_NAME_STR = f'x value for non-specified slope not unique'
 PAIRPLOT_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = f'Not a valid member of enum: '
+PAIRPLOT_ERROR_FILTER_MISSPECIFICATION_NAME_STR = f'Filter specification causes empty plotting dataframe. Please use existing {GROUP_FIELD_NAME_STR}-{CLUSTER_FIELD_NAME_STR} combinations!'
 
 ###################################################################################################
 # monitoring
