@@ -34,6 +34,13 @@ class ClusterResults:
     best_dim_reduction_parameters: dict
 
 @dataclass
+class PairplotData:
+    corr: float
+    intercept: float
+    slope: float
+    p_value: float
+
+@dataclass
 class TestResultsChiSquared:
     observed_frequency: np.ndarray
     expected_frequency: np.ndarray
