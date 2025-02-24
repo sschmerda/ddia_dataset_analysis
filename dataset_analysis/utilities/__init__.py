@@ -20,3 +20,4 @@ from .data_classes import *
 from .sequence_clustering_monitoring import *
 from .sequence_pairplot import *
 from .cluster_eval_metric_omnibus_tests import *
+from .custom_types import *
