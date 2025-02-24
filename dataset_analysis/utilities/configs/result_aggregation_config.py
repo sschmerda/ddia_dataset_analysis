@@ -62,6 +62,11 @@ class OmnibusTestResultPValueKind(Enum):
     PVAL_R = OMNIBUS_TESTS_R_PVAL_FIELD_NAME_STR
     PVAL_PERM_R = OMNIBUS_TESTS_R_PERM_PVAL_FIELD_NAME_STR
 
+class OmnibusTestResultMeasureAssociationStrengthCalculationBase(Enum):
+    MOA_VALUE = 0
+    MOA_CONF_INT_LOWER_BOUND = 1
+    MOA_CONF_INT_UPPER_BOUND = 2
+
 ########################################################################################################################
 ### sequence statistics plot fields ###
 ########################################################################################################################
@@ -301,7 +306,7 @@ RESULT_AGGREGATION_STYLE_HTML_TABLE = True
 ########################################################################################################################
 
 # p-value kind
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_KIND = OmnibusTestResultPValueKind.PVAL
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_KIND = OmnibusTestResultPValueKind.PVAL_PERM
 
 # p-value correction
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_CORRECT_P_VALUES = True
@@ -316,6 +321,9 @@ RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV = AOVMeasueAssociationEnum.OMEGA_
 # measure of association strength guideline
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_CONTINGENCY = ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_AOV = AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988
+
+# measure of association strength calculation base (conf int lower - moa value - conf int upper)
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_CALCULATION_BASE = OmnibusTestResultMeasureAssociationStrengthCalculationBase.MOA_VALUE
 
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES = [MeasureAssociationStrengthValuesEnum.VERY_SMALL.value,
                                                               MeasureAssociationStrengthValuesEnum.SMALL.value,

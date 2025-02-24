@@ -299,6 +299,11 @@ class ClusterEvalMetricOmnibusTest():
                                                                     measure_of_association_strength_guideline.value + 
                                                                     OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR)
 
+            measure_of_association_strength_guideline_ci_lower_field_name = (measure_of_association_strength_guideline_field_name +
+                                                                             OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_CONF_INT_LOWER_FIELD_NAME_STR)
+            measure_of_association_strength_guideline_ci_upper_field_name = (measure_of_association_strength_guideline_field_name +
+                                                                             OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_CONF_INT_UPPER_FIELD_NAME_STR)
+
             if self.evaluation_metric_field_is_categorical:
                 has_exp_freq_below_t_field = OMNIBUS_TESTS_CONTINGENCY_HAS_EXPECTED_FREQ_BELOW_THRESHOLD_FIELD_NAME_STR
                 test_statistic_field = OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_TEST_STATISTIC_FIELD_NAME_STR
@@ -320,6 +325,9 @@ class ClusterEvalMetricOmnibusTest():
             measure_of_association_conf_int = tuple(map(lambda x: round(x, 3), measure_of_association_conf_int))
             measure_of_association_conf_int_lvl = int(OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL * 100)
             measure_of_association_strength_guideline_value = self.omnibus_test_result_df.loc[is_group_series, measure_of_association_strength_guideline_field_name].values[0]
+            measure_of_association_strength_guideline_ci_lower_value = self.omnibus_test_result_df.loc[is_group_series, measure_of_association_strength_guideline_ci_lower_field_name].values[0]
+            measure_of_association_strength_guideline_ci_upper_value = self.omnibus_test_result_df.loc[is_group_series, measure_of_association_strength_guideline_ci_upper_field_name].values[0]
+
     
             # generate title strings for plot
             p_value_perm_star_str = self._return_p_value_star_string(p_value_perm)
@@ -351,7 +359,10 @@ class ClusterEvalMetricOmnibusTest():
             sub_strings = measure_of_association_strength_guideline.value.split('_')
             measure_of_association_strength_guideline_type = '_'.join([sub_str.capitalize() for sub_str in sub_strings])
             measure_of_association_strength_guideline_type = OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_PLOT_VALUE_NAME_STR + measure_of_association_strength_guideline_type
-            measure_of_association_strength_guideline_str = f'\n{measure_of_association_strength_guideline_type}:\n{measure_of_association_strength_guideline_value}'
+            measure_of_association_strength_guideline_str = (f'\n{measure_of_association_strength_guideline_type}:' +
+                                                             f'\n{measure_of_association_strength_guideline_ci_lower_value} - ' +
+                                                             f'{measure_of_association_strength_guideline_value}' + 
+                                                             f' - {measure_of_association_strength_guideline_ci_upper_value}')
 
             title_str = ''.join((group_str,
                                  n_observations_str,
@@ -764,6 +775,14 @@ class ClusterEvalMetricOmnibusTest():
                                                                                                                                    eval_metrics,
                                                                                                                                    moa_method)
 
+            moa_strength_guide_conf_int_lower_bound_values = [self._return_measure_association_contingency_strength_value(bootstrap_result.confidence_interval[0], 
+                                                                                                                          moa_strength_guide_method)
+                                                              for moa_strength_guide_method in moa_strength_guide_method_list]
+
+            moa_strength_guide_conf_int_upper_bound_values = [self._return_measure_association_contingency_strength_value(bootstrap_result.confidence_interval[1], 
+                                                                                                                          moa_strength_guide_method)
+                                                              for moa_strength_guide_method in moa_strength_guide_method_list]
+
             measure_of_association_contingency_results = MeasureAssociationContingencyResults(measure_of_association_type,
                                                                                               measure_of_association_value,
                                                                                               OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL,
@@ -771,7 +790,9 @@ class ClusterEvalMetricOmnibusTest():
                                                                                               bootstrap_result.bootstrap_distribution,
                                                                                               bootstrap_result.standard_error,
                                                                                               moa_strength_guide_methods,
-                                                                                              moa_strength_guide_values)
+                                                                                              moa_strength_guide_values,
+                                                                                              moa_strength_guide_conf_int_lower_bound_values,
+                                                                                              moa_strength_guide_conf_int_upper_bound_values)
 
             measure_of_association_contingency_results_list.append(measure_of_association_contingency_results)
             measure_of_association_contingency_fail_dict_list.append(measure_association_fail_dict)
@@ -1078,6 +1099,14 @@ class ClusterEvalMetricOmnibusTest():
             bootstrap_result, measure_association_fail_dict = self._return_measure_association_aov_conf_interval_bootstrap(sequence_cluster_df,
                                                                                                                            moa_method)
 
+            moa_strength_guide_conf_int_lower_bound_values = [self._return_measure_association_aov_strength_value(bootstrap_result.confidence_interval[0], 
+                                                                                                                  moa_strength_guide_method)
+                                                              for moa_strength_guide_method in moa_strength_guide_method_list]
+
+            moa_strength_guide_conf_int_upper_bound_values = [self._return_measure_association_aov_strength_value(bootstrap_result.confidence_interval[1], 
+                                                                                                                  moa_strength_guide_method)
+                                                              for moa_strength_guide_method in moa_strength_guide_method_list]
+
             measure_of_association_aov_results = MeasureAssociationAOVResults(measure_of_association_type,
                                                                               measure_of_association_value,
                                                                               OMNIBUS_TESTS_BOOTSTRAPPING_CONFIDENCE_LEVEL,
@@ -1085,7 +1114,9 @@ class ClusterEvalMetricOmnibusTest():
                                                                               bootstrap_result.bootstrap_distribution,
                                                                               bootstrap_result.standard_error,
                                                                               moa_strength_guide_methods,
-                                                                              moa_strength_guide_values)
+                                                                              moa_strength_guide_values,
+                                                                              moa_strength_guide_conf_int_lower_bound_values,
+                                                                              moa_strength_guide_conf_int_upper_bound_values)
 
             measure_of_association_aov_results_list.append(measure_of_association_aov_results)
             measure_of_association_aov_fail_dict_list.append(measure_association_fail_dict)
@@ -1138,15 +1169,28 @@ class ClusterEvalMetricOmnibusTest():
                                              measure_of_association_conf_int_value_field_name: [tuple(map(lambda x: round(x, OMNIBUS_TEST_RESULTS_ROUND_N_DIGITS), result.conf_int))]}
 
             moa_interpretation_guidelines_result = {}
-            moa_interpretation_guidelines = zip(result.interpretation_guideline_methods, result.interpretation_guideline_strength_values)
-            for moa_guideline_method, moa_guideline_strength_value in moa_interpretation_guidelines:
+            moa_interpretation_guidelines = zip(result.interpretation_guideline_methods, 
+                                                result.interpretation_guideline_strength_values,
+                                                result.interpretation_guideline_strength_for_conf_int_lower_bound_values,
+                                                result.interpretation_guideline_strength_for_conf_int_upper_bound_values)
+
+            for (moa_guideline_method, 
+                 moa_guideline_strength_value, 
+                 moa_guideline_strength_conf_int_lower_bound_value, 
+                 moa_guideline_strength_conf_int_upper_bound_value) in moa_interpretation_guidelines:
 
                 measure_of_association_interpretation_guideline_field_name = (result.measure_type +
                                                                               '_' + 
                                                                               moa_guideline_method + 
                                                                               OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR)
+                measure_of_association_interpretation_guideline_ci_lower_field_name = (measure_of_association_interpretation_guideline_field_name +
+                                                                                       OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_CONF_INT_LOWER_FIELD_NAME_STR)
+                measure_of_association_interpretation_guideline_ci_upper_field_name = (measure_of_association_interpretation_guideline_field_name +
+                                                                                       OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_CONF_INT_UPPER_FIELD_NAME_STR)
 
                 moa_interpretation_guidelines_result[measure_of_association_interpretation_guideline_field_name] = moa_guideline_strength_value
+                moa_interpretation_guidelines_result[measure_of_association_interpretation_guideline_ci_lower_field_name] = moa_guideline_strength_conf_int_lower_bound_value
+                moa_interpretation_guidelines_result[measure_of_association_interpretation_guideline_ci_upper_field_name] = moa_guideline_strength_conf_int_upper_bound_value
             
             measure_of_association_result = measure_of_association_result | moa_interpretation_guidelines_result
             
