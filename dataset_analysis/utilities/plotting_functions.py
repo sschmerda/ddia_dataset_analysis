@@ -5,7 +5,8 @@ from .standard_import import *
 def return_axis_limits(data: ArrayLike,
                        data_is_pct: bool,
                        pct_is_ratio: bool = False,
-                       pct: int = 5) -> tuple[float]:
+                       pct: int = 5,
+                       data_can_be_negative: bool = False) -> tuple[float]:
     """Returns a tuple with lower and upper axis limits for given input data
 
     Parameters
@@ -19,6 +20,8 @@ def return_axis_limits(data: ArrayLike,
         [0, 100] is being used. The parameter only has an effect if data_is_pct == True.
     pct : int, optional
         A pct of the max value in the data which defines upper and lower axis limits, by default 5
+    data_can_be_negative: bool, optional
+        A flag indicating whether the data can take on nagative values
 
     Returns
     -------
@@ -33,9 +36,21 @@ def return_axis_limits(data: ArrayLike,
             axis_upper_limit = 105
             axis_lower_limit = -5
     else:
-        max_val = max(data)
-        axis_upper_limit = float(max_val * (1 + pct / 100))
-        axis_lower_limit = float((axis_upper_limit - max_val) * -1)
+        if data_can_be_negative:
+            max_val = max(data)
+            min_val = min(data)
+
+            axis_upper_limit = float(max_val * (1 + pct / 100))
+
+            if min_val < 0: 
+                axis_lower_limit = min_val - float(axis_upper_limit - max_val)
+            else:
+                axis_lower_limit = float((axis_upper_limit - max_val) * -1)
+        
+        else:
+            max_val = max(data)
+            axis_upper_limit = float(max_val * (1 + pct / 100))
+            axis_lower_limit = float((axis_upper_limit - max_val) * -1)
 
     return axis_lower_limit, axis_upper_limit
 
