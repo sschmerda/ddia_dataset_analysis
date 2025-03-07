@@ -19,6 +19,11 @@ class PairplotGroupingVariable(Enum):
     GROUP = GROUP_FIELD_NAME_STR
     CLUSTER = CLUSTER_FIELD_NAME_STR
 
+class PairplotVariableScaler(Enum):
+    STANDARD_SCALER = StandardScaler
+    ROBUST_SCALER = RobustScaler
+    MIN_MAX_SCALER = MinMaxScaler
+
 def return_plot_field_data_kind(plot_field: PairplotFieldsToPlot) -> Tuple[bool, bool]:
     match plot_field:
         case PairplotFieldsToPlot.PCT_REPEATED_LEARNING_ACTIVITIES:
@@ -56,6 +61,8 @@ PAIRPLOT_FIELDS_TO_PLOT_LIST = [PairplotFieldsToPlot.PCT_REPEATED_LEARNING_ACTIV
 
 PAIRPLOT_GROUP_FILTER = None
 PAIRPLOT_CLUSTER_FILTER = None
+PAIRPLOT_VARIABLE_SCALER = None #PairplotVariableScaler.ROBUST_SCALER
+PAIRPLOT_VARIABLE_SCALER_BASE = PairplotGroupingVariable.GROUP
 PAIRPLOT_ADD_LEGEND = True
 PAIRPLOT_ADD_HEADER = True
 PAIRPLOT_EXCLUDE_NON_CLUSTERED = False

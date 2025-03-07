@@ -31,7 +31,6 @@ class LearningActivitySequencePairplot():
         self._fields = [GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, CLUSTER_FIELD_NAME_STR, SEQUENCE_ID_FIELD_NAME_STR]
         self._fields_to_plot = self._return_fields_to_plot(PAIRPLOT_FIELDS_TO_PLOT_LIST) + [self.evaluation_metric_field]
         self._n_plot_fields = len(self._fields_to_plot)
-        self._fields_to_plot_axis_lim_cat = self._return_fields_to_plot_data_kind(PAIRPLOT_FIELDS_TO_PLOT_LIST) + [(self.evaluation_metric_is_pct, self.evaluation_metric_pct_is_ratio)]
         self._fields_to_keep = self._fields + self._fields_to_plot
 
         self._merge_fields = [GROUP_FIELD_NAME_STR, USER_FIELD_NAME_STR, self.evaluation_metric_field]
@@ -40,27 +39,48 @@ class LearningActivitySequencePairplot():
 
     def return_sequence_stats_data(self,
                                    groups_filter: Iterable[int] | None,
-                                   clusters_filter: Iterable[int] | None) -> pd.DataFrame:
+                                   clusters_filter: Iterable[int] | None,
+                                   scaler: PairplotVariableScaler | None,
+                                   scaler_base: PairplotGroupingVariable | None) -> pd.DataFrame:
 
-        seq_stats_df = self._filter_seq_stats_df(self.seq_stats_data,
-                                                 groups_filter,
-                                                 clusters_filter)
+        seq_stats_data = self.seq_stats_data.copy()
 
-        return seq_stats_df
+        seq_stats_data = self._filter_seq_stats_df(seq_stats_data,
+                                                   groups_filter,
+                                                   clusters_filter)
+
+        seq_stats_data = self._scale_seq_stats_data(seq_stats_data,
+                                                    self._fields_to_plot,
+                                                    scaler,
+                                                    scaler_base,
+                                                    self.evaluation_metric_is_categorical)
+
+        return seq_stats_data
 
     def return_variable_relationship(self,
                                      group: int,
                                      cluster: int | None,
                                      groups_filter: Iterable[int] | None,
                                      clusters_filter: Iterable[int] | None,
+                                     scaler: PairplotVariableScaler | None,
+                                     scaler_base: PairplotGroupingVariable | None,
                                      x_var: str,
                                      y_var: str) -> PairplotData:
 
-        seq_stats_df = self._filter_seq_stats_df(self.seq_stats_data,
-                                                 groups_filter,
-                                                 clusters_filter)
 
-        variable_relationship_dict = self._return_variable_relationships_per_group_per_cluster(seq_stats_df,
+        seq_stats_data = self.seq_stats_data.copy()
+
+        seq_stats_data = self._filter_seq_stats_df(seq_stats_data,
+                                                   groups_filter,
+                                                   clusters_filter)
+
+        seq_stats_data = self._scale_seq_stats_data(seq_stats_data,
+                                                    self._fields_to_plot,
+                                                    scaler,
+                                                    scaler_base,
+                                                    self.evaluation_metric_is_categorical)
+
+        variable_relationship_dict = self._return_variable_relationships_per_group_per_cluster(seq_stats_data,
                                                                                                self._fields_to_plot)
 
         return self._return_variable_relationship(variable_relationship_dict,
@@ -73,6 +93,7 @@ class LearningActivitySequencePairplot():
     def plot_pairplot_seq_vars_per_cluster_for_each_group(self,
                                                           groups_filter: Iterable[int] | None,
                                                           clusters_filter: Iterable[int] | None,
+                                                          scaler: PairplotVariableScaler | None,
                                                           add_legend: bool,
                                                           add_header: bool,
                                                           add_central_tendency_marker: bool,
@@ -85,16 +106,28 @@ class LearningActivitySequencePairplot():
         print(DASH_STRING)
         print('')
 
-        color_palette_all_clust, grouping_variable_index_mapping = self._return_color_palette_and_index_mapping_df(self.seq_stats_data,
+        seq_stats_data = self.seq_stats_data.copy()
+
+        color_palette_all_clust, grouping_variable_index_mapping = self._return_color_palette_and_index_mapping_df(seq_stats_data,
                                                                                                                    PairplotGroupingVariable.CLUSTER)
 
-        seq_stats_df = self._filter_seq_stats_df(self.seq_stats_data,
-                                                 groups_filter,
-                                                 clusters_filter)
-        variable_relationship_dict = self._return_variable_relationships_per_group_per_cluster(seq_stats_df,
-                                                                                               self._fields_to_plot)
+        seq_stats_data = self._filter_seq_stats_df(seq_stats_data,
+                                                   groups_filter,
+                                                   clusters_filter)
 
-        for group, df in seq_stats_df.groupby(GROUP_FIELD_NAME_STR):
+        seq_stats_data = self._scale_seq_stats_data(seq_stats_data,
+                                                    self._fields_to_plot,
+                                                    scaler,
+                                                    PairplotGroupingVariable.GROUP,
+                                                    self.evaluation_metric_is_categorical)
+
+        variable_relationship_dict = self._return_variable_relationships_per_group_per_cluster(seq_stats_data,
+                                                                                               self._fields_to_plot)
+                                                                                            
+        fields_to_plot_axis_lim_cat = self._return_fields_to_plot_data_kind(PAIRPLOT_FIELDS_TO_PLOT_LIST,
+                                                                            scaler)
+
+        for group, df in seq_stats_data.groupby(GROUP_FIELD_NAME_STR):
 
             print(STAR_STRING)
             print(f'{GROUP_FIELD_NAME_STR}: {group}')
@@ -131,6 +164,7 @@ class LearningActivitySequencePairplot():
             self._format_plot(g,
                               df,
                               variable_relationship_dict,
+                              fields_to_plot_axis_lim_cat,
                               central_tendencies_df,
                               central_tendencies_per_cluster_df,
                               central_tendencies_df_categorical,
@@ -152,6 +186,7 @@ class LearningActivitySequencePairplot():
     def plot_pairplot_seq_vars_per_group(self,
                                          groups_filter: Iterable[int] | None,
                                          clusters_filter: Iterable[int] | None,
+                                         scaler: PairplotVariableScaler | None,
                                          add_legend: bool,
                                          add_header: bool,
                                          add_central_tendency_marker: bool,
@@ -164,32 +199,44 @@ class LearningActivitySequencePairplot():
         print(DASH_STRING)
         print('')
 
-        color_palette_all_group, grouping_variable_index_mapping = self._return_color_palette_and_index_mapping_df(self.seq_stats_data,
+        seq_stats_data = self.seq_stats_data.copy()
+
+        color_palette_all_group, grouping_variable_index_mapping = self._return_color_palette_and_index_mapping_df(seq_stats_data,
                                                                                                                    PairplotGroupingVariable.GROUP)
 
-        seq_stats_df = self._filter_seq_stats_df(self.seq_stats_data,
-                                                 groups_filter,
-                                                 clusters_filter)
-        variable_relationship_dict = self._return_variable_relationships_per_group_per_cluster(seq_stats_df,
+        seq_stats_data = self._filter_seq_stats_df(seq_stats_data,
+                                                   groups_filter,
+                                                   clusters_filter)
+
+        seq_stats_data = self._scale_seq_stats_data(seq_stats_data,
+                                                    self._fields_to_plot,
+                                                    scaler,
+                                                    None,
+                                                    self.evaluation_metric_is_categorical)
+
+        variable_relationship_dict = self._return_variable_relationships_per_group_per_cluster(seq_stats_data,
                                                                                                self._fields_to_plot)
 
-        groups = sorted(seq_stats_df[PairplotGroupingVariable.GROUP.value].unique())
+        fields_to_plot_axis_lim_cat = self._return_fields_to_plot_data_kind(PAIRPLOT_FIELDS_TO_PLOT_LIST,
+                                                                            scaler)
+
+        groups = sorted(seq_stats_data[PairplotGroupingVariable.GROUP.value].unique())
         color_palette = [color_palette_all_group[grouping_variable_index_mapping[i]] for i in groups]
 
-        central_tendencies_per_group_df = self._calculate_central_tendencies(seq_stats_df,
+        central_tendencies_per_group_df = self._calculate_central_tendencies(seq_stats_data,
                                                                              PairplotGroupingVariable.GROUP)
-        central_tendencies_df = self._calculate_central_tendencies(seq_stats_df,
+        central_tendencies_df = self._calculate_central_tendencies(seq_stats_data,
                                                                    None)
         if self.evaluation_metric_is_categorical:
-            central_tendencies_per_group_df_categorical = self._calculate_central_tendencies_categorical_eval_metric(seq_stats_df,
+            central_tendencies_per_group_df_categorical = self._calculate_central_tendencies_categorical_eval_metric(seq_stats_data,
                                                                                                                      PairplotGroupingVariable.GROUP)
-            central_tendencies_df_categorical = self._calculate_central_tendencies_categorical_eval_metric(seq_stats_df,
+            central_tendencies_df_categorical = self._calculate_central_tendencies_categorical_eval_metric(seq_stats_data,
                                                                                                            None)
         else:                                                            
             central_tendencies_per_group_df_categorical = None
             central_tendencies_df_categorical = None
 
-        g = sns.pairplot(seq_stats_df,
+        g = sns.pairplot(seq_stats_data,
                          vars=self._fields_to_plot,
                          hue=GROUP_FIELD_NAME_STR,
                          kind='scatter',
@@ -202,8 +249,9 @@ class LearningActivitySequencePairplot():
                                        edgecolor=PAIRPLOT_SCATTER_POINT_EDGECOLOR))
 
         self._format_plot(g,
-                          seq_stats_df,
+                          seq_stats_data,
                           variable_relationship_dict,
+                          fields_to_plot_axis_lim_cat,
                           central_tendencies_df,
                           central_tendencies_per_group_df,
                           central_tendencies_df_categorical,
@@ -225,6 +273,7 @@ class LearningActivitySequencePairplot():
                      g: FacetGrid,
                      plotting_df: pd.DataFrame,
                      variable_relationship_dict: dict,
+                     fields_to_plot_axis_lim_cat: List[Tuple[bool, bool]],
                      central_tendencies_df: pd.DataFrame,
                      central_tendencies_per_grouping_var_df: pd.DataFrame,
                      central_tendencies_df_categorical: pd.DataFrame | None,
@@ -358,18 +407,21 @@ class LearningActivitySequencePairplot():
                     if self.evaluation_metric_is_categorical:
                         if (column != (self._n_plot_fields - 1)) and (row != (self._n_plot_fields - 1)) and (column != row):
                             x_lim = return_axis_limits(plotting_df[self._fields_to_plot[column]],
-                                                       self._fields_to_plot_axis_lim_cat[column][0],
-                                                       self._fields_to_plot_axis_lim_cat[column][1])
+                                                       fields_to_plot_axis_lim_cat[column][0],
+                                                       fields_to_plot_axis_lim_cat[column][1],
+                                                       data_can_be_negative=True)
                             y_lim = return_axis_limits(plotting_df[self._fields_to_plot[row]],
-                                                       self._fields_to_plot_axis_lim_cat[row][0],
-                                                       self._fields_to_plot_axis_lim_cat[row][1])
+                                                       fields_to_plot_axis_lim_cat[row][0],
+                                                       fields_to_plot_axis_lim_cat[row][1],
+                                                       data_can_be_negative=True)
                             ax.set_xlim(x_lim)
                             ax.set_ylim(y_lim)
 
                         if (row == (self._n_plot_fields - 1)) and (column != row):
                             x_lim = return_axis_limits(plotting_df[self._fields_to_plot[column]],
-                                                       self._fields_to_plot_axis_lim_cat[column][0],
-                                                       self._fields_to_plot_axis_lim_cat[column][1])
+                                                       fields_to_plot_axis_lim_cat[column][0],
+                                                       fields_to_plot_axis_lim_cat[column][1],
+                                                       data_can_be_negative=True)
                             y_lim = ax.get_ylim()
                             ax.set_xlim(x_lim)
                                                                         
@@ -377,19 +429,22 @@ class LearningActivitySequencePairplot():
                         if (column == (self._n_plot_fields - 1)) and (column != row):
                             x_lim = ax.get_xlim()
                             y_lim = return_axis_limits(plotting_df[self._fields_to_plot[row]],
-                                                       self._fields_to_plot_axis_lim_cat[row][0],
-                                                       self._fields_to_plot_axis_lim_cat[row][1])
+                                                       fields_to_plot_axis_lim_cat[row][0],
+                                                       fields_to_plot_axis_lim_cat[row][1],
+                                                       data_can_be_negative=True)
                             ax.set_ylim(y_lim)
                                                                         
 
                     else:
                         if (column != row):
                             x_lim = return_axis_limits(plotting_df[self._fields_to_plot[column]],
-                                                       self._fields_to_plot_axis_lim_cat[column][0],
-                                                       self._fields_to_plot_axis_lim_cat[column][1])
+                                                       fields_to_plot_axis_lim_cat[column][0],
+                                                       fields_to_plot_axis_lim_cat[column][1],
+                                                       data_can_be_negative=True)
                             y_lim = return_axis_limits(plotting_df[self._fields_to_plot[row]],
-                                                       self._fields_to_plot_axis_lim_cat[row][0],
-                                                       self._fields_to_plot_axis_lim_cat[row][1])
+                                                       fields_to_plot_axis_lim_cat[row][0],
+                                                       fields_to_plot_axis_lim_cat[row][1],
+                                                       data_can_be_negative=True)
                             ax.set_xlim(x_lim)
                             ax.set_ylim(y_lim)
                 else:
@@ -530,6 +585,74 @@ class LearningActivitySequencePairplot():
         seq_stats_df = seq_stats_df.loc[df_filter, :]
 
         return seq_stats_df
+    
+    def _scale_seq_stats_data(self,
+                              seq_stats_df: pd.DataFrame,
+                              fields_to_plot: List[str],
+                              scaler: PairplotVariableScaler | None,
+                              grouping_variable: PairplotGroupingVariable | None,
+                              evaluation_metric_is_categorical: bool) -> pd.DataFrame:
+        
+        seq_stats_df = seq_stats_df.copy()
+
+        if evaluation_metric_is_categorical:
+            fields_to_plot = fields_to_plot[:-1]
+
+        if scaler:
+            if grouping_variable:
+                grouping_list = list(set([PairplotGroupingVariable.GROUP.value, grouping_variable.value]))
+                df_list = []
+                for group, df in seq_stats_df.groupby(grouping_list):
+            
+                    scaled_data = scaler.value().fit_transform(df[fields_to_plot].to_numpy())
+                    df[fields_to_plot] = scaled_data
+                    df_list.append(df)
+
+                seq_stats_df = pd.concat(df_list)
+            
+            else:
+                scaled_data = scaler.value().fit_transform(seq_stats_df[fields_to_plot].to_numpy())
+                seq_stats_df[fields_to_plot] = scaled_data
+        
+        return seq_stats_df
+    
+    def _return_variable_relationships_per_group_per_cluster(self,
+                                                             seq_stats_df: pd.DataFrame,
+                                                             fields: List[str]) -> Dict[Dict[str, PairplotData], Dict[str, Dict[str, PairplotData]]]:
+
+        pairplot_variable_relationship_per_group = {}
+        pairplot_variable_relationship_per_group_per_cluster = {}
+
+        variables_df = seq_stats_df[fields]
+
+        variable_relationship = self._return_variable_relationship_df(variables_df,
+                                                                      fields)
+
+        for group, df_per_group in seq_stats_df.groupby(GROUP_FIELD_NAME_STR):
+
+            variables_df_per_group = df_per_group[fields]
+
+            variable_relationship_per_group = self._return_variable_relationship_df(variables_df_per_group,
+                                                                                    fields)
+
+            pairplot_variable_relationship_per_group[group] = variable_relationship_per_group
+
+            
+            pairplot_variable_relationship_per_cluster = {}
+            for cluster, df_per_group_per_clust in df_per_group.groupby(CLUSTER_FIELD_NAME_STR):
+
+                variables_df_per_cluster = df_per_group_per_clust[fields]
+
+                variable_relationship_per_group_per_cluster = self._return_variable_relationship_df(variables_df_per_cluster,
+                                                                                                    fields)
+
+                pairplot_variable_relationship_per_cluster[cluster] = variable_relationship_per_group_per_cluster
+
+            pairplot_variable_relationship_per_group_per_cluster[group] = pairplot_variable_relationship_per_cluster
+
+        return  {PAIRPLOT_VARIABLE_RELATIONSHIP: variable_relationship,
+                 PAIRPLOT_VARIABLE_RELATIONSHIP_PER_GROUP: pairplot_variable_relationship_per_group,
+                 PAIRPLOT_VARIABLE_RELATIONSHIP_PER_GROUP_PER_CLUSTER: pairplot_variable_relationship_per_group_per_cluster}
 
     def _plot_stripplot(self,
                         df: pd.DataFrame,
@@ -1038,44 +1161,6 @@ class LearningActivitySequencePairplot():
                             columns=fields, 
                             index=fields)
 
-    def _return_variable_relationships_per_group_per_cluster(self,
-                                                             seq_stats_df: pd.DataFrame,
-                                                             fields: List[str]) -> Dict[Dict[str, PairplotData], Dict[str, Dict[str, PairplotData]]]:
-
-        pairplot_variable_relationship_per_group = {}
-        pairplot_variable_relationship_per_group_per_cluster = {}
-
-        variables_df = seq_stats_df[fields]
-
-        variable_relationship = self._return_variable_relationship_df(variables_df,
-                                                                      fields)
-
-        for group, df_per_group in seq_stats_df.groupby(GROUP_FIELD_NAME_STR):
-
-            variables_df_per_group = df_per_group[fields]
-
-            variable_relationship_per_group = self._return_variable_relationship_df(variables_df_per_group,
-                                                                                    fields)
-
-            pairplot_variable_relationship_per_group[group] = variable_relationship_per_group
-
-            
-            pairplot_variable_relationship_per_cluster = {}
-            for cluster, df_per_group_per_clust in df_per_group.groupby(CLUSTER_FIELD_NAME_STR):
-
-                variables_df_per_cluster = df_per_group_per_clust[fields]
-
-                variable_relationship_per_group_per_cluster = self._return_variable_relationship_df(variables_df_per_cluster,
-                                                                                                    fields)
-
-                pairplot_variable_relationship_per_cluster[cluster] = variable_relationship_per_group_per_cluster
-
-            pairplot_variable_relationship_per_group_per_cluster[group] = pairplot_variable_relationship_per_cluster
-
-        return  {PAIRPLOT_VARIABLE_RELATIONSHIP: variable_relationship,
-                 PAIRPLOT_VARIABLE_RELATIONSHIP_PER_GROUP: pairplot_variable_relationship_per_group,
-                 PAIRPLOT_VARIABLE_RELATIONSHIP_PER_GROUP_PER_CLUSTER: pairplot_variable_relationship_per_group_per_cluster}
-
     def _return_variable_relationship(self,
                                       variable_relationship_dict: dict,
                                       group: int | None,
@@ -1143,6 +1228,16 @@ class LearningActivitySequencePairplot():
         return [field.value for field in fields_to_plot]
     
     def _return_fields_to_plot_data_kind(self,
-                                         fields_to_plot: List[PairplotFieldsToPlot]) -> List[Tuple[bool, bool]]:
+                                         fields_to_plot: List[PairplotFieldsToPlot],
+                                         scaler: PairplotVariableScaler | None) -> List[Tuple[bool, bool]]:
+        
+        eval_metric_data_kind = [(self.evaluation_metric_is_pct, self.evaluation_metric_pct_is_ratio)]
 
-        return [return_plot_field_data_kind(field) for field in fields_to_plot]
+        if scaler:
+            fields_to_plot_data_kind =  [(False, False) for _ in fields_to_plot]
+        else:
+            fields_to_plot_data_kind =  [return_plot_field_data_kind(field) for field in fields_to_plot]
+        
+        fields_to_plot_data_kind += eval_metric_data_kind
+
+        return fields_to_plot_data_kind
