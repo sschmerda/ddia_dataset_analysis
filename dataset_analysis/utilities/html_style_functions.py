@@ -1,5 +1,5 @@
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
 
 def style_html_table_header(soup: Type[BeautifulSoup]) -> None:
     head_elements = soup.select('thead th')
@@ -62,7 +62,8 @@ def replace_html_table_text(soup: Type[BeautifulSoup],
         if tag.string == old_text:
             tag.string.replace_with(new_text)
 
-def apply_html_table_formatting(soup: Type[BeautifulSoup]):
+def apply_html_table_formatting(soup: Type[BeautifulSoup],
+                                style_booleans: bool = True):
     """Apply standardized formatting and styling to an html table via BeautifulSoup
 
     Parameters
@@ -80,8 +81,9 @@ def apply_html_table_formatting(soup: Type[BeautifulSoup]):
     style_html_table_values(soup)
 
     # booleans
-    style_html_table_true_values(soup)
-    style_html_table_false_values(soup)
+    if style_booleans:
+        style_html_table_true_values(soup)
+        style_html_table_false_values(soup)
 
     # replace NaNs with dashes
     replace_html_table_na_value(soup)
