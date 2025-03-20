@@ -6,6 +6,7 @@ def return_axis_limits(data: ArrayLike | None,
                        data_is_pct: bool,
                        pct_is_ratio: bool = False,
                        pct: int = 5,
+                       pct_log: int = 30,
                        data_can_be_negative: bool = False,
                        is_log_scale: bool = False) -> tuple[float]:
     """Returns a tuple with lower and upper axis limits for given input data
@@ -21,6 +22,8 @@ def return_axis_limits(data: ArrayLike | None,
         [0, 100] is being used. The parameter only has an effect if data_is_pct == True.
     pct : int, optional
         A pct of the max value in the data which defines upper and lower axis limits, by default 5
+    pct_log : int, optional
+        A pct of the max value in the data which defines upper axis limits when the plot is on logarithmic scale, by default 30
     data_can_be_negative: bool, optional
         A flag indicating whether the data can take on negative values
     is_log_scale: bool, optional
@@ -59,6 +62,8 @@ def return_axis_limits(data: ArrayLike | None,
             raise ValueError('Data is None. Please provide data for axis limit calculation.')
     
     if is_log_scale:
+        # axis_upper_limit *= 1.2 
+        axis_upper_limit = float(max_val * (1 + pct_log / 100))
         axis_lower_limit = 1
 
     return axis_lower_limit, axis_upper_limit
