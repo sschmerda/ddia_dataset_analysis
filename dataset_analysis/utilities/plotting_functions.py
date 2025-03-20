@@ -2,16 +2,17 @@ from .configs.general_config import *
 from .constants.constants import *
 from .standard_import import *
 
-def return_axis_limits(data: ArrayLike,
+def return_axis_limits(data: ArrayLike | None,
                        data_is_pct: bool,
                        pct_is_ratio: bool = False,
                        pct: int = 5,
-                       data_can_be_negative: bool = False) -> tuple[float]:
+                       data_can_be_negative: bool = False,
+                       is_log_scale: bool = False) -> tuple[float]:
     """Returns a tuple with lower and upper axis limits for given input data
 
     Parameters
     ----------
-    data : ArrayLike
+    data : ArrayLike | None
         An array of numeric data
     data_is_pct : bool
         A flag indicating whether data values are percentages. If true, the axis limits will be set to (-5, 105)
@@ -21,7 +22,9 @@ def return_axis_limits(data: ArrayLike,
     pct : int, optional
         A pct of the max value in the data which defines upper and lower axis limits, by default 5
     data_can_be_negative: bool, optional
-        A flag indicating whether the data can take on nagative values
+        A flag indicating whether the data can take on negative values
+    is_log_scale: bool, optional
+        A flag indicating whether the data is on log scale. If true, the lower bound will be set to 1
 
     Returns
     -------
@@ -36,21 +39,27 @@ def return_axis_limits(data: ArrayLike,
             axis_upper_limit = 105
             axis_lower_limit = -5
     else:
-        if data_can_be_negative:
-            max_val = max(data)
-            min_val = min(data)
+        if data is not None:
+            if data_can_be_negative:
+                max_val = max(data)
+                min_val = min(data)
 
-            axis_upper_limit = float(max_val * (1 + pct / 100))
+                axis_upper_limit = float(max_val * (1 + pct / 100))
 
-            if min_val < 0: 
-                axis_lower_limit = min_val - float(axis_upper_limit - max_val)
+                if min_val < 0: 
+                    axis_lower_limit = min_val - float(axis_upper_limit - max_val)
+                else:
+                    axis_lower_limit = float((axis_upper_limit - max_val) * -1)
+            
             else:
+                max_val = max(data)
+                axis_upper_limit = float(max_val * (1 + pct / 100))
                 axis_lower_limit = float((axis_upper_limit - max_val) * -1)
-        
         else:
-            max_val = max(data)
-            axis_upper_limit = float(max_val * (1 + pct / 100))
-            axis_lower_limit = float((axis_upper_limit - max_val) * -1)
+            raise ValueError('Data is None. Please provide data for axis limit calculation.')
+    
+    if is_log_scale:
+        axis_lower_limit = 1
 
     return axis_lower_limit, axis_upper_limit
 
