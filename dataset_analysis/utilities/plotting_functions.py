@@ -62,9 +62,8 @@ def return_axis_limits(data: ArrayLike | None,
             raise ValueError('Data is None. Please provide data for axis limit calculation.')
     
     if is_log_scale:
-        # axis_upper_limit *= 1.2 
         axis_upper_limit = float(max_val * (1 + pct_log / 100))
-        axis_lower_limit = 1
+        axis_lower_limit = 0.91
 
     return axis_lower_limit, axis_upper_limit
 
