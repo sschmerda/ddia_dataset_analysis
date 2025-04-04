@@ -1,5 +1,3 @@
-from .standard_import import *
-from .constants.constants import *
 from .configs.result_aggregation_config import *
 from .plotting_functions import *
 from .html_style_functions import *
@@ -10,9 +8,9 @@ class AggregatedResults():
 
         self._path_to_result_tables = self._return_result_tables_paths()
 
-        self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names = [strength_value + '_count' for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES]
-        self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names = [strength_value + '_pct' for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES]
-        self.result_aggregation_omnibus_test_result_moa_strength_counts_pct_combined_field_names = [strength_value + '_count_and_pct' for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES]
+        self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names = [strength_value + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_COUNT_NAME_STR for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES]
+        self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names = [strength_value + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_PCT_NAME_STR for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES]
+        self.result_aggregation_omnibus_test_result_moa_strength_counts_pct_combined_field_names = [strength_value + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_COUNT_PCT_NAME_STR for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES]
 
     @avg_sequence_statistics_per_group_per_dataset_decorator
     def plot_avg_sequence_statistics_per_group_per_dataset(self) -> None:
@@ -40,80 +38,123 @@ class AggregatedResults():
                 case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
 
                     data = avg_sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_RAW
+                    x_axis_log_scale = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_LOG_SCALE_X_RAW
                     x_axis_lim = return_axis_limits(data[field.value],
                                                     False,
-                                                    False)
-                    x_axis_ticks = None
+                                                    False,
+                                                    is_log_scale=x_axis_log_scale)
 
                 case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
                      SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
 
                     data = avg_sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_PCT
+                    x_axis_log_scale = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_LOG_SCALE_X_PCT
                     x_axis_lim = return_axis_limits(data[field.value],
                                                     True,
-                                                    False)
-                    x_axis_ticks = np.arange(0, 110, 10)
+                                                    False,
+                                                    is_log_scale=x_axis_log_scale)
+
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
 
                     data = avg_sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_PCT_RATIO
+                    x_axis_log_scale = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_LOG_SCALE_X_PCT_RATIO
                     x_axis_lim = return_axis_limits(data[field.value],
                                                     True,
-                                                    True)
-                    x_axis_ticks = np.arange(0, 1.1, 0.1)
+                                                    True,
+                                                    is_log_scale=x_axis_log_scale)
 
                 case UniqueSequenceFrequencyStatisticsPlotFields.SEQUENCE_FREQUENCY:
 
                     data = avg_unique_sequence_frequency_statistics_per_group_per_dataset
+                    x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_RAW
+                    x_axis_log_scale = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_LOG_SCALE_X_RAW
                     x_axis_lim = return_axis_limits(data[field.value],
                                                     False,
-                                                    False)
-                    x_axis_ticks = None
+                                                    False,
+                                                    is_log_scale=x_axis_log_scale)
 
                 case UniqueSequenceFrequencyStatisticsPlotFields.RELATIVE_SEQUENCE_FREQUENCY:
 
                     data = avg_unique_sequence_frequency_statistics_per_group_per_dataset
+                    x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_PCT
+                    x_axis_log_scale = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_LOG_SCALE_X_PCT
                     x_axis_lim = return_axis_limits(data[field.value],
                                                     True,
-                                                    False)
-                    x_axis_ticks = np.arange(0, 110, 10)
+                                                    False,
+                                                    is_log_scale=x_axis_log_scale)
 
                 case _:
-                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{UniqueSequenceFrequencyStatisticsPlotFields.__name__}')
 
+            color_dict = self._return_color_per_dataset(data,
+                                                        ColorPaletteAggregationLevel.DATASET,
+                                                        AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_PALETTE,
+                                                        AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_ALPHA,
+                                                        AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION)
+
+            if AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SORT_BOXES:
+                data = self._sort_groups_by_metric(data,
+                                                   field,
+                                                   AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SORT_METRIC,
+                                                   SequenceStatisticsDistributionSortingEntity.DATASET,
+                                                   AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SORT_ASCENDING)
+            colors = self._return_colors(data,
+                                         ColorPaletteAggregationLevel.DATASET,
+                                         None,
+                                         color_dict)
+            
             # boxplot
-            g = sns.boxplot(
-                            data, 
+            g = sns.boxplot(data, 
                             x=field.value, 
                             y=DATASET_NAME_FIELD_NAME_STR, 
                             hue=DATASET_NAME_FIELD_NAME_STR,
-                            palette=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_PALETTE,
                             showfliers=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_OUTLIERS,
                             linewidth=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_LINE_WIDTH,
                             width=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_BOX_WIDTH,
                             whis=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_BOX_WHISKERS,
                             showmeans=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SHOW_MEANS,
-                            meanprops=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_MARKER,
-                            saturation=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_COLOR_SATURATION,
-                           )
+                            meanprops=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_MARKER)
             # strip or swarmplot
-            g = sns.swarmplot(
-                              data, 
+            g = sns.swarmplot(data, 
                               x=field.value, 
                               y=DATASET_NAME_FIELD_NAME_STR, 
                               size=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_SIZE, 
                               color=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_COLOR,
                               alpha=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_ALPHA,
                               edgecolor=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_EDGECOLOR,
-                              linewidth=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_LINEWIDTH,
-                             )
-            g.set(
-                xlabel=x_label,
-                ylabel='',
-                xlim=x_axis_lim,
-                )
-            plt.xticks(x_axis_ticks)
+                              linewidth=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_SWARMPLOT_POINT_LINEWIDTH)
+
+            self._set_axis_labels(g,
+                                  AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_PLOT_X_AXIS_LABEL,
+                                  AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_PLOT_Y_AXIS_LABEL,
+                                  x_label,
+                                  AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_Y_AXIS_LABEL)
+
+            self._set_axis_ticks(g,
+                                 AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_PLOT_X_AXIS_TICKS,
+                                 AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_PLOT_Y_AXIS_TICKS,
+                                 AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_PLOT_X_AXIS_TICK_LABELS,
+                                 AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_PLOT_Y_AXIS_TICK_LABELS,
+                                 x_axis_ticks,
+                                 None)
+
+            if x_axis_log_scale:
+                self._set_log_scale_axes(g,
+                                         Axes.X_AXIS)
+            g.grid(True,
+                   axis=AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_GRID_LINE_AXIS.value,
+                   which='both')
+
+            for box, col in zip(g.patches, colors):
+                box.set_facecolor(col)
+            
+            g.set(xlim=(x_axis_lim))
+
             plt.tight_layout()
             title = AVG_SEQUENCE_STATISTICS_PLOT_NAME + field.value
             self._save_figure(title)
@@ -142,50 +183,66 @@ class AggregatedResults():
                 case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
 
                     data = sequence_summary_stats_per_group_per_dataset
+                    y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_RAW
                     statistic_is_pct = False 
                     statistic_is_ratio = False
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_RAW
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_RAW
+                    y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_RAW
 
                 case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
-                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+                     SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
 
                     data = sequence_summary_stats_per_group_per_dataset
+                    y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_PCT
                     statistic_is_pct = True 
                     statistic_is_ratio = False
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
+                    y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_PCT
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
 
                     data = sequence_summary_stats_per_group_per_dataset
+                    y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_PCT_RATIO
                     statistic_is_pct = True 
                     statistic_is_ratio = True
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT_RATIO
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT_RATIO
+                    y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_PCT_RATIO
 
                 case UniqueSequenceFrequencyStatisticsPlotFields.SEQUENCE_FREQUENCY:
 
                     data = unique_sequence_frequency_summary_stats_per_group_per_dataset
+                    y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_RAW
                     statistic_is_pct = False 
                     statistic_is_ratio = False
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_RAW
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_RAW
+                    y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_RAW
 
                 case UniqueSequenceFrequencyStatisticsPlotFields.RELATIVE_SEQUENCE_FREQUENCY:
 
                     data = unique_sequence_frequency_summary_stats_per_group_per_dataset
+                    y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_PCT
                     statistic_is_pct = True 
                     statistic_is_ratio = False
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
+                    y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_PCT
 
                 case _:
-                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{UniqueSequenceFrequencyStatisticsPlotFields.__name__}')
 
             n_cols = set_facet_grid_column_number(data[DATASET_NAME_FIELD_NAME_STR],
                                                   RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            color_dict = self._return_color_per_group_per_dataset(data,
+                                                                  ColorPaletteAggregationLevel.GROUP,
+                                                                  SUMMARY_SEQUENCE_STATISTICS_COLOR_PALETTE,
+                                                                  SUMMARY_SEQUENCE_STATISTICS_COLOR_ALPHA,
+                                                                  SUMMARY_SEQUENCE_STATISTICS_COLOR_SATURATION)
 
             # TODO: set new statistcs variable?
             g = sns.relplot(data,
@@ -207,46 +264,79 @@ class AggregatedResults():
                             markeredgewidth=SUMMARY_SEQUENCE_STATISTICS_MARKER_EDGEWIDTH,
                             alpha=SUMMARY_SEQUENCE_STATISTICS_MARKER_ALPHA,
                             facet_kws=dict(sharex=share_x,
-                                           sharey=share_y)
-                        )
+                                           sharey=share_y))
+
+            g.set_titles('{col_name}') 
 
             if share_y:
                 y_axis_lim = return_axis_limits(data[field.value],
                                                 statistic_is_pct,
-                                                statistic_is_ratio)
+                                                statistic_is_ratio,
+                                                is_log_scale=y_axis_log_scale)
                 g.set(ylim=y_axis_lim)
+            
+            for ax, (dataset_name, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
 
-            for ax, (facet_val, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
+                self._set_axis_labels(ax,
+                                      SUMMARY_SEQUENCE_STATISTICS_PLOT_X_AXIS_LABEL,
+                                      SUMMARY_SEQUENCE_STATISTICS_PLOT_Y_AXIS_LABEL,
+                                      SUMMARY_SEQUENCE_STATISTICS_X_AXIS_LABEL,
+                                      SUMMARY_SEQUENCE_STATISTICS_Y_AXIS_LABEL)
+
+                self._set_axis_ticks(ax,
+                                     SUMMARY_SEQUENCE_STATISTICS_PLOT_X_AXIS_TICKS,
+                                     SUMMARY_SEQUENCE_STATISTICS_PLOT_Y_AXIS_TICKS,
+                                     SUMMARY_SEQUENCE_STATISTICS_PLOT_X_AXIS_TICK_LABELS,
+                                     SUMMARY_SEQUENCE_STATISTICS_PLOT_Y_AXIS_TICK_LABELS,
+                                     None,
+                                     y_axis_ticks)
+
+                if y_axis_log_scale:
+                    self._set_log_scale_axes(ax,
+                                             Axes.Y_AXIS)
+                ax.grid(True,
+                        axis=SUMMARY_SEQUENCE_STATISTICS_GRID_LINE_AXIS.value,
+                        which='both')
 
                 if not share_y:
                     y_axis_lim = return_axis_limits(facet_data[field.value],
                                                     statistic_is_pct,
-                                                    statistic_is_ratio)
+                                                    statistic_is_ratio,
+                                                    is_log_scale=y_axis_log_scale)
                     ax.set_ylim(*y_axis_lim)
                 
-                color_palette = self._return_color_palette(facet_data,
-                                                           RESULT_AGGREGATION_COLOR_PALETTE,
-                                                           RESULT_AGGREGATION_COLOR_SATURATION)
+                colors = self._return_colors(facet_data,
+                                             ColorPaletteAggregationLevel.GROUP,
+                                             dataset_name,
+                                             color_dict)
                 
-                for line, color in zip(ax.lines, color_palette):
+                for line, color in zip(ax.lines, colors):
                     line.set_color(color)
-                    line.set_alpha(SUMMARY_SEQUENCE_STATISTICS_LINE_ALPHA)
-
+                
                 ax.spines['top'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_TOP)
                 ax.spines['bottom'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_BOTTOM)
                 ax.spines['left'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_LEFT)
                 ax.spines['right'].set_visible(SUMMARY_SEQUENCE_STATISTICS_SHOW_RIGHT)
 
-            for ax in g.axes.flatten():
-                ax.tick_params(labelbottom=True)
+            n_groups = data[DATASET_NAME_FIELD_NAME_STR].nunique()
+            self._remove_inner_plot_elements_grid(g,
+                                                  n_groups,
+                                                  n_cols,
+                                                  SUMMARY_SEQUENCE_STATISTICS_REMOVE_INNER_X_AXIS_LABELS,
+                                                  SUMMARY_SEQUENCE_STATISTICS_REMOVE_INNER_Y_AXIS_LABELS,
+                                                  SUMMARY_SEQUENCE_STATISTICS_REMOVE_INNER_X_AXIS_TICKS,
+                                                  SUMMARY_SEQUENCE_STATISTICS_REMOVE_INNER_Y_AXIS_TICKS,
+                                                  SUMMARY_SEQUENCE_STATISTICS_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                                  SUMMARY_SEQUENCE_STATISTICS_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+
             plt.tight_layout()
             title = SUMMARY_SEQUENCE_STATISTICS_PLOT_NAME + field.value
             self._save_figure(title)
             plt.show(g);
 
-    @sequence_statistics_distribution_per_group_per_dataset_decorator
-    def plot_sequence_statistics_distribution_per_group_per_dataset(self,
-                                                                    include_unique_sequences: bool) -> None:
+    @sequence_statistics_distribution_boxplot_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_boxplot_per_group_per_dataset(self,
+                                                                            include_unique_sequences: bool) -> None:
 
         if include_unique_sequences:
             sequence_stats_fields = [field.value for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST]
@@ -281,56 +371,76 @@ class AggregatedResults():
                 case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
 
                     data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_RAW
                     statistic_is_pct = False 
                     statistic_is_ratio = False
-                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
-                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_RAW
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_RAW
 
                 case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
                         SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
 
                     data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_PCT
                     statistic_is_pct = True 
                     statistic_is_ratio = False
-                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
-                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_PCT
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_PCT
+
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
 
                     data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_PCT_RATIO
                     statistic_is_pct = True 
                     statistic_is_ratio = True
-                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT_RATIO
-                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT_RATIO
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_PCT_RATIO
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_PCT_RATIO
                 
                 case UniqueSequenceFrequencyStatisticsPlotFields.SEQUENCE_FREQUENCY:
 
                     data = unique_sequence_frequency_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_RAW
                     statistic_is_pct = False 
                     statistic_is_ratio = False
-                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_RAW
-                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_RAW
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_RAW
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_RAW
 
                 case UniqueSequenceFrequencyStatisticsPlotFields.RELATIVE_SEQUENCE_FREQUENCY:
 
                     data = unique_sequence_frequency_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_PCT
                     statistic_is_pct = True 
                     statistic_is_ratio = False
-                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREX_PCT
-                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_SHAREY_PCT
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_PCT
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_PCT
 
                 case _:
-                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{field}')
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{UniqueSequenceFrequencyStatisticsPlotFields.__name__}')
 
             n_cols = set_facet_grid_column_number(data[DATASET_NAME_FIELD_NAME_STR],
                                                   RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            color_dict = self._return_color_per_group_per_dataset(data,
+                                                                  ColorPaletteAggregationLevel.GROUP,
+                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_PALETTE,
+                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_ALPHA,
+                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_COLOR_SATURATION)
 
             def plot_boxplot(data, **kwargs):
 
                 if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
                     data = self._sort_groups_by_metric(data,
-                                                       field.value)
+                                                       field,
+                                                       SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC,
+                                                       SequenceStatisticsDistributionSortingEntity.GROUP,
+                                                       SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_ASCENDING)
 
                 if include_unique_sequences:
                     hue_var = LEARNING_ACTIVITY_SEQUENCE_TYPE_NAME_STR
@@ -350,7 +460,7 @@ class AggregatedResults():
                             whis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_BOX_WHISKERS,
                             showmeans=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_MEANS,
                             meanprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_MARKER,
-                            saturation=RESULT_AGGREGATION_COLOR_SATURATION,
+                            flierprops=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_OUTLIER_MARKER,
                             **kwargs)
 
             g = sns.FacetGrid(data,
@@ -359,14 +469,17 @@ class AggregatedResults():
                               height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
                               aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
                               sharex=share_x,
-                              sharey=share_y,
-            )
+                              sharey=share_y)
+
             g.map_dataframe(plot_boxplot)
+
+            g.set_titles('{col_name}') 
 
             if share_x:
                 x_axis_lim = return_axis_limits(data[field.value],
                                                 statistic_is_pct,
-                                                statistic_is_ratio)
+                                                statistic_is_ratio,
+                                                is_log_scale=x_axis_log_scale)
                 g.set(xlim=x_axis_lim)
 
             if include_unique_sequences:
@@ -376,46 +489,324 @@ class AggregatedResults():
                             bbox_to_anchor=(0.98, 0.5), 
                             loc='center left')
 
-            for ax, (facet_val, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
+            for ax, (dataset_name, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                self._set_axis_labels(ax,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_X_AXIS_LABEL,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_Y_AXIS_LABEL,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_AXIS_LABEL,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_Y_AXIS_LABEL)
+
+                self._set_axis_ticks(ax,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_X_AXIS_TICKS,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_Y_AXIS_TICKS,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_X_AXIS_TICK_LABELS,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_Y_AXIS_TICK_LABELS,
+                                     x_axis_ticks,
+                                     None)
+
+                if x_axis_log_scale:
+                    self._set_log_scale_axes(ax,
+                                             Axes.X_AXIS)
+                ax.grid(True,
+                        axis=SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_GRID_LINE_AXIS.value,
+                        which='both')
 
                 if not share_x:
                     x_axis_lim = return_axis_limits(facet_data[field.value],
                                                     statistic_is_pct,
-                                                    statistic_is_ratio)
+                                                    statistic_is_ratio,
+                                                    is_log_scale=x_axis_log_scale)
                     ax.set_xlim(*x_axis_lim)
 
                 if include_unique_sequences:
                     pass
                 else:
-                    color_palette = self._return_color_palette(facet_data,
-                                                               RESULT_AGGREGATION_COLOR_PALETTE,
-                                                               RESULT_AGGREGATION_COLOR_SATURATION)
 
                     if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
-                        groups = np.unique(facet_data[GROUP_FIELD_NAME_STR])
-                        color_dict = dict(zip(groups, color_palette))
 
-                        labels = [int(tick.get_text()) for tick in ax.get_yticklabels()]
+                        facet_data = self._sort_groups_by_metric(facet_data,
+                                                                 field,
+                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC,
+                                                                 SequenceStatisticsDistributionSortingEntity.GROUP,
+                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_ASCENDING)
+                    colors = self._return_colors(facet_data,
+                                                 ColorPaletteAggregationLevel.GROUP,
+                                                 dataset_name,
+                                                 color_dict)
 
-                        for box, group in zip(ax.patches, labels):
-                            box.set_facecolor(color_dict[group])
-                    else:
-                        for box, color in zip(ax.patches, color_palette):
-                            box.set_facecolor(color)
+                    for box, col in zip(ax.patches, colors):
+                        box.set_facecolor(col)
 
-                ax.spines['top'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_TOP)
-                ax.spines['bottom'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_BOTTOM)
-                ax.spines['left'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_LEFT)
-                ax.spines['right'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_SHOW_RIGHT)
+                ax.spines['top'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_LEFT)
+                ax.spines['right'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHOW_RIGHT)
 
-            for ax in g.axes.flatten():
-                ax.tick_params(labelbottom=True)
+            n_groups = data[DATASET_NAME_FIELD_NAME_STR].nunique()
+            self._remove_inner_plot_elements_grid(g,
+                                                  n_groups,
+                                                  n_cols,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_REMOVE_INNER_X_AXIS_LABELS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_REMOVE_INNER_Y_AXIS_LABELS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_REMOVE_INNER_X_AXIS_TICKS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_REMOVE_INNER_Y_AXIS_TICKS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+            
             plt.tight_layout()
             if include_unique_sequences:
-                title = SEQUENCE_STATISTICS_DISTRIBUTION_NON_UNIQUE_UNIQUE_SPLIT_BOXPLOT_PLOT_NAME
+                title = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_NON_UNIQUE_UNIQUE_SPLIT_PLOT_NAME
             else:
                 title = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_PLOT_NAME
             title += field.value
+            self._save_figure(title)
+            plt.show(g);
+
+    @sequence_statistics_distribution_ridgeplot_per_group_per_dataset_decorator
+    def plot_sequence_statistics_distribution_ridgeplot_per_group_per_dataset(self) -> None:
+
+        sequence_stats_fields = [field.value for field in SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST]
+        sequence_statistics_per_group_per_dataset = self._return_sequence_statistics_distribution_per_group_per_dataset_df(sequence_stats_fields,
+                                                                                                                           False)
+
+        fields_to_plot = SEQUENCE_STATISTICS_FIELDS_TO_PLOT_LIST
+
+        for field in fields_to_plot:
+
+            print(STAR_STRING)
+            print(field.value)
+            print(STAR_STRING)
+
+            if SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_BOXES:
+                print(f'{RIDGEPLOT_IS_SORTED_STR}{SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_METRIC.value}')
+            else:
+                print(f'{RIDGEPLOT_IS_SORTED_STR}{GROUP_FIELD_NAME_STR}{RIDGEPLOT_GROUP_NUMBER_STR}')
+            print('')
+
+            match field:
+                case SequenceStatisticsPlotFields.SEQUENCE_LENGTH:
+
+                    data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_X_TICKS_RAW
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREY_RAW
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_RAW
+
+                case SequenceStatisticsPlotFields.PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ |\
+                        SequenceStatisticsPlotFields.PCT_REPEATED_LEARNING_ACTIVITIES:
+
+                    data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_X_TICKS_PCT
+                    statistic_is_pct = True 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREX_PCT
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREY_PCT
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_X_TICKS_PCT_RATIO
+                    statistic_is_pct = True 
+                    statistic_is_ratio = True
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREX_PCT_RATIO
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREY_PCT_RATIO
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_PCT_RATIO
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SequenceStatisticsPlotFields.__name__}')
+
+            n_cols = set_facet_grid_column_number(data[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            color_dict = self._return_color_per_group_per_dataset(data,
+                                                                  ColorPaletteAggregationLevel.GROUP,
+                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_COLOR_PALETTE,
+                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_COLOR_ALPHA,
+                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_COLOR_SATURATION)
+
+            def plot_ridgeplot(data, **kwargs):
+
+                dataset_name = data[DATASET_NAME_FIELD_NAME_STR].iloc[0]
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       field,
+                                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_METRIC,
+                                                       SequenceStatisticsDistributionSortingEntity.GROUP,
+                                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_ASCENDING)
+
+                colors = self._return_colors(data,
+                                             ColorPaletteAggregationLevel.GROUP,
+                                             dataset_name,
+                                             color_dict)
+
+                n_groups = data[GROUP_FIELD_NAME_STR].nunique()
+                shift_value = 0
+
+                y_axis_ticks = np.arange(0, 
+                                         -n_groups*SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_Y_AXIS_TICK_SHIFT_INCREMENT, 
+                                         -SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_Y_AXIS_TICK_SHIFT_INCREMENT)
+                y_axis_ticks_labels = data[GROUP_FIELD_NAME_STR].unique()
+
+                zorder = 10000
+
+                for (group, df), color in zip(data.groupby(GROUP_FIELD_NAME_STR), colors): 
+
+                    # conf int
+                    mean_value = df[field.value].mean()
+                    confidence = 0.95
+                    n = len(df)
+                    mean_value = df[field.value].mean()
+                    std_err = sp.stats.sem(df[field.value])  # Standard error: std / sqrt(n)
+                    deg_fred = n - 1
+                    ci = sp.stats.t.interval(confidence, deg_fred, loc=mean_value, scale=std_err)
+                    ci_lower = ci[0] 
+                    ci_upper = ci[1]
+                    #
+
+                    x_min = min(df[field.value])
+                    x_max = max(df[field.value])
+                    x_lower_bound = x_min - 0
+                    x_upper_bound = x_max + 0
+                    kde = sp.stats.gaussian_kde(df[field.value], 
+                                                bw_method=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_METHOD)
+                    x_vals = np.linspace(x_lower_bound, 
+                                         x_upper_bound, 
+                                         10000)
+                    y_vals = kde(x_vals)
+                    y_vals = y_vals / np.max(y_vals) # normalization to density of 1: y_vals = y_vals / np.trapz(y_vals, x_vals)
+
+                    # ensure that borders of the densities are drawn at the min and max value of the data
+                    y_vals[0] = 0
+                    y_vals[-1] = 0
+                    
+                    # shift the y values for correct position on y axis
+                    y_vals_shifted = y_vals + shift_value
+
+                    # kde
+                    sns.lineplot(x=x_vals, 
+                                 y=y_vals_shifted,
+                                 color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_COLOR,
+                                 linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_LINEWIDTH,
+                                 zorder=zorder)
+                    sns.lineplot(x=x_vals, 
+                                 y=y_vals_shifted,
+                                 color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_COLOR,
+                                 linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_LINEWIDTH,
+                                 zorder=zorder+0.5)
+                    if SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INCLUDE_KDE_BOTTOM_LINE:
+                        sns.lineplot(x=x_vals, 
+                                     y=np.zeros_like(x_vals) + shift_value,
+                                     color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_COLOR,
+                                     linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_LINEWIDTH,
+                                     zorder=zorder+0.5)
+                    plt.fill_between(x_vals, 
+                                     y_vals_shifted, 
+                                     shift_value, 
+                                     color=color, 
+                                     zorder=zorder)
+
+                    # conf int
+                    sns.lineplot(x=[ci_lower, ci_upper],
+                                 y=[shift_value, shift_value],
+                                 legend=False,
+                                 color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_OUTER_LINEPLOT_COLOR,
+                                 linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_OUTER_LINEPLOT_LINEWIDTH,
+                                 zorder=100_000)
+                    sns.lineplot(x=[ci_lower, ci_upper],
+                                 y=[shift_value, shift_value],
+                                 legend=False,
+                                 color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_INNER_LINEPLOT_COLOR,
+                                 linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_INNER_LINEPLOT_LINEWIDTH,
+                                 zorder=100_001)
+
+                    sns.scatterplot(x=[mean_value],
+                                    y=[shift_value],
+                                    legend=False,
+                                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SCATTER_COLOR,
+                                    s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SCATTER_SIZE,
+                                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SCATTER_LINEWIDTH,
+                                    edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SCATTER_EDGECOLOR,
+                                    zorder=100_002)
+
+                    shift_value -= SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_Y_AXIS_TICK_SHIFT_INCREMENT 
+                    zorder += 1
+
+                plt.yticks(y_axis_ticks, 
+                           labels=y_axis_ticks_labels)
+
+            g = sns.FacetGrid(data,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y)
+
+            g.map_dataframe(plot_ridgeplot)
+
+            g.set_titles('{col_name}') 
+
+            if share_x:
+                x_axis_lim = return_axis_limits(data[field.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio,
+                                                is_log_scale=x_axis_log_scale)
+                g.set(xlim=x_axis_lim)
+
+            for ax, (dataset_name, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                self._set_axis_labels(ax,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_X_AXIS_LABEL,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_Y_AXIS_LABEL,
+                                      field.value,
+                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_Y_AXIS_LABEL)
+
+                self._set_axis_ticks(ax,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_X_AXIS_TICKS,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_Y_AXIS_TICKS,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_X_AXIS_TICK_LABELS,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_Y_AXIS_TICK_LABELS,
+                                     x_axis_ticks,
+                                     None)
+
+                if x_axis_log_scale:
+                    self._set_log_scale_axes(ax,
+                                             Axes.X_AXIS)
+                ax.grid(True,
+                        axis=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_GRID_LINE_AXIS.value,
+                        which='both')
+
+                if not share_x:
+                    x_axis_lim = return_axis_limits(facet_data[field.value],
+                                                    statistic_is_pct,
+                                                    statistic_is_ratio,
+                                                    is_log_scale=x_axis_log_scale)
+                    ax.set_xlim(*x_axis_lim)
+
+                ax.spines['top'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHOW_TOP)
+                ax.spines['bottom'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHOW_LEFT)
+                ax.spines['right'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHOW_RIGHT)
+
+            n_groups = data[DATASET_NAME_FIELD_NAME_STR].nunique()
+            self._remove_inner_plot_elements_grid(g,
+                                                  n_groups,
+                                                  n_cols,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_REMOVE_INNER_X_AXIS_LABELS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_REMOVE_INNER_Y_AXIS_LABELS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_REMOVE_INNER_X_AXIS_TICKS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_REMOVE_INNER_Y_AXIS_TICKS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+
+            plt.tight_layout()
+            title = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_NAME + field.value
             self._save_figure(title)
             plt.show(g);
 
@@ -431,9 +822,16 @@ class AggregatedResults():
         n_cols = set_facet_grid_column_number(sequence_count_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR],
                                               RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
 
+        color_dict = self._return_color_per_group_per_dataset(sequence_count_per_group_per_dataset,
+                                                              ColorPaletteAggregationLevel.GROUP,
+                                                              SEQUENCE_COUNT_COLOR_PALETTE,
+                                                              SEQUENCE_COUNT_COLOR_ALPHA,
+                                                              SEQUENCE_COUNT_COLOR_SATURATION)
+
         g = sns.relplot(sequence_count_per_group_per_dataset,
                         x=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR,
                         y=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR,
+                        hue=GROUP_FIELD_NAME_STR,
                         col=DATASET_NAME_FIELD_NAME_STR,
                         col_wrap=n_cols,
                         height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
@@ -444,26 +842,43 @@ class AggregatedResults():
                         facecolor=SEQUENCE_COUNT_MARKER_FACECOLOR,
                         edgecolor=SEQUENCE_COUNT_MARKER_EDGECOLOR,
                         linewidth=SEQUENCE_COUNT_MARKER_EDGEWIDTH,
-                        alpha=SEQUENCE_COUNT_MARKER_ALPHA,
                         zorder=101,
                         facet_kws=dict(sharex=SEQUENCE_COUNT_SHAREX,
                                        sharey=SEQUENCE_COUNT_SHAREX)
                     )
 
+        g.set_titles('{col_name}') 
+
         if SEQUENCE_COUNT_SHAREX:
             x_axis_lim = return_axis_limits(sequence_count_per_group_per_dataset[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR],
                                             False,
-                                            False)
+                                            False,
+                                            is_log_scale=SEQUENCE_COUNT_LOG_SCALE_X_RAW)
             g.set(xlim=x_axis_lim,
                   ylim=x_axis_lim)
 
 
-        for ax, (facet_val, facet_data) in zip(g.axes.flat, sequence_count_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+        for ax, (dataset_name, facet_data) in zip(g.axes.flat, sequence_count_per_group_per_dataset.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+            self._set_axis_labels(ax,
+                                  SEQUENCE_COUNT_PLOT_X_AXIS_LABEL,
+                                  SEQUENCE_COUNT_PLOT_Y_AXIS_LABEL,
+                                  SEQUENCE_COUNT_X_AXIS_LABEL,
+                                  SEQUENCE_COUNT_Y_AXIS_LABEL)
+
+            self._set_axis_ticks(ax,
+                                 SEQUENCE_COUNT_PLOT_X_AXIS_TICKS,
+                                 SEQUENCE_COUNT_PLOT_Y_AXIS_TICKS,
+                                 SEQUENCE_COUNT_PLOT_X_AXIS_TICK_LABELS,
+                                 SEQUENCE_COUNT_PLOT_Y_AXIS_TICK_LABELS,
+                                 SEQUENCE_COUNT_X_TICKS_RAW,
+                                 SEQUENCE_COUNT_Y_TICKS_RAW)
 
             if not SEQUENCE_COUNT_SHAREX:
                 x_axis_lim = return_axis_limits(facet_data[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR],
                                                 False,
-                                                False)
+                                                False,
+                                                is_log_scale=SEQUENCE_COUNT_LOG_SCALE_X_RAW)
                 ax.set_xlim(*x_axis_lim)
                 ax.set_ylim(*x_axis_lim)
 
@@ -473,22 +888,239 @@ class AggregatedResults():
                       linewidth=SEQUENCE_COUNT_45_DEGREE_LINE_WIDTH, 
                       zorder=100)
 
-            color_palette = self._return_color_palette(facet_data,
-                                                       RESULT_AGGREGATION_COLOR_PALETTE,
-                                                       RESULT_AGGREGATION_COLOR_SATURATION)
+            colors = self._return_colors(facet_data,
+                                         ColorPaletteAggregationLevel.GROUP,
+                                         dataset_name,
+                                         color_dict)
 
             collection = ax.collections[0]
-            collection.set_facecolor(color_palette)
+            collection.set_facecolor(colors)
 
             ax.spines['top'].set_visible(SEQUENCE_COUNT_SHOW_TOP)
             ax.spines['bottom'].set_visible(SEQUENCE_COUNT_SHOW_BOTTOM)
             ax.spines['left'].set_visible(SEQUENCE_COUNT_SHOW_LEFT)
             ax.spines['right'].set_visible(SEQUENCE_COUNT_SHOW_RIGHT)
 
+        for ax in g.axes.flat:
+
+            if SEQUENCE_COUNT_LOG_SCALE_X_RAW:
+                self._set_log_scale_axes(ax,
+                                         Axes.BOTH)
+            ax.grid(True,
+                    axis=SEQUENCE_COUNT_GRID_LINE_AXIS.value,
+                    which='both')
+
+        n_groups = sequence_count_per_group_per_dataset[DATASET_NAME_FIELD_NAME_STR].nunique()
+        self._remove_inner_plot_elements_grid(g,
+                                              n_groups,
+                                              n_cols,
+                                              SEQUENCE_COUNT_REMOVE_INNER_X_AXIS_LABELS,
+                                              SEQUENCE_COUNT_REMOVE_INNER_Y_AXIS_LABELS,
+                                              SEQUENCE_COUNT_REMOVE_INNER_X_AXIS_TICKS,
+                                              SEQUENCE_COUNT_REMOVE_INNER_Y_AXIS_TICKS,
+                                              SEQUENCE_COUNT_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                              SEQUENCE_COUNT_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+
+        plt.tight_layout()
+        self._save_figure(SEQUENCE_COUNT_PLOT_NAME)
+        plt.show(g);
+
+    @aggregated_omnibus_test_result_per_dataset_stacked_barplot_decorator
+    def plot_aggregated_omnibus_test_result_per_dataset_stacked_barplot(self) -> None:
+
+        # plotting data 
+        pct_df, count_df = self._return_aggregated_omnibus_test_result_per_dataset_plotting_pct_df_count_df()
+
+        # use fields name appropriate for plotting
+        pct_df.columns = OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GROUP_CATEGORIES
+        count_df.columns = OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GROUP_CATEGORIES
+
+        pct_df = pct_df.sort_index(ascending=False)
+        count_df = count_df.sort_index(ascending=False)
+        pct_matrix = pct_df.to_numpy()
+        count_matrix = count_df.to_numpy()
+
+        x_axis_lim = return_axis_limits(None,
+                                        True,
+                                        False)
+        x_axis_ticks = np.arange(0, 110, 10)
+
+        # color palette
+        index = OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_INDEX
+        color_palette = sns.color_palette(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE,
+                                          n_colors=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_NUMBER_COLORS,
+                                          desat=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_DESAT)
+        color_palette = [color_palette[i] for i in index]
+        color_palette.insert(0, OMNIBUS_TEST_RESULT_STACKED_BARPLOT_NON_SIG_COLOR)
+        cmap = ListedColormap(color_palette)
+
+        # plot
+        ax = pct_df.plot.barh(stacked=True, 
+                              colormap=cmap,
+                              edgecolor=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_EDGECOLOR,
+                              linewidth=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_LINEWIDTH,
+                              width=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_WIDTH,
+                              alpha=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_ALPHA)
+
+        # pct/count text
+        pct_matrix = pct_df.to_numpy().transpose().flatten()
+        count_matrix = count_matrix.transpose().flatten()
+        for i, p in enumerate(ax.patches):
+            width = p.get_width()
+            height = p.get_height()
+            x_pos = p.get_x() + width / 2
+            y_pos = p.get_y() + height / 2
+
+            pct = pct_matrix[i] 
+            count = count_matrix[i]
+
+            if pct >= OMNIBUS_TEST_RESULT_STACKED_BARPLOT_ANNOTATION_TEXT_THRESHOLD:
+                ax.text(x_pos, 
+                        y_pos, 
+                        f'{pct:.1f}% (n={count})', 
+                        ha=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_ANNOTATION_TEXT_H_POS, 
+                        va=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_ANNOTATION_TEXT_V_POS, 
+                        fontsize=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_ANNOTATION_TEXT_FONTSIZE, 
+                        color=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_ANNOTATION_TEXT_COLOR)
+
+        # settings
+        plt.grid(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GRID_LINES_VERTICAL, 
+                 axis='x')
+        plt.grid(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GRID_LINES_HORIZONTAL, 
+                 axis='y')
+        plt.xlim(x_axis_lim)
+        plt.xticks(x_axis_ticks)
+        plt.xlabel(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_X_LABEL)
+        plt.ylabel('')
+        plt.legend(bbox_to_anchor=(0.5, 1.02),
+                   loc='lower center',
+                   borderaxespad=0,
+                   frameon=False,
+                   ncol=pct_df.shape[1])
+        plt.tight_layout()
+        self._save_figure(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_NAME)
+        plt.show(ax);
+
+    @aggregated_omnibus_test_result_per_dataset_grouped_barplot_decorator
+    def plot_aggregated_omnibus_test_result_per_dataset_grouped_barplot(self) -> None:
+
+        # plotting data 
+        pct_df, count_df = self._return_aggregated_omnibus_test_result_per_dataset_plotting_pct_df_count_df()
+
+        # use fields name appropriate for plotting
+        pct_df.columns = OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_GROUP_CATEGORIES
+        count_df.columns = OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_GROUP_CATEGORIES
+
+        pct_df_long = pd.melt(pct_df.reset_index(), 
+                              id_vars=DATASET_NAME_FIELD_NAME_STR, 
+                              var_name=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR,
+                              value_name=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_PCT_FIELD_NAME_STR)
+        pct_df_long = pct_df_long.sort_values(by=DATASET_NAME_FIELD_NAME_STR)
+
+        count_df_long = pd.melt(count_df.reset_index(), 
+                                id_vars=DATASET_NAME_FIELD_NAME_STR, 
+                                var_name=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR,
+                                value_name=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_COUNT_FIELD_NAME_STR)
+        count_df_long = count_df_long.sort_values(by=DATASET_NAME_FIELD_NAME_STR)
+
+        pct_count_df_long = pd.concat([pct_df_long[[DATASET_NAME_FIELD_NAME_STR, RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_PCT_FIELD_NAME_STR]],
+                                       count_df_long[[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_COUNT_FIELD_NAME_STR]]],
+                                       axis=1)
+
+        y_axis_lim = return_axis_limits(None,
+                                        True,
+                                        False)
+        y_axis_ticks = np.arange(0, 110, 10)
+
+        # color palette
+        index = OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_INDEX
+        color_palette = sns.color_palette(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE,
+                                          n_colors=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_NUMBER_COLORS,
+                                          desat=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_DESAT)
+        color_palette = [color_palette[i] for i in index]
+        color_palette.insert(0, OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_NON_SIG_COLOR)
+
+        n_cols = set_facet_grid_column_number(pct_df_long[DATASET_NAME_FIELD_NAME_STR],
+                                              RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+        g = sns.catplot(data=pct_df_long,
+                        x=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR,
+                        y=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_PCT_FIELD_NAME_STR,
+                        hue=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR,
+                        col=DATASET_NAME_FIELD_NAME_STR,
+                        col_wrap=n_cols,
+                        height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                        aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                        legend=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_LEGEND,
+                        orient=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ORIENTATION,
+                        kind=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_KIND,
+                        palette=color_palette,
+                        alpha=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ALPHA,
+                        width=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_WIDTH,
+                        edgecolor=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_EDGECOLOR,
+                        linewidth=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_EDGEWIDTH,
+                        sharex=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHAREX,
+                        sharey=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHAREY)
+
+        g.set_titles('{col_name}') 
+
+        g.set(ylim=y_axis_lim,
+              yticks=y_axis_ticks,
+              ylabel=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_Y_LABEL,
+              xlabel=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_X_LABEL)
+        
+        g.set_xticklabels(rotation=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_X_TICKS_ROTATION)
+
+        for ax, (df_name, df) in zip(g.axes.flat, pct_count_df_long.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+            # set spines
+            ax.spines['top'].set_visible(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHOW_TOP)
+            ax.spines['bottom'].set_visible(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHOW_BOTTOM)
+            ax.spines['left'].set_visible(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHOW_LEFT)
+            ax.spines['right'].set_visible(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHOW_RIGHT)
+
+
+            # add annotiation text
+            pct_array = df[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_PCT_FIELD_NAME_STR].to_numpy()
+            count_array = df[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_COUNT_FIELD_NAME_STR].to_numpy()
+            for i, p in enumerate(ax.patches):
+                if p.get_height() > 0:
+                    width = p.get_width()
+                    height = p.get_height()
+                    x_pos = p.get_x() + width / 2
+                    y_pos = p.get_y() + height / 2
+
+                    pct = pct_array[i]
+                    count = count_array[i]
+
+                    if pct >= OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_THRESHOLD:
+                        ax.text(x_pos, 
+                                y_pos, 
+                                f'{pct:.1f}%\n(n={count})', 
+                                ha=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_H_POS, 
+                                va=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_V_POS, 
+                                fontsize=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_FONTSIZE, 
+                                color=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_COLOR)
+
+        # legend
+        sns.move_legend(g, 
+                        "lower center",
+                        bbox_to_anchor=(.5, 1), 
+                        title=None, 
+                        frameon=False, 
+                        ncol=pct_df_long[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR].nunique())
+
+        #TODO: adjust
+        # for handle in g.legend.legendHandles:  
+        #     handle.set_height(15)
+        #     handle.set_width(30)
+        #     handle.set_edgecolor("black")
+        #     handle.set_linewidth(1.5) 
+        
         for ax in g.axes.flatten():
             ax.tick_params(labelbottom=True)
         plt.tight_layout()
-        self._save_figure(SEQUENCE_COUNT_PLOT_NAME)
+        self._save_figure(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_NAME)
         plt.show(g);
 
     def display_summary_statistics_result(self,
@@ -969,35 +1601,43 @@ class AggregatedResults():
             
             eval_metric_is_categorical = omnibus_test_result_per_group[OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR].iloc[0]
 
-            p_val_is_significant_field_name, moa_strength_guideline = self._return_result_aggregation_omnibus_test_fields(eval_metric_is_categorical)
+            p_val_is_significant_field_name, moa_strength_guidelines = self._return_result_aggregation_omnibus_test_fields(eval_metric_is_categorical)
 
             fields = [DATASET_NAME_FIELD_NAME_STR,
                       GROUP_FIELD_NAME_STR,
                       OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR,
                       OMNIBUS_TESTS_EVAlUATION_FIELD_TYPE_FIELD_NAME_STR,
                       p_val_is_significant_field_name,
-                      moa_strength_guideline]
+                      *moa_strength_guidelines]
 
             omnibus_test_result_per_group = omnibus_test_result_per_group[fields]
             aggregation_dict = self._return_result_aggregation_omnibus_test_aggregation_dict(p_val_is_significant_field_name)
 
-            agg_results = omnibus_test_result_per_group.groupby(DATASET_NAME_FIELD_NAME_STR)\
-                                                       .agg(**aggregation_dict)\
-                                                       .reset_index()
+            agg_results = (omnibus_test_result_per_group.groupby(DATASET_NAME_FIELD_NAME_STR)
+                                                        .agg(**aggregation_dict)
+                                                        .reset_index())
 
-            moa_strength_counter = self._return_moa_strength_counter()
-            for _, value in omnibus_test_result_per_group.query(f'{p_val_is_significant_field_name}==True')[moa_strength_guideline].iteritems():
-                moa_strength_counter[value] += 1
+            moa_strength_counts_pcts = []
+            for moa_strength_guideline, moa_strength_calc_base in zip(moa_strength_guidelines, OmnibusTestResultMeasureAssociationStrengthCalculationBase):
 
-            agg_moa_strength = pd.DataFrame(moa_strength_counter, 
-                                            index=pd.Index([0]))
-            agg_moa_strength.columns = self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names
+                moa_calculation_base_suffix = self._return_measure_association_strength_calculation_base_suffix_str(moa_strength_calc_base)
 
-            n_significant_groups = omnibus_test_result_per_group[p_val_is_significant_field_name].sum()
-            agg_moa_strength_pct = agg_moa_strength.copy() / n_significant_groups * 100
-            agg_moa_strength_pct.columns = self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names
+                moa_strength_counter = self._return_moa_strength_counter()
+                for _, value in omnibus_test_result_per_group.query(f'{p_val_is_significant_field_name}==True')[moa_strength_guideline].iteritems():
+                    moa_strength_counter[value] += 1
 
-            agg_moa_strength = pd.concat([agg_results, agg_moa_strength, agg_moa_strength_pct], 
+                agg_moa_strength = pd.DataFrame(moa_strength_counter, 
+                                                index=pd.Index([0]))
+                agg_moa_strength.columns = [strength_count + moa_calculation_base_suffix for strength_count in self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names]
+
+                n_groups = omnibus_test_result_per_group.shape[0]
+                agg_moa_strength_pct = agg_moa_strength.copy() / n_groups * 100
+                agg_moa_strength_pct.columns = [strength_pct + moa_calculation_base_suffix  for strength_pct in self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names]
+                
+                moa_strength_counts_pcts.extend([agg_moa_strength, agg_moa_strength_pct])
+
+            agg_df_list = [agg_results] + moa_strength_counts_pcts
+            agg_moa_strength = pd.concat(agg_df_list, 
                                          axis=1, 
                                          ignore_index=False)
 
@@ -1011,6 +1651,38 @@ class AggregatedResults():
                                                                   ignore_index=True)
 
         return aggregated_omnibus_test_result_per_dataset_df
+    
+    def _return_aggregated_omnibus_test_result_per_dataset_plotting_pct_df_count_df(self) -> Tuple[pd.DataFrame, pd.DataFrame]:
+
+        aggregated_omnibus_test_result_per_dataset = self._return_aggregated_omnibus_test_result_per_dataset_df()
+
+        index = aggregated_omnibus_test_result_per_dataset[DATASET_NAME_FIELD_NAME_STR]
+
+        moa_strength_count_fields = self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names.copy()
+        moa_strength_count_fields.insert(0, RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_NO_SIGNIFICANT_P_VALUE)
+
+        moa_strength_pct_fields = self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names.copy()
+        moa_strength_pct_fields.insert(0, RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_PCT_OF_GROUPS_NO_SIGNIFICANT_P_VALUE)
+        
+        non_sig = (aggregated_omnibus_test_result_per_dataset[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS] - 
+                   aggregated_omnibus_test_result_per_dataset[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE])
+        aggregated_omnibus_test_result_per_dataset[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_NO_SIGNIFICANT_P_VALUE] = non_sig
+
+        count_matrix = aggregated_omnibus_test_result_per_dataset.copy()[moa_strength_count_fields].to_numpy()
+        pct_matrix = count_matrix / count_matrix.sum(axis=1).reshape(count_matrix.shape[0], 1) * 100
+
+
+        pct_df = pd.DataFrame(pct_matrix, 
+                              columns=moa_strength_pct_fields, 
+                              index=index)
+        pct_df = pct_df.sort_index(ascending=True)
+
+        count_df = pd.DataFrame(count_matrix, 
+                                columns=moa_strength_count_fields, 
+                                index=index)
+        count_df = count_df.sort_index(ascending=True)
+
+        return pct_df, count_df
 
     def _return_aggregated_omnibus_test_result_per_dataset_df_display(self,
                                                                       aggregated_omnibus_test_result_per_dataset: pd.DataFrame) -> pd.DataFrame:
@@ -1026,12 +1698,39 @@ class AggregatedResults():
                                                                            agg_pct_of_groups_sig_p_value,
                                                                            agg_number_pct_of_groups_sig_p_value_field_name)
         # combine the moa strength number and pct of groups with significant p-value
-        agg_moa_strength_count = aggregated_omnibus_test_result_per_dataset[self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names]
-        agg_moa_strength_pct = aggregated_omnibus_test_result_per_dataset[self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names]
+        agg_moa_strength_count_pct_combined_list = []
+        for moa_strength_calc_base in OmnibusTestResultMeasureAssociationStrengthCalculationBase: #TODO: make optional in config
 
-        agg_moa_strength_count_pct_combined = self._combine_count_and_pct(agg_moa_strength_count,
-                                                                          agg_moa_strength_pct,
-                                                                          self.result_aggregation_omnibus_test_result_moa_strength_counts_pct_combined_field_names)
+            moa_calculation_base_suffix = self._return_measure_association_strength_calculation_base_suffix_str(moa_strength_calc_base)
+
+            moa_strength_count_fields = [strength_count + moa_calculation_base_suffix for strength_count in self.result_aggregation_omnibus_test_result_moa_strength_counts_field_names]
+            moa_strength_pct_fields = [strength_pct + moa_calculation_base_suffix for strength_pct in self.result_aggregation_omnibus_test_result_moa_strength_pct_field_names]
+
+            agg_moa_strength_count = aggregated_omnibus_test_result_per_dataset[moa_strength_count_fields]
+            agg_moa_strength_pct = aggregated_omnibus_test_result_per_dataset[moa_strength_pct_fields]
+
+            agg_moa_strength_count_pct_combined = self._combine_count_and_pct(agg_moa_strength_count,
+                                                                              agg_moa_strength_pct,
+                                                                              self.result_aggregation_omnibus_test_result_moa_strength_counts_pct_combined_field_names)
+
+            agg_moa_strength_count_pct_combined_list.append(agg_moa_strength_count_pct_combined)
+
+        ##
+        def sum_data(array_first: np.ndarray,
+                     array_second: np.ndarray) -> np.ndarray:
+
+            return array_first + np.full_like(array_first, ' - ') + array_second
+
+        index = agg_moa_strength_count_pct_combined_list[0].copy().index
+        agg_moa_strength_count_pct_combined_list = [df.values for df in agg_moa_strength_count_pct_combined_list]
+
+        agg_moa_strength_count_pct_combined = reduce(sum_data, agg_moa_strength_count_pct_combined_list)
+
+        agg_moa_strength_count_pct_combined = pd.DataFrame(agg_moa_strength_count_pct_combined,
+                                                           index=index)
+        agg_moa_strength_count_pct_combined.columns = self.result_aggregation_omnibus_test_result_moa_strength_counts_pct_combined_field_names
+
+        ##
 
         aggregation_fields = [DATASET_NAME_FIELD_NAME_STR, 
                               OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR, 
@@ -1060,41 +1759,54 @@ class AggregatedResults():
     
     def _sort_groups_by_metric(self,
                                data: pd.DataFrame,
-                               sequence_statistic: str) -> pd.DataFrame:
+                               sequence_statistic: SequenceStatisticsPlotFields | UniqueSequenceFrequencyStatisticsPlotFields,
+                               seq_stat_dist_sort_metric: SequenceStatisticsDistributionSortMetric,
+                               sorting_entity: SequenceStatisticsDistributionSortingEntity,
+                               ascending: bool) -> pd.DataFrame:
         """
-        Sorts the data by sequence statistic. Used for sorting boxplots. 
+        Sorts the data by sequence statistic. Used for sorting boxplots and ridgeplots. 
         """
 
         data = data.copy()
 
-        match SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC:
-            case BoxplotSortMetric.MEAN:
+        match seq_stat_dist_sort_metric:
+            case SequenceStatisticsDistributionSortMetric.MEAN:
                 sort_metric = np.mean
 
-            case BoxplotSortMetric.MEDIAN:
+            case SequenceStatisticsDistributionSortMetric.MEDIAN:
                 sort_metric = np.median
 
-            case BoxplotSortMetric.MAX:
+            case SequenceStatisticsDistributionSortMetric.MAX:
                 sort_metric = np.max
 
-            case BoxplotSortMetric.MIN:
+            case SequenceStatisticsDistributionSortMetric.MIN:
                 sort_metric = np.min
 
             case _:
-                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC}')
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{seq_stat_dist_sort_metric.__name__}')
+        
+        match sorting_entity:
+            case SequenceStatisticsDistributionSortingEntity.GROUP:
+                sorting_field = GROUP_FIELD_NAME_STR
 
-        sort_metric_values = data.groupby([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR])[sequence_statistic]\
+            case SequenceStatisticsDistributionSortingEntity.DATASET:
+                sorting_field = DATASET_NAME_FIELD_NAME_STR
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{sorting_entity.__name__}')
+
+        sort_metric_values = data.groupby(sorting_field)[sequence_statistic.value]\
                                  .agg(sort_metric)\
                                  .reset_index()
 
-        sort_metric_values.rename({sequence_statistic: SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.name}, 
+        sort_metric_values.rename({sequence_statistic.value: seq_stat_dist_sort_metric.name}, 
                                   axis=1, 
                                   inplace=True)
 
-        sort_metric_values.sort_values(by=[DATASET_NAME_FIELD_NAME_STR, SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC.name], inplace=True, ascending=False)
+        sort_metric_values.sort_values(by=[seq_stat_dist_sort_metric.name], inplace=True, ascending=ascending)
 
-        data[GROUP_FIELD_NAME_STR] = pd.Categorical(data[GROUP_FIELD_NAME_STR], categories=sort_metric_values[GROUP_FIELD_NAME_STR], ordered=True)
-        data.sort_values(by=GROUP_FIELD_NAME_STR, inplace=True)
+        data[sorting_field] = pd.Categorical(data[sorting_field], categories=sort_metric_values[sorting_field], ordered=True)
+        data.sort_values(by=sorting_field, inplace=True)
 
         return data
 
@@ -1107,7 +1819,7 @@ class AggregatedResults():
         return moa_strength_counter
     
     def _return_result_aggregation_omnibus_test_fields(self,
-                                                       eval_metric_is_categorical: bool) -> tuple[str, str]:
+                                                       eval_metric_is_categorical: bool) -> Tuple[str, Tuple[str, str, str]]:
 
         if RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_CORRECT_P_VALUES:
             p_val_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_KIND.value + OMNIBUS_TESTS_PVAL_CORRECTED_FIELD_NAME_STR + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_CORRECTION_METHOD.value
@@ -1116,28 +1828,29 @@ class AggregatedResults():
 
         p_val_is_significant_field_name = p_val_field_name + OMNIBUS_TESTS_PVAL_IS_SIGNIFICANT_FIELD_NAME_STR
 
-        moa_calculation_base_suffix = self._return_measure_association_strength_calculation_base_suffix_str(RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_CALCULATION_BASE)
+        moa_strength_guidelines = []
+        for moa_strength_calc_base in OmnibusTestResultMeasureAssociationStrengthCalculationBase:
 
-        if eval_metric_is_categorical:
+            moa_calculation_base_suffix = self._return_measure_association_strength_calculation_base_suffix_str(moa_strength_calc_base)
 
-            # moa_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
-            # moa_conf_int_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
-            moa_strength_guideline = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY.value + 
-                                      '_' + 
-                                      RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_CONTINGENCY.value + 
-                                      OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR + 
-                                      moa_calculation_base_suffix)
+            if eval_metric_is_categorical:
 
-        else:
-            # moa_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
-            # moa_conf_int_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV.value + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR
-            moa_strength_guideline = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV.value + 
-                                      '_' + 
-                                      RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_AOV.value + 
-                                      OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR + 
-                                      moa_calculation_base_suffix)
+                moa_strength_guideline = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY.value + 
+                                          '_' + 
+                                          RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_CONTINGENCY.value + 
+                                          OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR + 
+                                          moa_calculation_base_suffix)
 
-        return p_val_is_significant_field_name, moa_strength_guideline
+            else:
+                moa_strength_guideline = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV.value + 
+                                          '_' + 
+                                          RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_AOV.value + 
+                                          OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_FIELD_NAME_STR + 
+                                          moa_calculation_base_suffix)
+
+            moa_strength_guidelines.append(moa_strength_guideline)
+
+        return (p_val_is_significant_field_name, tuple(moa_strength_guidelines))
     
     def _return_measure_association_strength_calculation_base_suffix_str(self,
                                                                          moa_strength_calc_base : OmnibusTestResultMeasureAssociationStrengthCalculationBase) -> str:
@@ -1194,15 +1907,208 @@ class AggregatedResults():
                     dpi=SAVE_FIGURE_DPI,
                     format=SAVE_FIGURE_IMAGE_FORMAT,
                     bbox_inches=SAVE_FIGURE_BBOX_INCHES)
+
+    def _set_axis_labels(self,
+                         ax: matplotlib.axes.Axes,
+                         plot_x_label: bool,
+                         plot_y_label: bool,
+                         x_label: str | None,
+                         y_label: str | None) -> None:
+
+        if plot_x_label:
+            if x_label is not None:
+                ax.set_xlabel(x_label)
+        else:
+            ax.set_xlabel('')
+
+        if plot_y_label:
+            if y_label is not None:
+                ax.set_ylabel(y_label)
+        else:
+            ax.set_ylabel('')
+    
+    def _set_axis_ticks(self,
+                        ax: matplotlib.axes.Axes,
+                        plot_x_ticks: bool,
+                        plot_y_ticks: bool,
+                        plot_x_tick_labels: bool,
+                        plot_y_tick_labels: bool,
+                        x_axis_ticks: NDArray[np.number] | None,
+                        y_axis_ticks: NDArray[np.number] | None) -> None:
+
+        ax.tick_params(axis='x', 
+                       which='both',
+                       bottom=plot_x_ticks,
+                       top=False,
+                       labelbottom=plot_x_tick_labels,    
+                       labeltop=False)
+
+        ax.tick_params(axis='y', 
+                       which='both',
+                       left=plot_y_ticks,
+                       right=False,
+                       labelleft=plot_y_tick_labels,    
+                       labelright=False)
+
+        if x_axis_ticks is not None:
+            ax.set_xticks(x_axis_ticks)
+            ax.set_xticklabels([f'{tick}' for tick in x_axis_ticks])
+
+        if y_axis_ticks is not None:
+            ax.set_yticks(y_axis_ticks)
+            ax.set_yticklabels([f'{tick}' for tick in y_axis_ticks])
+
+    def _remove_inner_plot_elements_grid(self,
+                                         g: FacetGrid,
+                                         n_groups: int,
+                                         n_cols: int,
+                                         remove_inner_x_labels: bool,
+                                         remove_inner_y_labels: bool,
+                                         remove_inner_x_ticks: bool,
+                                         remove_inner_y_ticks: bool,
+                                         remove_inner_x_tick_labels: bool,
+                                         remove_inner_y_tick_labels: bool) -> None:
+
+        index_last_row_in_grid = (n_groups - 1) // n_cols
+        for n, ax in enumerate(g.axes.flatten()):
+            if (n % n_cols != 0):
+
+                if remove_inner_y_labels:
+                    ax.set_ylabel('')
+
+                plt.tick_params(axis='y', 
+                                which='both',
+                                left=not remove_inner_y_ticks,
+                                right=False,
+                                labelleft=not remove_inner_y_tick_labels,    
+                                labelright=False)
+
+            if ((n // n_groups) != index_last_row_in_grid):
+
+                if remove_inner_x_labels:
+                    ax.set_xlabel('')
+  
+                plt.tick_params(axis='x', 
+                                which='both',
+                                bottom=not remove_inner_x_ticks,
+                                top=False,
+                                labelbottom=not remove_inner_x_tick_labels,    
+                                labeltop=False)
+    
+    def _set_log_scale_axes(self,
+                            ax: matplotlib.axes.Axes,
+                            axis: Axes) -> None:
+    
+        match axis:
+            case Axes.X_AXIS:
+                ax.set(xscale='log')
+
+                ax.xaxis.set_major_locator(mticker.LogLocator(base=10.0, subs=None))
+                ax.xaxis.set_minor_locator(mticker.LogLocator(base=10.0, subs=np.arange(0.1, 1, 0.1), numticks=10))
+
+                ax.xaxis.set_major_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+                ax.xaxis.set_minor_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+
+            case Axes.Y_AXIS:
+                ax.set(yscale='log')
+
+                ax.yaxis.set_major_locator(mticker.LogLocator(base=10.0, subs=None))
+                ax.yaxis.set_minor_locator(mticker.LogLocator(base=10.0, subs=np.arange(0.1, 1, 0.1), numticks=10))
+
+                ax.yaxis.set_major_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+                ax.yaxis.set_minor_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+
+            case Axes.BOTH:
+                ax.set(xscale='log')
+                ax.set(yscale='log')
+
+                ax.xaxis.set_major_locator(mticker.LogLocator(base=10.0, subs=None))
+                ax.xaxis.set_minor_locator(mticker.LogLocator(base=10.0, subs=np.arange(0.1, 1, 0.1), numticks=10))
+
+                ax.xaxis.set_major_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+                ax.xaxis.set_minor_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+
+                ax.yaxis.set_major_locator(mticker.LogLocator(base=10.0, subs=None))
+                ax.yaxis.set_minor_locator(mticker.LogLocator(base=10.0, subs=np.arange(0.1, 1, 0.1), numticks=10))
+
+                ax.yaxis.set_major_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+                ax.yaxis.set_minor_formatter(mticker.LogFormatterSciNotation(base=10, labelOnlyBase=False))
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{Axes.__name__}')
     
     def _return_color_palette(self,
                               data: pd.DataFrame,
+                              color_palette_agg_level: ColorPaletteAggregationLevel,
                               palette: str,
+                              alpha: float,
                               saturation: float) -> Iterable[Tuple[float]]:
 
-        n_groups = data[GROUP_FIELD_NAME_STR].nunique()
+        n_groups = data[color_palette_agg_level.value].nunique()
 
         color_palette = sns.color_palette(palette,
                                           desat=saturation, 
                                           n_colors=n_groups)
+        color_palette = [col + (alpha,) for col in color_palette]
+
         return color_palette
+
+    def _return_color_per_group_per_dataset(self,
+                                            data: pd.DataFrame,
+                                            color_palette_agg_level: ColorPaletteAggregationLevel,
+                                            palette: str,
+                                            alpha: float,
+                                            saturation: float) -> Dict[str, Dict[int, Tuple[float]]]:
+
+        color_dict = {}
+        for dataset, df in data.groupby(DATASET_NAME_FIELD_NAME_STR):
+
+            color_palette = self._return_color_palette(df,
+                                                       color_palette_agg_level,
+                                                       palette,
+                                                       alpha,
+                                                       saturation)
+
+            groups = np.unique(df[GROUP_FIELD_NAME_STR])
+            color_dict[dataset] = dict(zip(groups, color_palette))
+
+        return color_dict
+
+    def _return_color_per_dataset(self,
+                                  data: pd.DataFrame,
+                                  color_palette_agg_level: ColorPaletteAggregationLevel,
+                                  palette: str,
+                                  alpha: float,
+                                  saturation: float) -> Dict[str, Tuple[float]]:
+
+        color_palette = self._return_color_palette(data,
+                                                   color_palette_agg_level,
+                                                   palette,
+                                                   alpha,
+                                                   saturation)
+
+        datasets = np.unique(data[DATASET_NAME_FIELD_NAME_STR])
+        color_dict = dict(zip(datasets, color_palette))
+
+        return color_dict
+    
+    def _return_colors(self,
+                       data: pd.DataFrame,
+                       color_palette_agg_level: ColorPaletteAggregationLevel,
+                       dataset_name: str | None,
+                       color_dict: Dict[str, Dict[int, Tuple[float]]] | Dict[str, Tuple[float]]) -> List[Tuple[float]]:
+
+        match color_palette_agg_level:
+            case ColorPaletteAggregationLevel.GROUP:
+                color_dict = color_dict[dataset_name]
+
+            case ColorPaletteAggregationLevel.DATASET:
+                pass
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ColorPaletteAggregationLevel.__name__}')
+
+        keys = data[color_palette_agg_level.value].unique()
+        colors = [color_dict[key] for key in keys]
+
+        return colors
