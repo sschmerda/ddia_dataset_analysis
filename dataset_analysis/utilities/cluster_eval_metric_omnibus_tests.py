@@ -590,6 +590,11 @@ class ClusterEvalMetricOmnibusTest():
     
     def _return_cramers_v(self,
                           observed_freq: np.ndarray) -> float:
+        """
+        ---
+        [1] H. Cramer, MATHEMATICAL METHODS OF STATISTICS. in Princeton landmarks in mathematics and physics. Princeton University Press, 1946.
+        [2] D. J. Sheskin, Handbook of parametric and nonparametric statistical procedures, Fifth edition. Boca Raton London New York: CRC Press, Taylor & Francis Group, 2011. doi: 10.1201/9780429186196.
+        """
 
         cramers_v = association(observed_freq,
                                 method='cramer',
@@ -614,6 +619,11 @@ class ClusterEvalMetricOmnibusTest():
 
     def _return_cramers_v_bias_corrected(self,
                                          observed_freq: np.ndarray) -> float:
+        """
+        ---
+        [1] W. Bergsma, “A bias-correction for Cramér’s and Tschuprow’s,” Journal of the Korean Statistical Society, vol. 42, no. 3, pp. 323–328, Sep. 2013, doi: 10.1016/j.jkss.2012.10.002.
+        """
+
 
         chi2_stat = sp.stats.chi2_contingency(observed_freq).statistic
 
@@ -696,62 +706,34 @@ class ClusterEvalMetricOmnibusTest():
     def _return_cohen_1988_measure_association_contingency_strength(self,
                                                                     measure_of_association_value: float) -> str:
         
-        if measure_of_association_value < 0.1:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
-        elif measure_of_association_value < 0.3:
-            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
-        elif measure_of_association_value < 0.5:
-            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
-        else:
-            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
+        moa_guideline = Cohen1988MeasureAssociationStrengthContingency()
+        moa_strength = moa_guideline.return_moa_strength(measure_of_association_value)
         
-        return moa_strength
+        return moa_strength.value
 
     def _return_gignac_szodorai_2016_measure_association_contingency_strength(self,
                                                                               measure_of_association_value: float) -> str:
-        
-        if measure_of_association_value < 0.1:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
-        elif measure_of_association_value < 0.2:
-            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
-        elif measure_of_association_value < 0.3:
-            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
-        else:
-            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
 
-        return moa_strength
+        moa_guideline = GignacSzodorai2016MeasureAssociationStrengthContingency()
+        moa_strength = moa_guideline.return_moa_strength(measure_of_association_value)
+        
+        return moa_strength.value
 
     def _return_funder_ozer_2019_measure_association_contingency_strength(self,
                                                                           measure_of_association_value: float) -> str:
-        
-        if measure_of_association_value < 0.05:
-            moa_strength = MeasureAssociationStrengthValuesEnum.TINY.value
-        if measure_of_association_value < 0.1:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
-        elif measure_of_association_value < 0.2:
-            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
-        elif measure_of_association_value < 0.3:
-            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
-        elif measure_of_association_value < 0.4:
-            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
-        else:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_LARGE.value
 
-        return moa_strength
+        moa_guideline = FunderOzer2019MeasureAssociationStrengthContingency()
+        moa_strength = moa_guideline.return_moa_strength(measure_of_association_value)
+        
+        return moa_strength.value
 
     def _return_lovakov_agadullina_2021_measure_association_contingency_strength(self,
                                                                                  measure_of_association_value: float) -> str:
-        
-        if measure_of_association_value < 0.12:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
-        elif measure_of_association_value < 0.24:
-            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
-        elif measure_of_association_value < 0.41:
-            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
-        else:
-            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
 
-        return moa_strength
+        moa_guideline = LovakovAgadullina2021MeasureAssociationStrengthContingency()
+        moa_strength = moa_guideline.return_moa_strength(measure_of_association_value)
+        
+        return moa_strength.value
                             
     def _return_measure_association_contingency_results(self,
                                                         clusters: np.ndarray,
@@ -986,6 +968,13 @@ class ClusterEvalMetricOmnibusTest():
     
     def _return_omega_squared(self,
                               sequence_cluster_df: pd.DataFrame) -> float:
+        """
+        Although omega squared can theoretically be negative, here the minimum value will be set to 0, which means the
+        absence of any effect. This is consistent with the interpretation of omega squared as a measure of effect size.
+        ---
+        [1] W. L. Hays, Statistics for Psychologists. New York: Holt, Rinehart and Winston, 1963.
+        [2] A. D. A. Kroes and J. R. Finley, “Demystifying omega squared: Practical guidance for effect size in common analysis of variance designs.,” Psychological Methods, Jul. 2023, doi: 10.1037/met0000581.
+        """
 
         n_groups = sequence_cluster_df[CLUSTER_FIELD_NAME_STR].nunique()
         df_within = sequence_cluster_df.shape[0] - n_groups
@@ -1056,31 +1045,22 @@ class ClusterEvalMetricOmnibusTest():
     
     def _return_cohen_1988_measure_association_aov_strength(self,
                                                             measure_of_association_value: float) -> str:
+
+        moa_guideline = Cohen1988MeasureAssociationStrengthAOV()
+        moa_strength = moa_guideline.return_moa_strength(measure_of_association_value)
+
+        if moa_strength is None:
+            print(measure_of_association_value)
         
-        if measure_of_association_value < 0.0099:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
-        elif measure_of_association_value < 0.0588:
-            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
-        elif measure_of_association_value < 0.1379:
-            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
-        else:
-            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
-        
-        return moa_strength
+        return moa_strength.value
 
     def _return_cohen_1988_f_measure_association_aov_strength(self,
                                                               measure_of_association_value: float) -> str:
+
+        moa_guideline = Cohen1988FMeasureAssociationStrengthAOV()
+        moa_strength = moa_guideline.return_moa_strength(measure_of_association_value)
         
-        if measure_of_association_value < 0.10:
-            moa_strength = MeasureAssociationStrengthValuesEnum.VERY_SMALL.value
-        elif measure_of_association_value < 0.25:
-            moa_strength = MeasureAssociationStrengthValuesEnum.SMALL.value
-        elif measure_of_association_value < 0.4:
-            moa_strength = MeasureAssociationStrengthValuesEnum.MEDIUM.value
-        else:
-            moa_strength = MeasureAssociationStrengthValuesEnum.LARGE.value
-        
-        return moa_strength
+        return moa_strength.value
 
     def _return_measure_association_aov_results(self,
                                                 sequence_cluster_df: pd.DataFrame) -> tuple[list[MeasureAssociationAOVResults], list[DefaultDict[str, int]]]:

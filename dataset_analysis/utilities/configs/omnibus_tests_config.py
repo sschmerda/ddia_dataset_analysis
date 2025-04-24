@@ -47,6 +47,102 @@ class PValueCorrectionEnum(Enum):
     FDR_TSBKY = OMNIBUS_TESTS_P_VALUE_CORRECTION_METHOD_FDR_TSBKY_VALUE_NAME_STR
 
 ########################################################################################################################
+### measure of association strength guideline classes ###
+########################################################################################################################
+
+class MeasureAssociationStrength(ABC):
+    
+    association_strength_values = {}
+
+    @classmethod
+    def return_moa_strength(cls,
+                            measure_of_association_value: float) -> MeasureAssociationStrengthValuesEnum:
+        
+        for moa_strength, (lower_bound_incl, upper_bound_excl) in cls.association_strength_values.items():
+
+            if lower_bound_incl <= measure_of_association_value < upper_bound_excl:
+                return moa_strength
+
+class Cohen1988MeasureAssociationStrengthContingency(MeasureAssociationStrength):
+    """Cohen's (1988, pp. 224 ff.) measure of association strength for Cohen's w, Cramer's phi, Tschuprow’s T and Phi.
+    ---
+    [1] J. Cohen, Statistical power analysis for the behavioral sciences, 2nd ed. Hillsdale, N.J: L. Erlbaum Associates, 1988.
+    [2] “Automated Interpretation of Indices of Effect Size.” Accessed: Apr. 23, 2025. [Online]. Available: https://easystats.github.io/effectsize/articles/interpret.html#correlation-r
+    """
+
+    # upper bounds not inclusive
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.1),
+                                   MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.3),
+                                   MeasureAssociationStrengthValuesEnum.MEDIUM: (0.3, 0.5),
+                                   MeasureAssociationStrengthValuesEnum.LARGE: (0.5, np.inf)}
+
+class GignacSzodorai2016MeasureAssociationStrengthContingency(MeasureAssociationStrength):
+    """Gignac's and Szodorai's (2016) measure of association strength for Cohen's w, Cramer's phi, Tschuprow’s T and Phi.
+    ---
+    [1] G. E. Gignac and E. T. Szodorai, “Effect size guidelines for individual differences researchers,” Personality and Individual Differences, vol. 102, pp. 74–78, Nov. 2016, doi: 10.1016/j.paid.2016.06.069.
+    [2] “Automated Interpretation of Indices of Effect Size.” Accessed: Apr. 23, 2025. [Online]. Available: https://easystats.github.io/effectsize/articles/interpret.html#correlation-r
+    """
+
+    # upper bounds not inclusive
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.1),
+                                   MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.2),
+                                   MeasureAssociationStrengthValuesEnum.MEDIUM: (0.2, 0.3),
+                                   MeasureAssociationStrengthValuesEnum.LARGE: (0.3, np.inf)}
+
+class FunderOzer2019MeasureAssociationStrengthContingency(MeasureAssociationStrength):
+    """Funder's and Ozer's (2019) measure of association strength for Cohen's w, Cramer's phi, Tschuprow’s T and Phi.
+    ---
+    [1] D. C. Funder and D. J. Ozer, “Evaluating Effect Size in Psychological Research: Sense and Nonsense,” Advances in Methods and Practices in Psychological Science, vol. 2, no. 2, pp. 156–168, Jun. 2019, doi: 10.1177/2515245919847202.
+    [2] “Automated Interpretation of Indices of Effect Size.” Accessed: Apr. 23, 2025. [Online]. Available: https://easystats.github.io/effectsize/articles/interpret.html#correlation-r
+    """
+
+    # upper bounds not inclusive
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.TINY: (0, 0.05),
+                                   MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0.05, 0.1),
+                                   MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.2),
+                                   MeasureAssociationStrengthValuesEnum.MEDIUM: (0.2, 0.3),
+                                   MeasureAssociationStrengthValuesEnum.LARGE: (0.3, 0.4),
+                                   MeasureAssociationStrengthValuesEnum.VERY_LARGE: (0.4, np.inf)}
+
+class LovakovAgadullina2021MeasureAssociationStrengthContingency(MeasureAssociationStrength):
+    """Lovakov's and Agadullina's (2016) measure of association strength for Cohen's w, Cramer's phi, Tschuprow’s T and Phi.
+    ---
+    [1] A. Lovakov and E. R. Agadullina, “Empirically derived guidelines for effect size interpretation in social psychology,” Euro J Social Psych, vol. 51, no. 3, pp. 485–504, Apr. 2021, doi: 10.1002/ejsp.2752.
+    [2] “Automated Interpretation of Indices of Effect Size.” Accessed: Apr. 23, 2025. [Online]. Available: https://easystats.github.io/effectsize/articles/interpret.html#correlation-r
+    """
+
+    # upper bounds not inclusive
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.12),
+                                   MeasureAssociationStrengthValuesEnum.SMALL: (0.12, 0.24),
+                                   MeasureAssociationStrengthValuesEnum.MEDIUM: (0.24, 0.41),
+                                   MeasureAssociationStrengthValuesEnum.LARGE: (0.41, np.inf)}
+
+class Cohen1988MeasureAssociationStrengthAOV(MeasureAssociationStrength):
+    """A conversion of Cohen's (1988, p.283) measure of association strength for Cohen's f to Omega Squared.
+    ---
+    [1] J. Cohen, Statistical power analysis for the behavioral sciences, 2nd ed. Hillsdale, N.J: L. Erlbaum Associates, 1988.
+    [2] “Automated Interpretation of Indices of Effect Size.” Accessed: Apr. 23, 2025. [Online]. Available: https://easystats.github.io/effectsize/articles/interpret.html#correlation-r
+    """
+
+    # upper bounds not inclusive
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.0099),
+                                   MeasureAssociationStrengthValuesEnum.SMALL: (0.0099, 0.0588),
+                                   MeasureAssociationStrengthValuesEnum.MEDIUM: (0.0588, 0.1379),
+                                   MeasureAssociationStrengthValuesEnum.LARGE: (0.1379, np.inf)}
+
+class Cohen1988FMeasureAssociationStrengthAOV(MeasureAssociationStrength):
+    """Cohen's (1988, pp. 284 ff.) measure of association strength for Cohen's f.
+    ---
+    [1] J. Cohen, Statistical power analysis for the behavioral sciences, 2nd ed. Hillsdale, N.J: L. Erlbaum Associates, 1988.
+    """
+
+    # upper bounds not inclusive
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.1),
+                                   MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.25),
+                                   MeasureAssociationStrengthValuesEnum.MEDIUM: (0.25, 0.4),
+                                   MeasureAssociationStrengthValuesEnum.LARGE: (0.4, np.inf)}
+
+########################################################################################################################
 ### general ###
 ########################################################################################################################
 
