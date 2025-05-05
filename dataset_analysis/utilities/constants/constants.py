@@ -545,6 +545,8 @@ SEQUENCE_DISTANCE_ANALYTICS_SEQUENCE_DIST_AVG_MEDIAN_NAME_STR = f'median'
 
 ###################################################################################################
 # clustering of learning activity sequences
+###################################################################################################
+
 CLUSTER_FIELD_NAME_STR = f'Cluster'
 CLUSTERING_DATASET_NAME_FIELD_NAME_STR = DATASET_NAME_STR
 CLUSTERING_GROUP_FIELD_NAME_STR = f'{GROUP_FIELD_NAME_STR}'
@@ -721,6 +723,8 @@ CLUSTERING_PARAMETER_TUNING_NUMBER_CANDIDATES_NAME_STR = 'n_candidates'
 CLUSTERING_PARAMETER_TUNING_CATEGORICAL_VALUES_NAME_STR = 'categorical_values'
 
 ###################################################################################################
+# Omnibus tests
+###################################################################################################
 
 # result df general 
 OMNIBUS_TESTS_NUMBER_OF_OBSERVATIONS_FIELD_NAME_STR = 'number_of_observations'
@@ -745,10 +749,10 @@ OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_TEST_STATISTIC_FIELD_NAME_STR = 'chi_squar
 OMNIBUS_TESTS_CONTINGENCY_CHI_SQUARED_DEGREES_OF_FREEDOM_FIELD_NAME_STR = 'degrees_of_freedom'
 
 # result df values categorical
-OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_CRAMERS_V_VALUE_NAME_STR = 'cramers_v'
-OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_CRAMERS_V_BIAS_CORRECTED_VALUE_NAME_STR = 'cramers_v_bias_corrected'
-OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_TSCHUPROWS_T_VALUE_NAME_STR = 'tschuprows_t'
-OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_PEARSONS_CONTINGENCY_COEFFICIENT_VALUE_NAME_STR = 'pearsons_c'
+OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_CRAMERS_V_VALUE_NAME_STR = 'cramer\'s_v'
+OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_CRAMERS_V_BIAS_CORRECTED_VALUE_NAME_STR = 'cramer\'s_v_bias_corrected'
+OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_TSCHUPROWS_T_VALUE_NAME_STR = 'tschuprow\'s_t'
+OMNIBUS_TESTS_CONTINGENCY_TEST_EFFECT_SIZE_PEARSONS_CONTINGENCY_COEFFICIENT_VALUE_NAME_STR = 'pearson\'s_c'
 
 # result df fields continuous 
 OMNIBUS_TESTS_CONTINUOUS_AOV_PG_F_VALUE_FIELD_NAME_STR = 'F'
@@ -766,7 +770,7 @@ OMNIBUS_TESTS_CONTINUOUS_AOV_MSS_WITHIN_FIELD_NAME_STR = 'mss_within'
 
 # result df values continuous
 OMNIBUS_TESTS_CONTINUOUS_TEST_EFFECT_SIZE_ETA_SQUARED_VALUE_NAME_STR = 'eta_squared'
-OMNIBUS_TESTS_CONTINUOUS_TEST_EFFECT_SIZE_COHENS_F_VALUE_NAME_STR = 'cohens_f'
+OMNIBUS_TESTS_CONTINUOUS_TEST_EFFECT_SIZE_COHENS_F_VALUE_NAME_STR = 'cohen\'s_f'
 OMNIBUS_TESTS_CONTINUOUS_TEST_EFFECT_SIZE_OMEGA_SQUARED_VALUE_NAME_STR = 'omega_squared'
 
 # measure of association result fields
@@ -829,6 +833,8 @@ OMNIBUS_TESTS_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = 'Not a valid member of enum
 
 ###################################################################################################
 # pairplot
+###################################################################################################
+
 PAIRPLOT_PER_GROUP_PER_CLUSTER_TITLE_STR = f'Pairplot of Analysis-Relevant Variables Subdivided by {CLUSTER_FIELD_NAME_STR}s for each {GROUP_FIELD_NAME_STR}'
 PAIRPLOT_PER_GROUP_TITLE_STR = f'Pairplot of Analysis-Relevant Variables Subdivided by {GROUP_FIELD_NAME_STR}'
 PAIRPLOT_VARIABLE_RELATIONSHIP = 'all_group'
@@ -845,6 +851,8 @@ PAIRPLOT_ERROR_FILTER_MISSPECIFICATION_NAME_STR = f'Filter specification causes 
 
 ###################################################################################################
 # monitoring
+###################################################################################################
+
 MONITORING_OBJECT_NAME_FIELD_NAME_STR = 'Object'
 MONITORING_MEGABYTE_FIELD_NAME_STR = 'Size in MB'
 
@@ -874,6 +882,7 @@ MONITORING_RESULT_TABLES_LIST = [MONITORING_INTERACTIONS_STR,
 
 ###################################################################################################
 # result_tables constants
+###################################################################################################
 
 # available fields class vars
 IS_AVAILABLE_STR = 'Is Available'
@@ -930,6 +939,7 @@ RESULT_TABLES_DASH_STYLE = 'color: white; text-align:center'
 
 ###################################################################################################
 # result aggregation
+###################################################################################################
 
 # error messages
 RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = 'Not a valid member of enum: '
@@ -972,6 +982,13 @@ RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_PCT_OF_GROUPS_NO_SIGNIFICANT_P_VALUE = f'
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_PCT_OF_GROUPS_SIGNIFICANT_P_VALUE = f'pct_of_{GROUP_FIELD_NAME_STR.lower()}s_sig_p_value'
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_PCT_OF_GROUPS_COMBINED_SIGNIFICANT_P_VALUE = f'number_and_pct_of_{GROUP_FIELD_NAME_STR.lower()}s_sig_p_value'
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_GROUP_NON_SIGNIFICANT_NAME_STR = 'non-significant'
+
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_FIELD_NAME_STR = 'effect_size'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_KIND_NAME_STR = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_FIELD_NAME_STR + '_type'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_NAME_STR = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_FIELD_NAME_STR + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_CONF_INT_LOWER_NAME_STR = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_NAME_STR + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_CONF_INT_LOWER_FIELD_NAME_STR
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_CONF_INT_UPPER_NAME_STR = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_NAME_STR + OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_STRENGTH_GUIDELINE_CONF_INT_UPPER_FIELD_NAME_STR
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_FIELD_NAME_STR + '_strength_boundaries'
 
 # plot labels
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_PCT_OF_GROUPS_NAME_STR = f'% of {GROUP_FIELD_NAME_STR}s'

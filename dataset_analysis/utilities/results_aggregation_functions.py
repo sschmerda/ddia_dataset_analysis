@@ -99,9 +99,9 @@ class AggregatedResults():
 
             if AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SORT_BOXES:
                 data = self._sort_groups_by_metric(data,
-                                                   field,
+                                                   [field],
                                                    AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SORT_METRIC,
-                                                   SequenceStatisticsDistributionSortingEntity.DATASET,
+                                                   SortingEntity.DATASET,
                                                    AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_BOXPLOT_SORT_ASCENDING)
             colors = self._return_colors(data,
                                          ColorPaletteAggregationLevel.DATASET,
@@ -437,9 +437,9 @@ class AggregatedResults():
 
                 if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
                     data = self._sort_groups_by_metric(data,
-                                                       field,
+                                                       [field],
                                                        SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC,
-                                                       SequenceStatisticsDistributionSortingEntity.GROUP,
+                                                       SortingEntity.GROUP,
                                                        SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_ASCENDING)
 
                 if include_unique_sequences:
@@ -526,9 +526,9 @@ class AggregatedResults():
                     if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
 
                         facet_data = self._sort_groups_by_metric(facet_data,
-                                                                 field,
+                                                                 [field],
                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_METRIC,
-                                                                 SequenceStatisticsDistributionSortingEntity.GROUP,
+                                                                 SortingEntity.GROUP,
                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_ASCENDING)
                     colors = self._return_colors(facet_data,
                                                  ColorPaletteAggregationLevel.GROUP,
@@ -638,9 +638,9 @@ class AggregatedResults():
 
                 if SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_BOXES:
                     data = self._sort_groups_by_metric(data,
-                                                       field,
+                                                       [field],
                                                        SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_METRIC,
-                                                       SequenceStatisticsDistributionSortingEntity.GROUP,
+                                                       SortingEntity.GROUP,
                                                        SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SORT_ASCENDING)
 
                 colors = self._return_colors(data,
@@ -959,22 +959,24 @@ class AggregatedResults():
                                         False)
         x_axis_ticks = np.arange(0, 110, 10)
 
-        # color palette
-        index = OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_INDEX
-        color_palette = sns.color_palette(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE,
-                                          n_colors=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_NUMBER_COLORS,
-                                          desat=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_DESAT)
-        color_palette = [color_palette[i] for i in index]
-        color_palette.insert(0, OMNIBUS_TEST_RESULT_STACKED_BARPLOT_NON_SIG_COLOR)
-        cmap = ListedColormap(color_palette)
+        n_moa_strength_categories = len(pct_df.columns) - 1
+        moa_strength_colors = self._return_moa_strength_color_palette(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE,
+                                                                      OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_NUMBER_COLORS,
+                                                                      OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_COLOR_INDEX_MIN,
+                                                                      OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_COLOR_INDEX_MAX,
+                                                                      n_moa_strength_categories,
+                                                                      OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_DESAT,
+                                                                      OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PALETTE_ALPHA,
+                                                                      OMNIBUS_TEST_RESULT_STACKED_BARPLOT_NON_SIG_COLOR)
+
+        cmap = ListedColormap(moa_strength_colors)
 
         # plot
         ax = pct_df.plot.barh(stacked=True, 
                               colormap=cmap,
                               edgecolor=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_EDGECOLOR,
                               linewidth=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_LINEWIDTH,
-                              width=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_WIDTH,
-                              alpha=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_ALPHA)
+                              width=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_BAR_WIDTH)
 
         # pct/count text
         pct_matrix = pct_df.to_numpy().transpose().flatten()
@@ -1004,13 +1006,37 @@ class AggregatedResults():
                  axis='y')
         plt.xlim(x_axis_lim)
         plt.xticks(x_axis_ticks)
-        plt.xlabel(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_X_LABEL)
-        plt.ylabel('')
-        plt.legend(bbox_to_anchor=(0.5, 1.02),
-                   loc='lower center',
-                   borderaxespad=0,
-                   frameon=False,
-                   ncol=pct_df.shape[1])
+
+        self._set_axis_labels(ax,
+                                OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_X_AXIS_LABEL,
+                                OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_Y_AXIS_LABEL,
+                                OMNIBUS_TEST_RESULT_STACKED_BARPLOT_X_AXIS_LABEL,
+                                OMNIBUS_TEST_RESULT_STACKED_BARPLOT_Y_AXIS_LABEL)
+
+        self._set_axis_ticks(ax,
+                             OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_X_AXIS_TICKS,
+                             OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_Y_AXIS_TICKS,
+                             OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_X_AXIS_TICK_LABELS,
+                             OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_Y_AXIS_TICK_LABELS,
+                             OMNIBUS_TEST_RESULT_STACKED_BARPLOT_X_TICKS,
+                             None,
+                             x_axis_ticks_position=None,
+                             y_axis_ticks_position=None,
+                             x_rotation=OMNIBUS_TEST_RESULT_STACKED_BARPLOT_X_TICKS_ROTATION)
+
+        # plot the legend with matching colors
+        ax = plt.gca()
+        ax.get_legend().remove()
+        if OMNIBUS_TEST_RESULT_STACKED_BARPLOT_PLOT_LEGEND:
+            
+            self._add_moa_strength_legend(ax,
+                                          OMNIBUS_TEST_RESULT_STACKED_BARPLOT_LEGEND_BOX_COLOR,
+                                          OMNIBUS_TEST_RESULT_STACKED_BARPLOT_LEGEND_BOX_LINEWIDTH,
+                                          OMNIBUS_TEST_RESULT_STACKED_BARPLOT_LEGEND_BOX_LENGTH,
+                                          OMNIBUS_TEST_RESULT_STACKED_BARPLOT_LEGEND_BOX_WIDTH,
+                                          pct_df.shape[1],
+                                          None)
+
         plt.tight_layout()
         self._save_figure(OMNIBUS_TEST_RESULT_STACKED_BARPLOT_NAME)
         plt.show(ax);
@@ -1046,46 +1072,75 @@ class AggregatedResults():
                                         False)
         y_axis_ticks = np.arange(0, 110, 10)
 
-        # color palette
-        index = OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_INDEX
-        color_palette = sns.color_palette(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE,
-                                          n_colors=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_NUMBER_COLORS,
-                                          desat=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_DESAT)
-        color_palette = [color_palette[i] for i in index]
-        color_palette.insert(0, OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_NON_SIG_COLOR)
+        n_moa_strength_categories = pct_df_long[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR].nunique() - 1
+        moa_strength_colors = self._return_moa_strength_color_palette(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE,
+                                                                      OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_NUMBER_COLORS,
+                                                                      OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_COLOR_INDEX_MIN,
+                                                                      OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_COLOR_INDEX_MAX,
+                                                                      n_moa_strength_categories,
+                                                                      OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_DESAT,
+                                                                      OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE_ALPHA,
+                                                                      OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_NON_SIG_COLOR)
 
         n_cols = set_facet_grid_column_number(pct_df_long[DATASET_NAME_FIELD_NAME_STR],
                                               RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
 
-        g = sns.catplot(data=pct_df_long,
+        def plot_grouped_barplot(data, **kwargs):
+
+            sns.barplot(data=data,
                         x=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR,
                         y=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GROUPS_PCT_FIELD_NAME_STR,
                         hue=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR,
-                        col=DATASET_NAME_FIELD_NAME_STR,
-                        col_wrap=n_cols,
-                        height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
-                        aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
-                        legend=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_LEGEND,
                         orient=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ORIENTATION,
-                        kind=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_KIND,
-                        palette=color_palette,
-                        alpha=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ALPHA,
+                        legend=True,
+                        palette=moa_strength_colors,
+                        saturation=1,
                         width=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_WIDTH,
-                        edgecolor=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_EDGECOLOR,
-                        linewidth=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_EDGEWIDTH,
-                        sharex=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHAREX,
-                        sharey=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHAREY)
+                        linewidth=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_EDGEWIDTH)
+
+            ax = plt.gca()
+            for bar, color in zip(ax.patches, moa_strength_colors):
+                bar.set_facecolor(color)
+                bar.set_edgecolor(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_EDGECOLOR)
+
+        g = sns.FacetGrid(pct_df_long,
+                          col=DATASET_NAME_FIELD_NAME_STR,
+                          col_wrap=n_cols,
+                          height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                          aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                          sharex=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHAREX,
+                          sharey=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHAREY)
+
+        g.map_dataframe(plot_grouped_barplot)
+
+        g.add_legend(
+                    title=None,
+                    frameon=True,
+                    bbox_to_anchor=(0.98, 0.5), 
+                    loc='center left')
 
         g.set_titles('{col_name}') 
 
-        g.set(ylim=y_axis_lim,
-              yticks=y_axis_ticks,
-              ylabel=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_Y_LABEL,
-              xlabel=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_X_LABEL)
+        g.set(ylim=y_axis_lim)
         
-        g.set_xticklabels(rotation=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_X_TICKS_ROTATION)
-
         for ax, (df_name, df) in zip(g.axes.flat, pct_count_df_long.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+            self._set_axis_labels(ax,
+                                  OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_X_AXIS_LABEL,
+                                  OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_Y_AXIS_LABEL,
+                                  OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_X_AXIS_LABEL,
+                                  OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_Y_AXIS_LABEL)
+
+            self._set_axis_ticks(ax,
+                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_X_AXIS_TICKS,
+                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_Y_AXIS_TICKS,
+                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_X_AXIS_TICK_LABELS,
+                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_Y_AXIS_TICK_LABELS,
+                                 None,
+                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_Y_TICKS,
+                                 x_axis_ticks_position=None,
+                                 y_axis_ticks_position=None,
+                                 x_rotation=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_X_TICKS_ROTATION)
 
             # set spines
             ax.spines['top'].set_visible(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_SHOW_TOP)
@@ -1115,26 +1170,227 @@ class AggregatedResults():
                                 va=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_V_POS, 
                                 fontsize=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_FONTSIZE, 
                                 color=OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_ANNOTATION_TEXT_COLOR)
-
-        # legend
-        sns.move_legend(g, 
-                        "lower center",
-                        bbox_to_anchor=(.5, 1), 
-                        title=None, 
-                        frameon=False, 
-                        ncol=pct_df_long[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR].nunique())
-
-        #TODO: adjust
-        # for handle in g.legend.legendHandles:  
-        #     handle.set_height(15)
-        #     handle.set_width(30)
-        #     handle.set_edgecolor("black")
-        #     handle.set_linewidth(1.5) 
         
-        for ax in g.axes.flatten():
-            ax.tick_params(labelbottom=True)
+        n_groups = pct_df_long[DATASET_NAME_FIELD_NAME_STR].nunique()
+        self._remove_inner_plot_elements_grid(g,
+                                              n_groups,
+                                              n_cols,
+                                              OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_X_AXIS_LABELS,
+                                              OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_Y_AXIS_LABELS,
+                                              OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_X_AXIS_TICKS,
+                                              OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_Y_AXIS_TICKS,
+                                              OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                              OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+
+        # plot the legend with matching colors
+        g.legend.remove()
+        if OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PLOT_LEGEND:
+            self._add_moa_strength_facet_grid_legend(g,
+                                                     OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_LEGEND_BOX_COLOR,
+                                                     OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_LEGEND_BOX_LINEWIDTH,
+                                                     OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_LEGEND_BOX_LENGTH,
+                                                     OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_LEGEND_BOX_WIDTH,
+                                                     None)
+        
         plt.tight_layout()
         self._save_figure(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_NAME)
+        plt.show(g);
+
+    @omnibus_test_result_moa_confidence_interval_per_group_per_dataset_decorator
+    def plot_omnibus_test_result_moa_confidence_interval_per_group_per_dataset(self) -> None:
+
+        data = self._return_omnibus_test_result_per_dataset_plotting_moa_conf_int_df()
+        color_dict = self._return_color_per_group_per_dataset(data,
+                                                              ColorPaletteAggregationLevel.GROUP,
+                                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_COLOR_PALETTE,
+                                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_COLOR_ALPHA,
+                                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_COLOR_SATURATION)
+        data = self._filter_data_by_significant_groups(data)
+
+        field = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_FIELD
+        field_lower_bound = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_LOWER_BOUND_FIELD
+        field_upper_bound = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_UPPER_BOUND_FIELD
+
+        x_axis_ticks = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_X_TICKS_PCT_RATIO
+        statistic_is_pct = False 
+        statistic_is_ratio = True
+        share_x = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHAREX_PCT_RATIO
+        share_y = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHAREY_PCT_RATIO
+
+        n_cols = set_facet_grid_column_number(data[DATASET_NAME_FIELD_NAME_STR],
+                                              RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+        def plot_moa_conf_int(data, **kwargs):
+
+            dataset_name = data[DATASET_NAME_FIELD_NAME_STR].iloc[0]
+            if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_CONFIDENCE_INTERVALS:
+                data = self._sort_groups_by_metric(data,
+                                                   [field, OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_SECOND_SORT_FIELD],
+                                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_METRIC,
+                                                   SortingEntity.GROUP,
+                                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_ASCENDING)
+
+            colors = self._return_colors(data,
+                                         ColorPaletteAggregationLevel.GROUP,
+                                         dataset_name,
+                                         color_dict)
+
+            x_array = data[field.value].to_numpy()
+            y_array = data[GROUP_FIELD_NAME_STR].to_numpy()
+            y_array_numerical = self._return_y_array_numerical(y_array)
+
+            distance_lower_bound = (x_array - 
+                                    data[field_lower_bound.value])
+            distance_upper_bound = (data[field_upper_bound.value] - 
+                                    x_array)
+
+
+            sns.scatterplot(data=data,
+                            x=field.value,
+                            y=y_array_numerical,
+                            hue=GROUP_FIELD_NAME_STR,
+                            palette=colors,
+                            s=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_SIZE,
+                            edgecolor=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_EDGECOLOR,
+                            linewidth=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_EDGEWIDTH,
+                            legend=False,
+                            zorder=2)
+
+            plt.errorbar(x=x_array, 
+                         y=y_array_numerical, 
+                         xerr=[distance_lower_bound, distance_upper_bound], 
+                         fmt='none', 
+                         capsize=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_CAP_SIZE,
+                         capthick=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_CAP_THICKNESS,
+                         ecolor=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_BAR_COLOR, 
+                         elinewidth=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_BAR_LINEWIDTH,
+                         zorder=1)
+            
+            plt.margins(y=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_Y_AXIS_MARGIN)
+
+            moa_strength_cat_interval_mapping = data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR].iloc[0]
+            n_moa_strength_categories = len(moa_strength_cat_interval_mapping)
+            
+            moa_strength_colors = self._return_moa_strength_color_palette(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PALETTE,
+                                                                          OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PALETTE_NUMBER_COLORS,
+                                                                          OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PALETTE_COLOR_INDEX_MIN,
+                                                                          OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PALETTE_COLOR_INDEX_MAX,
+                                                                          n_moa_strength_categories,
+                                                                          OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PALETTE_DESAT,
+                                                                          OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PALETTE_ALPHA,
+                                                                          OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_NON_SIG_COLOR)
+            
+            moa_cat_interval_col = zip(moa_strength_cat_interval_mapping.keys(),
+                                       moa_strength_cat_interval_mapping.values(),
+                                       moa_strength_colors)
+
+            for moa_strength_cat, moa_strength_interval, moa_strength_color in moa_cat_interval_col:
+
+                lower_bound = moa_strength_interval[0]
+                upper_bound = moa_strength_interval[1]
+
+                if upper_bound == np.inf:
+                    upper_bound = 1
+
+                plt.axvspan(lower_bound,
+                            upper_bound,
+                            facecolor=moa_strength_color,
+                            edgecolor='none',
+                            label=moa_strength_cat.value,
+                            zorder=-1)
+
+
+        g = sns.FacetGrid(data,
+                          col=DATASET_NAME_FIELD_NAME_STR,
+                          col_wrap=n_cols,
+                          height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                          aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                          sharex=share_x,
+                          sharey=share_y)
+
+        g.map_dataframe(plot_moa_conf_int)
+
+        g.set_titles('{col_name}') 
+
+        if share_x:
+            x_axis_lim = return_axis_limits(data[field_upper_bound.value],
+                                            statistic_is_pct,
+                                            statistic_is_ratio)
+            g.set(xlim=x_axis_lim)
+
+        for ax, (dataset_name, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+            # x_label can be set statically or dynamically
+            x_label = self._return_moa_conf_int_plot_x_label(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_X_AXIS_LABEL,
+                                                             facet_data)
+
+            if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_CONFIDENCE_INTERVALS:
+                facet_data = self._sort_groups_by_metric(facet_data,
+                                                         [field, OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_SECOND_SORT_FIELD],
+                                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_METRIC,
+                                                         SortingEntity.GROUP,
+                                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_ASCENDING)
+
+            y_array = facet_data[GROUP_FIELD_NAME_STR].to_numpy()
+            y_array_numerical = self._return_y_array_numerical(y_array)
+
+            self._set_axis_labels(ax,
+                                  OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_LABEL,
+                                  OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_LABEL,
+                                  x_label,
+                                  OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_Y_AXIS_LABEL)
+
+            self._set_axis_ticks(ax,
+                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICKS,
+                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_TICKS,
+                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICK_LABELS,
+                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_TICK_LABELS,
+                                 x_axis_ticks,
+                                 y_array,
+                                 x_axis_ticks_position=None,
+                                 y_axis_ticks_position=y_array_numerical)
+
+            ax.grid(True,
+                    axis=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_GRID_LINE_AXIS.value,
+                    which='both')
+
+            if not share_x:
+                x_axis_lim = return_axis_limits(facet_data[field_upper_bound.value],
+                                                statistic_is_pct,
+                                                statistic_is_ratio)
+                ax.set_xlim(*x_axis_lim)
+
+            ax.spines['top'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_TOP)
+            ax.spines['bottom'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_BOTTOM)
+            ax.spines['left'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_LEFT)
+            ax.spines['right'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_RIGHT)
+
+        n_groups = data[DATASET_NAME_FIELD_NAME_STR].nunique()
+        self._remove_inner_plot_elements_grid(g,
+                                              n_groups,
+                                              n_cols,
+                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_X_AXIS_LABELS,
+                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_Y_AXIS_LABELS,
+                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_X_AXIS_TICKS,
+                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_Y_AXIS_TICKS,
+                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                              OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+        
+        # plot the legend with matching colors
+        if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_LEGEND:
+
+            moa_strength_cat_interval_mapping = data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR].iloc[0]
+            moa_streng_categories = [i.value for i in moa_strength_cat_interval_mapping.keys()]
+            moa_streng_categories = [i.replace('_', '-') + ' ' + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NAME_STR for i in moa_streng_categories]
+            self._add_moa_strength_facet_grid_legend(g,
+                                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_LEGEND_BOX_COLOR,
+                                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_LEGEND_BOX_LINEWIDTH,
+                                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_LEGEND_BOX_LENGTH,
+                                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_LEGEND_BOX_WIDTH,
+                                                     moa_streng_categories)
+
+        plt.tight_layout()
+        self._save_figure(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_NAME)
         plt.show(g);
 
     def display_summary_statistics_result(self,
@@ -1615,7 +1871,7 @@ class AggregatedResults():
             
             eval_metric_is_categorical = omnibus_test_result_per_group[OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR].iloc[0]
 
-            p_val_is_significant_field_name, moa_strength_guidelines = self._return_result_aggregation_omnibus_test_fields(eval_metric_is_categorical)
+            p_val_is_significant_field_name, moa_strength_guidelines = self._return_result_aggregation_omnibus_test_pval_sig_moa_strength_guide_field_names(eval_metric_is_categorical)
 
             fields = [DATASET_NAME_FIELD_NAME_STR,
                       GROUP_FIELD_NAME_STR,
@@ -1697,6 +1953,77 @@ class AggregatedResults():
         count_df = count_df.sort_index(ascending=True)
 
         return pct_df, count_df
+    
+    def _return_omnibus_test_result_per_dataset_plotting_moa_conf_int_df(self) -> pd.DataFrame:
+
+        omnibus_test_result_per_group_per_dataset_moa_conf_int_df_list = []
+        for file_path in self._path_to_result_tables:
+
+            with open(file_path, 'rb') as f:
+                omnibus_test_result_per_group = pickle.load(f).omnibus_test_result_df
+            
+            eval_metric_is_categorical = omnibus_test_result_per_group[OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR].iloc[0]
+
+            (p_val_is_significant_field_name, 
+             moa_value, 
+             moa_conf_int) = self._return_result_aggregation_omnibus_test_pval_sig_moa_field_names(eval_metric_is_categorical)
+
+            fields = [DATASET_NAME_FIELD_NAME_STR,
+                      GROUP_FIELD_NAME_STR,
+                      OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR,
+                      OMNIBUS_TESTS_EVAlUATION_FIELD_TYPE_FIELD_NAME_STR,
+                      p_val_is_significant_field_name]
+
+            moa_value_new = moa_value.replace(OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR, '')
+            omnibus_test_result_per_group.rename({moa_value: moa_value_new}, inplace=True, axis=1)
+
+            moa_conf_int_lower_values = omnibus_test_result_per_group[moa_conf_int].map(lambda x: x[0] if x[0] is not None else np.nan).to_numpy()
+            moa_conf_int_upper_values = omnibus_test_result_per_group[moa_conf_int].map(lambda x: x[1] if x[1] is not None else np.nan).to_numpy()
+
+            omnibus_test_result_per_group_moa_conf_int = pd.melt(omnibus_test_result_per_group, 
+                                                                 id_vars=fields,
+                                                                 value_vars=[moa_value_new],
+                                                                 value_name=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_NAME_STR,
+                                                                 var_name=RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_KIND_NAME_STR)
+
+            omnibus_test_result_per_group_moa_conf_int[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_CONF_INT_LOWER_NAME_STR] = moa_conf_int_lower_values
+            omnibus_test_result_per_group_moa_conf_int[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_CONF_INT_UPPER_NAME_STR] = moa_conf_int_upper_values
+    
+            moa_strength_guide_boundaries = self._return_measure_association_strength_guideline_boundary_dict(eval_metric_is_categorical)
+            omnibus_test_result_per_group_moa_conf_int[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR] = [moa_strength_guide_boundaries] * omnibus_test_result_per_group_moa_conf_int.shape[0]
+
+            omnibus_test_result_per_group_per_dataset_moa_conf_int_df_list.append(omnibus_test_result_per_group_moa_conf_int)
+        
+
+        omnibus_test_result_per_group_per_dataset_moa_conf_int_df = pd.concat(omnibus_test_result_per_group_per_dataset_moa_conf_int_df_list, 
+                                                                              ignore_index=True)
+        omnibus_test_result_per_group_per_dataset_moa_conf_int_df.sort_values(by=[DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR], 
+                                                                              inplace=True, 
+                                                                              ignore_index=True)
+
+        return omnibus_test_result_per_group_per_dataset_moa_conf_int_df
+    
+    def _filter_data_by_significant_groups(self,
+                                           data: pd.DataFrame) -> pd.DataFrame:
+
+        group_inclusion = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_GROUP_INCLUSION
+
+        match group_inclusion:
+            case OmnibusTestResultMeasureAssociationConfIntGroupInclusion.ALL_GROUPS:
+                pass
+
+            case OmnibusTestResultMeasureAssociationConfIntGroupInclusion.SIGNIFICANT_GROUPS:
+                p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
+                data = data.loc[data[p_val_is_significant_field_name], :]
+
+            case OmnibusTestResultMeasureAssociationConfIntGroupInclusion.NON_SIGNIFICANT_GROUPS:
+                p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
+                data = data.loc[~data[p_val_is_significant_field_name], :]
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{OmnibusTestResultMeasureAssociationConfIntGroupInclusion.__name__}')
+            
+        return data
 
     def _return_aggregated_omnibus_test_result_per_dataset_df_display(self,
                                                                       aggregated_omnibus_test_result_per_dataset: pd.DataFrame) -> pd.DataFrame:
@@ -1773,57 +2100,57 @@ class AggregatedResults():
     
     def _sort_groups_by_metric(self,
                                data: pd.DataFrame,
-                               sequence_statistic: SequenceStatisticsPlotFields | UniqueSequenceFrequencyStatisticsPlotFields,
-                               seq_stat_dist_sort_metric: SequenceStatisticsDistributionSortMetric,
-                               sorting_entity: SequenceStatisticsDistributionSortingEntity,
+                               sort_by: List[SequenceStatisticsPlotFields | UniqueSequenceFrequencyStatisticsPlotFields | MeasureAssociationConfIntPlotFields],
+                               sort_metric: SortMetric,
+                               sorting_entity: SortingEntity,
                                ascending: bool) -> pd.DataFrame:
         """
-        Sorts the data by sequence statistic. Used for sorting boxplots and ridgeplots. 
+        Sort entity by sort_by variable.by
         """
 
         data = data.copy()
 
-        match seq_stat_dist_sort_metric:
-            case SequenceStatisticsDistributionSortMetric.MEAN:
-                sort_metric = np.mean
+        match sort_metric:
+            case SortMetric.MEAN:
+                sort_metric_func = np.mean
 
-            case SequenceStatisticsDistributionSortMetric.MEDIAN:
-                sort_metric = np.median
+            case SortMetric.MEDIAN:
+                sort_metric_func = np.median
 
-            case SequenceStatisticsDistributionSortMetric.MAX:
-                sort_metric = np.max
+            case SortMetric.MAX:
+                sort_metric_func = np.max
 
-            case SequenceStatisticsDistributionSortMetric.MIN:
-                sort_metric = np.min
+            case SortMetric.MIN:
+                sort_metric_func = np.min
 
             case _:
-                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{seq_stat_dist_sort_metric.__name__}')
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SortMetric.__name__}')
         
         match sorting_entity:
-            case SequenceStatisticsDistributionSortingEntity.GROUP:
+            case SortingEntity.GROUP:
                 sorting_field = GROUP_FIELD_NAME_STR
 
-            case SequenceStatisticsDistributionSortingEntity.DATASET:
+            case SortingEntity.DATASET:
                 sorting_field = DATASET_NAME_FIELD_NAME_STR
 
             case _:
-                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{sorting_entity.__name__}')
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SortingEntity.__name__}')
 
-        sort_metric_values = data.groupby(sorting_field)[sequence_statistic.value]\
-                                 .agg(sort_metric)\
+        sort_metric_values = data.groupby(sorting_field)[[field.value for field in sort_by]]\
+                                 .agg(sort_metric_func)\
                                  .reset_index()
 
-        sort_metric_values.rename({sequence_statistic.value: seq_stat_dist_sort_metric.name}, 
-                                  axis=1, 
-                                  inplace=True)
+        # sort_metric_values.rename({sort_by.value: sort_metric.value}, 
+        #                           axis=1, 
+        #                           inplace=True)
 
-        sort_metric_values.sort_values(by=[seq_stat_dist_sort_metric.name], inplace=True, ascending=ascending)
+        sort_metric_values.sort_values(by=[field.value for field in sort_by], inplace=True, ascending=ascending)
 
         data[sorting_field] = pd.Categorical(data[sorting_field], categories=sort_metric_values[sorting_field], ordered=True)
         data.sort_values(by=sorting_field, inplace=True)
 
         return data
-
+    
     def _return_moa_strength_counter(self) -> defaultdict[str, int]:
 
         moa_strength_counter = defaultdict(int)
@@ -1832,8 +2159,7 @@ class AggregatedResults():
 
         return moa_strength_counter
     
-    def _return_result_aggregation_omnibus_test_fields(self,
-                                                       eval_metric_is_categorical: bool) -> Tuple[str, Tuple[str, str, str]]:
+    def _return_p_val_is_significant_field_name(self) -> str:
 
         if RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_CORRECT_P_VALUES:
             p_val_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_KIND.value + OMNIBUS_TESTS_PVAL_CORRECTED_FIELD_NAME_STR + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_CORRECTION_METHOD.value
@@ -1841,6 +2167,13 @@ class AggregatedResults():
             p_val_field_name = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_P_VALUE_KIND.value
 
         p_val_is_significant_field_name = p_val_field_name + OMNIBUS_TESTS_PVAL_IS_SIGNIFICANT_FIELD_NAME_STR
+    
+        return p_val_is_significant_field_name
+    
+    def _return_result_aggregation_omnibus_test_pval_sig_moa_strength_guide_field_names(self,
+                                                                                        eval_metric_is_categorical: bool) -> Tuple[str, Tuple[str, str, str]]:
+
+        p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
 
         moa_strength_guidelines = []
         for moa_strength_calc_base in OmnibusTestResultMeasureAssociationStrengthCalculationBase:
@@ -1865,6 +2198,66 @@ class AggregatedResults():
             moa_strength_guidelines.append(moa_strength_guideline)
 
         return (p_val_is_significant_field_name, tuple(moa_strength_guidelines))
+
+    def _return_result_aggregation_omnibus_test_pval_sig_moa_field_names(self,
+                                                                         eval_metric_is_categorical: bool) -> Tuple[str]:
+
+        p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
+
+
+        if eval_metric_is_categorical:
+
+            moa_value = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY.value + 
+                         OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR)
+            moa_conf_int = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_CONTINGENCY.value + 
+                            OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR)
+        else:
+
+            moa_value = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV.value + 
+                         OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_VALUE_FIELD_NAME_STR)
+            moa_conf_int = (RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV.value + 
+                            OMNIBUS_TESTS_MEASURE_OF_ASSOCIATION_CONF_INT_VALUE_FIELD_NAME_STR)
+
+        return (p_val_is_significant_field_name, moa_value, moa_conf_int)
+    
+    def _return_measure_association_strength_guideline_boundary_dict(self,
+                                                                     eval_metric_is_categorical: bool) -> Dict[MeasureAssociationStrengthValuesEnum, Tuple[float, float]]:
+
+        if eval_metric_is_categorical:
+
+            moa_guideline = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_CONTINGENCY
+
+            match moa_guideline:
+                case ContingencyMeasureAssociationStrengthGuidelineEnum.COHEN_1988:
+                    boundary_dict = Cohen1988MeasureAssociationStrengthContingency.association_strength_values
+
+                case ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016:
+                    boundary_dict = GignacSzodorai2016MeasureAssociationStrengthContingency.association_strength_values
+
+                case ContingencyMeasureAssociationStrengthGuidelineEnum.FUNDER_OZER_2019:
+                    boundary_dict = FunderOzer2019MeasureAssociationStrengthContingency.association_strength_values
+
+                case ContingencyMeasureAssociationStrengthGuidelineEnum.LOVAKOV_AGADULLINA_2021:
+                    boundary_dict = LovakovAgadullina2021MeasureAssociationStrengthContingency.association_strength_values
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ContingencyMeasureAssociationStrengthGuidelineEnum.__name__}')
+
+        else:
+
+            moa_guideline = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_AOV
+
+            match moa_guideline:
+                case AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988:
+                    boundary_dict = Cohen1988MeasureAssociationStrengthAOV.association_strength_values
+
+                case AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988_F:
+                    boundary_dict = Cohen1988FMeasureAssociationStrengthAOV.association_strength_values
+
+                case _:
+                    raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{AOVMeasureAssociationStrengthGuidelineEnum.__name__}')
+        
+        return boundary_dict
     
     def _return_measure_association_strength_calculation_base_suffix_str(self,
                                                                          moa_strength_calc_base : OmnibusTestResultMeasureAssociationStrengthCalculationBase) -> str:
@@ -1947,8 +2340,12 @@ class AggregatedResults():
                         plot_y_ticks: bool,
                         plot_x_tick_labels: bool,
                         plot_y_tick_labels: bool,
-                        x_axis_ticks: NDArray[np.number] | None,
-                        y_axis_ticks: NDArray[np.number] | None) -> None:
+                        x_axis_ticks_labels: NDArray[np.number] | None,
+                        y_axis_ticks_labels: NDArray[np.number] | None,
+                        x_axis_ticks_position: NDArray[np.number] | None  = None,
+                        y_axis_ticks_position: NDArray[np.number] | None  = None,
+                        x_rotation: int = 0,
+                        y_rotation: int = 0) -> None:
 
         ax.tick_params(axis='x', 
                        which='both',
@@ -1964,13 +2361,22 @@ class AggregatedResults():
                        labelleft=plot_y_tick_labels,    
                        labelright=False)
 
-        if x_axis_ticks is not None:
-            ax.set_xticks(x_axis_ticks)
-            ax.set_xticklabels([f'{tick}' for tick in x_axis_ticks])
+        if x_axis_ticks_labels is not None:
+            if x_axis_ticks_position is None:
+                ax.set_xticks(x_axis_ticks_labels)
+            else:
+                ax.set_xticks(x_axis_ticks_position)
+            ax.set_xticklabels([f'{tick}' for tick in x_axis_ticks_labels])
 
-        if y_axis_ticks is not None:
-            ax.set_yticks(y_axis_ticks)
-            ax.set_yticklabels([f'{tick}' for tick in y_axis_ticks])
+        if y_axis_ticks_labels is not None:
+            if y_axis_ticks_position is None:
+                ax.set_yticks(y_axis_ticks_labels)
+            else:
+                ax.set_yticks(y_axis_ticks_position)
+            ax.set_yticklabels([f'{tick}' for tick in y_axis_ticks_labels])
+        
+        plt.setp(ax.get_xticklabels(), rotation=x_rotation)
+        plt.setp(ax.get_yticklabels(), rotation=y_rotation)
 
     def _remove_inner_plot_elements_grid(self,
                                          g: FacetGrid,
@@ -2552,3 +2958,127 @@ class AggregatedResults():
         ci_upper = min(ci[1], data_range_limits[1])
 
         return ci_lower, ci_upper
+
+    def _return_moa_conf_int_plot_x_label(self,
+                                          x_label_kind: OmnibusTestResultMeasureAssociationConfIntXLabelKind,
+                                          facet_data: pd.DataFrame) -> str:
+
+        match x_label_kind:
+            case OmnibusTestResultMeasureAssociationConfIntXLabelKind.DYNAMIC:
+                x_label = facet_data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_KIND_NAME_STR].iloc[0]
+                x_label =  ' '.join([i.capitalize() for i in x_label.split('_')])
+
+            case OmnibusTestResultMeasureAssociationConfIntXLabelKind.STATIC:
+                x_label = x_label_kind.value
+                x_label = x_label.replace('_', ' ').title()
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{OmnibusTestResultMeasureAssociationConfIntXLabelKind.__name__}')
+
+        return x_label
+    
+    def _return_y_array_numerical(self,
+                                  y_array: np.ndarray) -> np.ndarray:
+
+        y_array_numerical = np.array(range(len(y_array))) * -1
+
+        return y_array_numerical
+    
+    def _return_moa_strength_color_palette(self,
+                                           color_palette: str, 
+                                           col_palette_size: int,
+                                           col_palette_index_min: int,
+                                           col_palette_index_max: int,
+                                           n_moa_strength_categories: int,
+                                           desaturation: int | float,
+                                           alpha: int | float | None,
+                                           non_sig_color: str | None) -> List[Tuple[float]]:
+        
+        col_palette_index = np.linspace(col_palette_index_min, 
+                                        col_palette_index_max, 
+                                        n_moa_strength_categories).astype(int)
+        col_palette_index = list(col_palette_index)
+
+        color_palette = sns.color_palette(color_palette,
+                                          n_colors=col_palette_size,
+                                          desat=desaturation)
+        color_palette = [color_palette[i] for i in col_palette_index]
+
+        if non_sig_color is not None:
+            rgb_col = mcolors.to_rgb(non_sig_color)
+            color_palette.insert(0, rgb_col)
+
+        if alpha is not None:
+            color_palette = [i + (alpha,) for i in color_palette]
+
+        return color_palette
+    
+    def _add_moa_strength_facet_grid_legend(self,
+                                            g: FacetGrid,
+                                            box_edgecolor: str,
+                                            box_linewidth: int | float,
+                                            box_length: int | float,
+                                            box_height: int | float,
+                                            custom_label: List[str] | None) -> None:
+
+        handles = {}
+        if custom_label is not None:
+            for ax in g.axes.flat:
+                for p, label in zip(ax.patches, custom_label):
+                        facecolor = p.get_facecolor()
+                        patch = Patch(facecolor=facecolor,
+                                      edgecolor=box_edgecolor,
+                                      linewidth=box_linewidth,
+                                      label=label)
+                        handles[label] = patch
+        else:
+            for ax in g.axes.flat:
+                for p in ax.patches:
+                    label = p.get_label()
+                    if label != '_nolegend_':
+                        facecolor = p.get_facecolor()
+                        patch = Patch(facecolor=facecolor,
+                                      edgecolor=box_edgecolor,
+                                      linewidth=box_linewidth,
+                                      label=label)
+                        handles[label] = patch
+
+        g.figure.legend(handles=handles.values(),
+                        loc='lower center',
+                        bbox_to_anchor=(.5, 1), 
+                        title=None,
+                        ncol=len(handles),
+                        handlelength=box_length, 
+                        handleheight=box_height,
+                        frameon=False)
+    
+    def _add_moa_strength_legend(self,
+                                 ax: matplotlib.axes.Axes,
+                                 box_edgecolor: str,
+                                 box_linewidth: int | float,
+                                 box_length: int | float,
+                                 box_height: int | float,
+                                 n_cols: int,
+                                 custom_labels: List[str] | None) -> None:
+
+        if custom_labels is not None:
+            legend = ax.legend(loc='lower center',
+                               labels=custom_labels,
+                               bbox_to_anchor=(.5, 1), 
+                               title=None,
+                               ncol=n_cols,
+                               handlelength=box_length, 
+                               handleheight=box_height,
+                               frameon=False)
+        else:
+            legend = ax.legend(loc='lower center',
+                               bbox_to_anchor=(.5, 1), 
+                               title=None,
+                               ncol=n_cols,
+                               handlelength=box_length, 
+                               handleheight=box_height,
+                               frameon=False)
+
+        for handle in legend.legend_handles:
+            handle.set_linewidth(box_linewidth)
+            handle.set_edgecolor(box_edgecolor)

@@ -70,6 +70,7 @@ from matplotlib.colors import LinearSegmentedColormap
 from matplotlib.ticker import FuncFormatter
 from matplotlib.colors import ListedColormap
 import matplotlib.patches as patches
+from matplotlib.patches import Patch
 from matplotlib.patches import Rectangle
 import matplotlib.axes
 import seaborn as sns
@@ -77,6 +78,7 @@ from seaborn.axisgrid import FacetGrid
 import plotly.graph_objects as go
 from statsmodels.graphics.mosaicplot import mosaic
 import matplotlib.ticker as mticker
+import matplotlib.colors as mcolors
 
 # libraries for clustering
 from sklearn.base import BaseEstimator

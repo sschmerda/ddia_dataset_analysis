@@ -68,6 +68,8 @@ class MeasureAssociationContingencyResults:
     bootstrap_standard_error: float | np.ndarray
     interpretation_guideline_methods: list[str]
     interpretation_guideline_strength_values: list[str]
+    interpretation_guideline_strength_for_conf_int_lower_bound_values: list[str]
+    interpretation_guideline_strength_for_conf_int_upper_bound_values: list[str]
 
 @dataclass
 class TestResultsAOV:
@@ -91,6 +93,8 @@ class MeasureAssociationAOVResults:
     bootstrap_standard_error: float | np.ndarray
     interpretation_guideline_methods: list[str]
     interpretation_guideline_strength_values: list[str]
+    interpretation_guideline_strength_for_conf_int_lower_bound_values: list[str]
+    interpretation_guideline_strength_for_conf_int_upper_bound_values: list[str]
 
 @dataclass
 class OmnibusTestResults:
