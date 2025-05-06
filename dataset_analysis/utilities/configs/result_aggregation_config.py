@@ -116,6 +116,10 @@ class OmnibusTestResultMeasureAssociationConfIntGroupInclusion(Enum):
 
 RESULT_AGGREGATION_STYLE_HTML_TABLE = True
 
+#***********************************************************************************************************************
+#** sequence statistics results ***
+#***********************************************************************************************************************
+
 ########################################################################################################################
 ### sequence statistics plot fields ###
 ########################################################################################################################
@@ -645,27 +649,33 @@ RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_AOV = AOVMeasueAssociationEnum.OMEGA_
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_CONTINGENCY = ContingencyMeasureAssociationStrengthGuidelineEnum.GIGNAC_SZODORAI_2016
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_AOV = AOVMeasureAssociationStrengthGuidelineEnum.COHEN_1988
 
-# measure of association strength calculation base (conf int lower - moa value - conf int upper)
-#TODO: maybe delete
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_CALCULATION_BASE = OmnibusTestResultMeasureAssociationStrengthCalculationBase.MOA_VALUE
-
+# moa strength values
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES = [MeasureAssociationStrengthValuesEnum.VERY_SMALL.value,
                                                               MeasureAssociationStrengthValuesEnum.SMALL.value,
                                                               MeasureAssociationStrengthValuesEnum.MEDIUM.value,
                                                               MeasureAssociationStrengthValuesEnum.LARGE.value]
 
-# table decimal places
+# table 
+# specifies which of [moa_conf_int_lower_bound, moa_value, moa_conf_int_upper_bound] will be shown in result table
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_TABLE_VALUES = [
+                                                                    # OmnibusTestResultMeasureAssociationStrengthCalculationBase.MOA_CONF_INT_LOWER_BOUND,
+                                                                    OmnibusTestResultMeasureAssociationStrengthCalculationBase.MOA_VALUE,
+                                                                    # OmnibusTestResultMeasureAssociationStrengthCalculationBase.MOA_CONF_INT_UPPER_BOUND
+                                                                    ]
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_ROUND_DECIMAL_POINTS = 1
-
 # result aggregation omnibus test result table field names
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_EVAlUATION_FIELD_IS_CATEGORICAL_DISPLAY_FIELD = f'{CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR} Is Categorical'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_EVAlUATION_FIELD_IS_CATEGORICAL_DISPLAY_FIELD = f'{CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR} is Categorical'
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_EVAlUATION_FIELD_TYPE_DISPLAY_FIELD = f'{CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR}'
 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_DISPLAY_FIELD = f'# {GROUP_FIELD_NAME_STR}s'
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD = f'# (%) of {GROUP_FIELD_NAME_STR}s with Significant Differences in {CLUSTERING_EVALUATION_METRIC_FIELD_NAME_STR} between {CLUSTER_FIELD_NAME_STR}'
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_VERY_SMALL_EFFECT_SIZE_DISPLAY_FIELD = f"# (%) of Significant {GROUP_FIELD_NAME_STR}s with {' '.join(i.capitalize() for i in MeasureAssociationStrengthValuesEnum.VERY_SMALL.value.split('_'))} Effect Size"
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_SMALL_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.SMALL.value.capitalize()} Effect Size'
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_MEDIUM_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.MEDIUM.value.capitalize()} Effect Size'
-RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_LARGE_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.LARGE.value.capitalize()} Effect Size'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD = f'# (%) Significant {GROUP_FIELD_NAME_STR}s'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_VERY_SMALL_EFFECT_SIZE_DISPLAY_FIELD = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD + f" w/ {' '.join(i.capitalize() for i in MeasureAssociationStrengthValuesEnum.VERY_SMALL.value.split('_'))} Effect Size"
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_SMALL_EFFECT_SIZE_DISPLAY_FIELD = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD + f' w/ {MeasureAssociationStrengthValuesEnum.SMALL.value.capitalize()} Effect Size'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_MEDIUM_EFFECT_SIZE_DISPLAY_FIELD = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD + f' w/ {MeasureAssociationStrengthValuesEnum.MEDIUM.value.capitalize()} Effect Size'
+RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_LARGE_EFFECT_SIZE_DISPLAY_FIELD = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_DISPLAY_FIELD + f' w/ {MeasureAssociationStrengthValuesEnum.LARGE.value.capitalize()} Effect Size'
+# RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_VERY_SMALL_EFFECT_SIZE_DISPLAY_FIELD = f"# (%) of Significant {GROUP_FIELD_NAME_STR}s with {' '.join(i.capitalize() for i in MeasureAssociationStrengthValuesEnum.VERY_SMALL.value.split('_'))} Effect Size"
+# RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_SMALL_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.SMALL.value.capitalize()} Effect Size'
+# RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_MEDIUM_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.MEDIUM.value.capitalize()} Effect Size'
+# RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_LARGE_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.LARGE.value.capitalize()} Effect Size'
 
 ########################################################################################################################
 ### plot_aggregated_omnibus_test_result_per_dataset_stacked_barplot options ###
@@ -860,7 +870,7 @@ def omnibus_test_result_moa_confidence_interval_per_group_per_dataset_decorator(
     return wrapper
 
 # group inclusion
-OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_GROUP_INCLUSION = OmnibusTestResultMeasureAssociationConfIntGroupInclusion.ALL_GROUPS
+OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_GROUP_INCLUSION = OmnibusTestResultMeasureAssociationConfIntGroupInclusion.SIGNIFICANT_GROUPS
 
 # effect size field
 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_FIELD = MeasureAssociationConfIntPlotFields.EFFECT_SIZE

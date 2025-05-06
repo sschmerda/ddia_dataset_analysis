@@ -2040,7 +2040,7 @@ class AggregatedResults():
                                                                            agg_number_pct_of_groups_sig_p_value_field_name)
         # combine the moa strength number and pct of groups with significant p-value
         agg_moa_strength_count_pct_combined_list = []
-        for moa_strength_calc_base in OmnibusTestResultMeasureAssociationStrengthCalculationBase: #TODO: make optional in config
+        for moa_strength_calc_base in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_TABLE_VALUES:
 
             moa_calculation_base_suffix = self._return_measure_association_strength_calculation_base_suffix_str(moa_strength_calc_base)
 
@@ -2056,7 +2056,6 @@ class AggregatedResults():
 
             agg_moa_strength_count_pct_combined_list.append(agg_moa_strength_count_pct_combined)
 
-        ##
         def sum_data(array_first: np.ndarray,
                      array_second: np.ndarray) -> np.ndarray:
 
@@ -2068,10 +2067,8 @@ class AggregatedResults():
         agg_moa_strength_count_pct_combined = reduce(sum_data, agg_moa_strength_count_pct_combined_list)
 
         agg_moa_strength_count_pct_combined = pd.DataFrame(agg_moa_strength_count_pct_combined,
-                                                           index=index)
+                                                            index=index)
         agg_moa_strength_count_pct_combined.columns = self.result_aggregation_omnibus_test_result_moa_strength_counts_pct_combined_field_names
-
-        ##
 
         aggregation_fields = [DATASET_NAME_FIELD_NAME_STR, 
                               OMNIBUS_TESTS_EVAlUATION_FIELD_IS_CATEGORICAL_FIELD_NAME_STR, 
