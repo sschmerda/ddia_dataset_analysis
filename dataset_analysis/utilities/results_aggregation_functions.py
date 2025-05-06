@@ -946,8 +946,14 @@ class AggregatedResults():
         pct_df, count_df = self._return_aggregated_omnibus_test_result_per_dataset_plotting_pct_df_count_df()
 
         # use fields name appropriate for plotting
-        pct_df.columns = OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GROUP_CATEGORIES
-        count_df.columns = OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GROUP_CATEGORIES
+        moa_streng_categories = ([RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_GROUP_NON_SIGNIFICANT_NAME_STR] + 
+                                 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES)
+        moa_streng_categories = self._format_moa_strength_labels(moa_streng_categories,
+                                                                 OMNIBUS_TEST_RESULT_STACKED_BARPLOT_MOA_LABELS_ADD_EFFECT_SIZE_STR,
+                                                                 OMNIBUS_TEST_RESULT_STACKED_BARPLOT_MOA_LABELS_CAPITALIZE)
+
+        pct_df.columns = moa_streng_categories
+        count_df.columns = moa_streng_categories
 
         pct_df = pct_df.sort_index(ascending=False)
         count_df = count_df.sort_index(ascending=False)
@@ -1048,8 +1054,13 @@ class AggregatedResults():
         pct_df, count_df = self._return_aggregated_omnibus_test_result_per_dataset_plotting_pct_df_count_df()
 
         # use fields name appropriate for plotting
-        pct_df.columns = OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_GROUP_CATEGORIES
-        count_df.columns = OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_GROUP_CATEGORIES
+        moa_streng_categories = ([RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_GROUP_NON_SIGNIFICANT_NAME_STR] + 
+                                 RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES)
+        moa_streng_categories = self._format_moa_strength_labels(moa_streng_categories,
+                                                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_MOA_LABELS_ADD_EFFECT_SIZE_STR,
+                                                                 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_MOA_LABELS_CAPITALIZE)
+        pct_df.columns = moa_streng_categories
+        count_df.columns = moa_streng_categories
 
         pct_df_long = pd.melt(pct_df.reset_index(), 
                               id_vars=DATASET_NAME_FIELD_NAME_STR, 
@@ -1070,7 +1081,6 @@ class AggregatedResults():
         y_axis_lim = return_axis_limits(None,
                                         True,
                                         False)
-        y_axis_ticks = np.arange(0, 110, 10)
 
         n_moa_strength_categories = pct_df_long[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_FIELD_NAME_STR].nunique() - 1
         moa_strength_colors = self._return_moa_strength_color_palette(OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_PALETTE,
@@ -1084,7 +1094,6 @@ class AggregatedResults():
 
         n_cols = set_facet_grid_column_number(pct_df_long[DATASET_NAME_FIELD_NAME_STR],
                                               RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
-
         def plot_grouped_barplot(data, **kwargs):
 
             sns.barplot(data=data,
@@ -1381,7 +1390,9 @@ class AggregatedResults():
 
             moa_strength_cat_interval_mapping = data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR].iloc[0]
             moa_streng_categories = [i.value for i in moa_strength_cat_interval_mapping.keys()]
-            moa_streng_categories = [i.replace('_', '-') + ' ' + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NAME_STR for i in moa_streng_categories]
+            moa_streng_categories = self._format_moa_strength_labels(moa_streng_categories,
+                                                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_MOA_LABELS_ADD_EFFECT_SIZE_STR,
+                                                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_MOA_LABELS_CAPITALIZE)
             self._add_moa_strength_facet_grid_legend(g,
                                                      OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_LEGEND_BOX_COLOR,
                                                      OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_LEGEND_BOX_LINEWIDTH,
@@ -3079,3 +3090,20 @@ class AggregatedResults():
         for handle in legend.legend_handles:
             handle.set_linewidth(box_linewidth)
             handle.set_edgecolor(box_edgecolor)
+
+    def _format_moa_strength_labels(self,
+                                    moa_labels_raw: List[str],
+                                    add_effect_size_str: bool,
+                                    capitalize: bool) -> List[str]:
+        if capitalize:
+            effect_size_str = ' '.join([i.capitalize() for i in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NAME_STR.split(' ')])
+            moa_labels_raw = ['_'.join([j.capitalize() for j in i.split('_')]) for i in moa_labels_raw]
+        else:
+            effect_size_str = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NAME_STR
+        
+        if not add_effect_size_str:
+            effect_size_str = ''
+
+        moa_streng_categories = ['-'.join(i.split('_')) + ' ' + effect_size_str for i in moa_labels_raw]
+
+        return moa_streng_categories

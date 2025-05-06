@@ -754,8 +754,8 @@ OMNIBUS_TEST_RESULT_STACKED_BARPLOT_ANNOTATION_TEXT_H_POS = 'center'
 
 # strings
 # group categories str
-OMNIBUS_TEST_RESULT_STACKED_BARPLOT_GROUP_CATEGORIES = ([RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_GROUP_NON_SIGNIFICANT_NAME_STR] + 
-                                                        [strength_value.replace('_', '-') + ' ' + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NAME_STR for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES])
+OMNIBUS_TEST_RESULT_STACKED_BARPLOT_MOA_LABELS_ADD_EFFECT_SIZE_STR = True
+OMNIBUS_TEST_RESULT_STACKED_BARPLOT_MOA_LABELS_CAPITALIZE = False
 
 ########################################################################################################################
 ### plot_aggregated_omnibus_test_result_per_dataset_grouped_barplot options ###
@@ -842,8 +842,8 @@ OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS = False
 
 # strings
 # group categories str
-OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_GROUP_CATEGORIES = ([RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_GROUP_NON_SIGNIFICANT_NAME_STR] + 
-                                                        [strength_value.replace('_', '-') + ' ' + RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NAME_STR for strength_value in RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_VALUES])
+OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_MOA_LABELS_ADD_EFFECT_SIZE_STR = False
+OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_MOA_LABELS_CAPITALIZE = False
 
 ########################################################################################################################
 ### plot_omnibus_test_result_moa_confidence_interval_per_group_per_dataset options ###
@@ -943,3 +943,8 @@ OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_X_AXIS_TICKS = False
 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_Y_AXIS_TICKS = False
 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_X_AXIS_TICK_LABELS = False
 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_Y_AXIS_TICK_LABELS = False
+
+# strings
+# group categories str
+OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_MOA_LABELS_ADD_EFFECT_SIZE_STR = True
+OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_MOA_LABELS_CAPITALIZE = False
