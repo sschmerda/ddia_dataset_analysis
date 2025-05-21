@@ -33,6 +33,7 @@ from typing import DefaultDict
 
 # misc
 from pympler import asizeof
+import inflection
 
 # var
 from IPython.display import display, Markdown
@@ -79,6 +80,7 @@ import plotly.graph_objects as go
 from statsmodels.graphics.mosaicplot import mosaic
 import matplotlib.ticker as mticker
 import matplotlib.colors as mcolors
+from matplotlib.lines import Line2D
 
 # libraries for clustering
 from sklearn.base import BaseEstimator

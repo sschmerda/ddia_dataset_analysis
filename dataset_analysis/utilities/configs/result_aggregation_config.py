@@ -52,6 +52,10 @@ class UniqueSequenceFrequencyStatisticsPlotFields(Enum):
     SEQUENCE_FREQUENCY = LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_NAME_STR
     RELATIVE_SEQUENCE_FREQUENCY = LEARNING_ACTIVITY_SEQUENCE_FREQUENCY_WITHIN_GROUP_PCT_NAME_STR
 
+class ClusterSizePlotFields(Enum):
+    NUMBER_OF_CLUSTER = CLUSTER_FIELD_NAME_STR
+    SEQUENCE_COUNT = RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR
+
 class MeasureAssociationConfIntPlotFields(Enum):
     EFFECT_SIZE = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_NAME_STR
     EFFECT_SIZE_CONF_INT_LOWER = RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_VALUE_CONF_INT_LOWER_NAME_STR
@@ -89,6 +93,10 @@ class LineCapSizeAdjustment(Enum):
 class ColorPaletteAggregationLevel(Enum):
     GROUP = GROUP_FIELD_NAME_STR
     DATASET = DATASET_NAME_FIELD_NAME_STR
+
+class ClusterSizeScatterPlotKind(Enum):
+    STRIPPLOT = 0
+    SWARMPLOT = 1
 
 class OmnibusTestResultPValueKind(Enum):
     PVAL = OMNIBUS_TESTS_PVAL_FIELD_NAME_STR
@@ -678,12 +686,161 @@ RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_LARG
 # RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_NUMBER_OF_GROUPS_SIGNIFICANT_P_VALUE_LARGE_EFFECT_SIZE_DISPLAY_FIELD = f'# (%) of Significant {GROUP_FIELD_NAME_STR}s with {MeasureAssociationStrengthValuesEnum.LARGE.value.capitalize()} Effect Size'
 
 ########################################################################################################################
+### plot_cluster_size_per_group_per_dataset_categorical_scatter options ###
+########################################################################################################################
+
+# plot name
+CLUSTER_SIZE_SCATTERPLOT_NAME = 'cluster_size_scatterplot'
+
+# plot decorator
+def cluster_size_per_group_per_dataset_categorical_scatter_decorator(func):
+    """A decorator to apply temporary Seaborn settings."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        axes_style_rc_dict = {'font.family': ['Arial']}
+        rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI,
+                           'axes.labelpad': 20}
+
+        with sns.axes_style('ticks', rc=axes_style_rc_dict),\
+             sns.plotting_context(context='paper', font_scale=1, rc={}),\
+             plt.rc_context(rc_context_dict):
+
+             return func(*args, **kwargs)
+    return wrapper
+
+# colors
+CLUSTER_SIZE_SCATTERPLOT_COLOR_PALETTE = RESULT_AGGREGATION_COLOR_PALETTE
+CLUSTER_SIZE_SCATTERPLOT_COLOR_ALPHA = 0.5
+CLUSTER_SIZE_SCATTERPLOT_COLOR_SATURATION = 1
+
+# scatter config
+CLUSTER_SIZE_SCATTERPLOT_KIND = ClusterSizeScatterPlotKind.SWARMPLOT
+CLUSTER_SIZE_SCATTERPLOT_MARKER_KIND = 'o'
+CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE = 8
+CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR = 'black'
+CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGEWIDTH = 0.8
+CLUSTER_SIZE_SCATTERPLOT_MARKER_JITTER = 0.2
+CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_KIND = 'X'
+CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_COLOR = (1, 1, 1, 0.5)
+
+# scatter sort order
+CLUSTER_SIZE_SCATTERPLOT_SORT_BOXES = True
+CLUSTER_SIZE_SCATTERPLOT_SORT_ASCENDING = True
+CLUSTER_SIZE_SCATTERPLOT_SORT_METRIC = SortMetric.MAX
+CLUSTER_SIZE_SCATTERPLOT_SORT_FIELD = ClusterSizePlotFields.NUMBER_OF_CLUSTER
+
+# legend config
+CLUSTER_SIZE_SCATTERPLOT_PLOT_LEGEND = True
+
+# spines
+CLUSTER_SIZE_SCATTERPLOT_SHOW_TOP = False
+CLUSTER_SIZE_SCATTERPLOT_SHOW_BOTTOM = True
+CLUSTER_SIZE_SCATTERPLOT_SHOW_LEFT = False
+CLUSTER_SIZE_SCATTERPLOT_SHOW_RIGHT = False
+# axes
+CLUSTER_SIZE_SCATTERPLOT_SHAREX_RAW = False
+CLUSTER_SIZE_SCATTERPLOT_SHAREY_RAW = False
+CLUSTER_SIZE_SCATTERPLOT_LOG_SCALE_X_RAW = False
+CLUSTER_SIZE_SCATTERPLOT_GRID_LINE_AXIS = Axes.BOTH
+
+# axes labels
+CLUSTER_SIZE_SCATTERPLOT_PLOT_X_AXIS_LABEL = True
+CLUSTER_SIZE_SCATTERPLOT_PLOT_Y_AXIS_LABEL = True
+CLUSTER_SIZE_SCATTERPLOT_X_AXIS_LABEL = None
+CLUSTER_SIZE_SCATTERPLOT_Y_AXIS_LABEL = GROUP_FIELD_NAME_STR
+# ticks
+CLUSTER_SIZE_SCATTERPLOT_PLOT_X_AXIS_TICKS = True
+CLUSTER_SIZE_SCATTERPLOT_PLOT_Y_AXIS_TICKS = True
+CLUSTER_SIZE_SCATTERPLOT_PLOT_X_AXIS_TICK_LABELS = True
+CLUSTER_SIZE_SCATTERPLOT_PLOT_Y_AXIS_TICK_LABELS = True
+# facet grid remove inner plot elements
+CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_X_AXIS_LABELS = True
+CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_Y_AXIS_LABELS = True
+CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_X_AXIS_TICKS = False
+CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_Y_AXIS_TICKS = False
+CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS = False
+CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS = False
+
+########################################################################################################################
+### plot_cluster_size_per_group_per_dataset_lineplot options ###
+########################################################################################################################
+
+# plot name
+CLUSTER_SIZE_LINEPLOT_NAME = 'cluster_size_lineplot'
+
+# plot decorator
+def cluster_size_per_group_per_dataset_lineplot_decorator(func):
+    """A decorator to apply temporary Seaborn settings."""
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        axes_style_rc_dict = {'font.family': ['Arial']}
+        rc_context_dict = {'figure.dpi': RESULT_AGGREGATION_FIG_SIZE_DPI,
+                           'axes.labelpad': 20}
+
+        with sns.axes_style('ticks', rc=axes_style_rc_dict),\
+             sns.plotting_context(context='paper', font_scale=1, rc={}),\
+             plt.rc_context(rc_context_dict):
+
+             return func(*args, **kwargs)
+    return wrapper
+
+# colors
+CLUSTER_SIZE_LINEPLOT_COLOR_PALETTE = RESULT_AGGREGATION_COLOR_PALETTE
+CLUSTER_SIZE_LINEPLOT_COLOR_ALPHA = RESULT_AGGREGATION_COLOR_ALPHA
+CLUSTER_SIZE_LINEPLOT_COLOR_SATURATION = RESULT_AGGREGATION_COLOR_SATURATION
+
+# line line config
+CLUSTER_SIZE_LINEPLOT_LINE_WIDTH = 1.6
+
+# line marker config
+CLUSTER_SIZE_LINEPLOT_MARKER_KIND = 'o'
+CLUSTER_SIZE_LINEPLOT_MARKER_SIZE = 18
+CLUSTER_SIZE_LINEPLOT_MARKER_EDGECOLOR = 'black'
+CLUSTER_SIZE_LINEPLOT_MARKER_EDGEWIDTH = 1
+CLUSTER_SIZE_LINEPLOT_MARKER_ALPHA = 1
+
+# legend config
+CLUSTER_SIZE_LINEPLOT_PLOT_LEGEND = False
+
+# spines
+CLUSTER_SIZE_LINEPLOT_SHOW_TOP = False
+CLUSTER_SIZE_LINEPLOT_SHOW_BOTTOM = True
+CLUSTER_SIZE_LINEPLOT_SHOW_LEFT = False
+CLUSTER_SIZE_LINEPLOT_SHOW_RIGHT = False
+# axes
+CLUSTER_SIZE_LINEPLOT_SHAREX_RAW = False
+CLUSTER_SIZE_LINEPLOT_SHAREY_RAW = False
+CLUSTER_SIZE_LINEPLOT_LOG_SCALE_X_RAW = False
+CLUSTER_SIZE_LINEPLOT_GRID_LINE_AXIS = Axes.BOTH
+
+# axes labels
+CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_LABEL = True
+CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_LABEL = True
+CLUSTER_SIZE_LINEPLOT_X_AXIS_LABEL = None
+CLUSTER_SIZE_LINEPLOT_Y_AXIS_LABEL = None
+# ticks
+CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_TICKS = True
+CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_TICKS = True
+CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_TICK_LABELS = True
+CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_TICK_LABELS = True
+# facet grid remove inner plot elements
+CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_X_AXIS_LABELS = True
+CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_Y_AXIS_LABELS = True
+CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_X_AXIS_TICKS = False
+CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_Y_AXIS_TICKS = False
+CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS = False
+CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS = False
+
+########################################################################################################################
 ### plot_aggregated_omnibus_test_result_per_dataset_stacked_barplot options ###
 ########################################################################################################################
 
 # plot name
 OMNIBUS_TEST_RESULT_STACKED_BARPLOT_NAME = 'omnibus_test_result_stacked_barplot'
 
+# plot decorator
 def aggregated_omnibus_test_result_per_dataset_stacked_barplot_decorator(func):
     """A decorator to apply temporary Seaborn settings."""
 
@@ -764,6 +921,7 @@ OMNIBUS_TEST_RESULT_STACKED_BARPLOT_MOA_LABELS_CAPITALIZE = False
 # plot name
 OMNIBUS_TEST_RESULT_GROUPED_BARPLOT_NAME = 'omnibus_test_result_grouped_barplot'
 
+# plot decorator
 def aggregated_omnibus_test_result_per_dataset_grouped_barplot_decorator(func):
     """A decorator to apply temporary Seaborn settings."""
 

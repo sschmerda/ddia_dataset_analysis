@@ -939,6 +939,315 @@ class AggregatedResults():
         self._save_figure(SEQUENCE_COUNT_PLOT_NAME)
         plt.show(g);
 
+    @cluster_size_per_group_per_dataset_categorical_scatter_decorator
+    def plot_cluster_size_per_group_per_dataset_categorical_scatter(self) -> None:
+
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore', category=UserWarning)
+
+            cluster_size_per_group = self._return_cluster_size_per_group_per_dataset_df()
+
+            color_dict = self._return_color_per_group_per_dataset(cluster_size_per_group,
+                                                                  ColorPaletteAggregationLevel.GROUP,
+                                                                  CLUSTER_SIZE_SCATTERPLOT_COLOR_PALETTE,
+                                                                  CLUSTER_SIZE_SCATTERPLOT_COLOR_ALPHA,
+                                                                  CLUSTER_SIZE_SCATTERPLOT_COLOR_SATURATION)
+
+            statistic_is_pct = False 
+            statistic_is_ratio = False
+            share_x = CLUSTER_SIZE_SCATTERPLOT_SHAREX_RAW
+            share_y = CLUSTER_SIZE_SCATTERPLOT_SHAREY_RAW
+            x_axis_log_scale = CLUSTER_SIZE_SCATTERPLOT_LOG_SCALE_X_RAW
+
+            n_cols = set_facet_grid_column_number(cluster_size_per_group[DATASET_NAME_FIELD_NAME_STR],
+                                                  RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+            def plot_cluster_size_scatter(data, **kwargs):
+
+                dataset_name = data[DATASET_NAME_FIELD_NAME_STR].iloc[0]
+                if CLUSTER_SIZE_SCATTERPLOT_SORT_BOXES:
+                    data = self._sort_groups_by_metric(data,
+                                                       [CLUSTER_SIZE_SCATTERPLOT_SORT_FIELD],
+                                                       CLUSTER_SIZE_SCATTERPLOT_SORT_METRIC,
+                                                       SortingEntity.GROUP,
+                                                       CLUSTER_SIZE_SCATTERPLOT_SORT_ASCENDING)
+
+                colors = self._return_colors(data,
+                                             ColorPaletteAggregationLevel.GROUP,
+                                             dataset_name,
+                                             color_dict)
+
+                data_clustered = data.loc[data[CLUSTER_FIELD_NAME_STR]!=-1, :]
+                data_non_clustered = data.loc[data[CLUSTER_FIELD_NAME_STR]==-1, :]
+
+                match CLUSTER_SIZE_SCATTERPLOT_KIND:
+                    case ClusterSizeScatterPlotKind.STRIPPLOT:
+                        sns.stripplot(data_clustered,
+                                      x=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR,
+                                      y=GROUP_FIELD_NAME_STR,
+                                      hue=GROUP_FIELD_NAME_STR,
+                                      orient='h',
+                                      palette=colors,
+                                      s=CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE,
+                                      edgecolor=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR,
+                                      marker=CLUSTER_SIZE_SCATTERPLOT_MARKER_KIND,
+                                      linewidth=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGEWIDTH,
+                                      jitter=CLUSTER_SIZE_SCATTERPLOT_MARKER_JITTER,
+                                      zorder=2)
+
+                        sns.stripplot(data_non_clustered,
+                                      x=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR,
+                                      y=GROUP_FIELD_NAME_STR,
+                                      orient='h',
+                                      color=CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_COLOR,
+                                      s=CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE,
+                                      edgecolor=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR,
+                                      marker=CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_KIND,
+                                      linewidth=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGEWIDTH,
+                                      jitter=CLUSTER_SIZE_SCATTERPLOT_MARKER_JITTER,
+                                      zorder=1)
+
+                    case ClusterSizeScatterPlotKind.SWARMPLOT:
+                        sns.swarmplot(data_clustered,
+                                      x=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR,
+                                      y=GROUP_FIELD_NAME_STR,
+                                      hue=GROUP_FIELD_NAME_STR,
+                                      orient='h',
+                                      palette=colors,
+                                      s=CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE,
+                                      edgecolor=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR,
+                                      marker=CLUSTER_SIZE_SCATTERPLOT_MARKER_KIND,
+                                      linewidth=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGEWIDTH,
+                                      dodge=False,
+                                      zorder=2)
+
+                        sns.swarmplot(data_non_clustered,
+                                      x=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR,
+                                      y=GROUP_FIELD_NAME_STR,
+                                      orient='h',
+                                      color=CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_COLOR,
+                                      s=CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE,
+                                      edgecolor=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR,
+                                      marker=CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_KIND,
+                                      linewidth=CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGEWIDTH,
+                                      dodge=False,
+                                      zorder=1)
+
+                    case _:
+                        raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ClusterSizeScatterPlotKind.__name__}')
+
+                plt.margins(y=0.05)
+
+            g = sns.FacetGrid(cluster_size_per_group,
+                              col=DATASET_NAME_FIELD_NAME_STR,
+                              col_wrap=n_cols,
+                              height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                              aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                              sharex=share_x,
+                              sharey=share_y)
+
+            g.map_dataframe(plot_cluster_size_scatter)
+
+            g.set_titles('{col_name}') 
+
+            if share_x:
+                x_axis_lim = return_axis_limits(cluster_size_per_group[RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR],
+                                                statistic_is_pct,
+                                                statistic_is_ratio,
+                                                is_log_scale=x_axis_log_scale)
+                g.set(xlim=x_axis_lim)
+
+            for ax, (dataset_name, facet_data) in zip(g.axes.flat, cluster_size_per_group.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+                self._set_axis_labels(ax,
+                                      CLUSTER_SIZE_SCATTERPLOT_PLOT_X_AXIS_LABEL,
+                                      CLUSTER_SIZE_SCATTERPLOT_PLOT_Y_AXIS_LABEL,
+                                      CLUSTER_SIZE_SCATTERPLOT_X_AXIS_LABEL,
+                                      CLUSTER_SIZE_SCATTERPLOT_Y_AXIS_LABEL)
+
+                self._set_axis_ticks(ax,
+                                     CLUSTER_SIZE_SCATTERPLOT_PLOT_X_AXIS_TICKS,
+                                     CLUSTER_SIZE_SCATTERPLOT_PLOT_Y_AXIS_TICKS,
+                                     CLUSTER_SIZE_SCATTERPLOT_PLOT_X_AXIS_TICK_LABELS,
+                                     CLUSTER_SIZE_SCATTERPLOT_PLOT_Y_AXIS_TICK_LABELS,
+                                     None,
+                                     None)
+
+                if x_axis_log_scale:
+                    self._set_log_scale_axes(ax,
+                                             Axes.X_AXIS)
+                ax.grid(True,
+                        axis=CLUSTER_SIZE_SCATTERPLOT_GRID_LINE_AXIS.value,
+                        which='both')
+
+                if not share_x:
+                    x_axis_lim = return_axis_limits(facet_data[RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR],
+                                                    statistic_is_pct,
+                                                    statistic_is_ratio,
+                                                    is_log_scale=x_axis_log_scale)
+                    ax.set_xlim(*x_axis_lim)
+
+
+                if SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SORT_BOXES:
+
+                    facet_data = self._sort_groups_by_metric(facet_data,
+                                                             [CLUSTER_SIZE_SCATTERPLOT_SORT_FIELD],
+                                                             CLUSTER_SIZE_SCATTERPLOT_SORT_METRIC,
+                                                             SortingEntity.GROUP,
+                                                             CLUSTER_SIZE_SCATTERPLOT_SORT_ASCENDING)
+
+                ax.spines['top'].set_visible(CLUSTER_SIZE_SCATTERPLOT_SHOW_TOP)
+                ax.spines['bottom'].set_visible(CLUSTER_SIZE_SCATTERPLOT_SHOW_BOTTOM)
+                ax.spines['left'].set_visible(CLUSTER_SIZE_SCATTERPLOT_SHOW_LEFT)
+                ax.spines['right'].set_visible(CLUSTER_SIZE_SCATTERPLOT_SHOW_RIGHT)
+
+            n_groups = cluster_size_per_group[DATASET_NAME_FIELD_NAME_STR].nunique()
+            self._remove_inner_plot_elements_grid(g,
+                                                  n_groups,
+                                                  n_cols,
+                                                  CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_X_AXIS_LABELS,
+                                                  CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_Y_AXIS_LABELS,
+                                                  CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_X_AXIS_TICKS,
+                                                  CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_Y_AXIS_TICKS,
+                                                  CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                                  CLUSTER_SIZE_SCATTERPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+
+            # plot the legend with matching markers
+            if CLUSTER_SIZE_SCATTERPLOT_PLOT_LEGEND:
+                self._plot_cluster_size_scatter_legend(g,
+                                                       CLUSTER_SIZE_SCATTERPLOT_MARKER_KIND,
+                                                       CLUSTER_SIZE_SCATTERPLOT_NON_CLUSTERED_MARKER_KIND,
+                                                       RESULT_AGGREGATION_CLUSTER_SIZE_LEGEND_CLUSTERED_SEQUENCES_STR,
+                                                       RESULT_AGGREGATION_CLUSTER_SIZE_LEGEND_NON_CLUSTERED_SEQUENCES_STR,
+                                                       CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR,
+                                                       CLUSTER_SIZE_SCATTERPLOT_MARKER_EDGECOLOR,
+                                                       CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE,
+                                                       CLUSTER_SIZE_SCATTERPLOT_MARKER_SIZE)
+            
+            plt.tight_layout()
+            self._save_figure(CLUSTER_SIZE_SCATTERPLOT_NAME)
+            plt.show(g);
+
+    @cluster_size_per_group_per_dataset_lineplot_decorator
+    def plot_cluster_size_per_group_per_dataset_lineplot(self) -> None:
+        
+        cluster_size_per_group = self._return_cluster_size_per_group_per_dataset_df()
+        cluster_size_per_group_sorted_and_ranked = self._return_cluster_size_per_group_per_dataset_sorted_and_ranked_df(cluster_size_per_group)
+
+        color_dict = self._return_color_per_group_per_dataset(cluster_size_per_group_sorted_and_ranked,
+                                                              ColorPaletteAggregationLevel.GROUP,
+                                                              CLUSTER_SIZE_LINEPLOT_COLOR_PALETTE,
+                                                              CLUSTER_SIZE_LINEPLOT_COLOR_ALPHA,
+                                                              CLUSTER_SIZE_LINEPLOT_COLOR_SATURATION)
+
+        statistic_is_pct = False 
+        statistic_is_ratio = False
+        share_x = CLUSTER_SIZE_LINEPLOT_SHAREX_RAW
+        share_y = CLUSTER_SIZE_LINEPLOT_SHAREY_RAW
+        x_axis_log_scale = CLUSTER_SIZE_LINEPLOT_LOG_SCALE_X_RAW
+
+        n_cols = set_facet_grid_column_number(cluster_size_per_group_sorted_and_ranked[DATASET_NAME_FIELD_NAME_STR],
+                                              RESULT_AGGREGATION_FACET_GRID_N_COLUMNS)
+
+
+            
+        def plot_cluster_size_lineplot(data, **kwargs):
+
+            dataset_name = data[DATASET_NAME_FIELD_NAME_STR].iloc[0]
+            colors = self._return_colors(data,
+                                         ColorPaletteAggregationLevel.GROUP,
+                                         dataset_name,
+                                         color_dict)
+
+            sns.lineplot(data,
+                         x=RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR,
+                         y=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR,
+                         hue=GROUP_FIELD_NAME_STR,
+                         legend=CLUSTER_SIZE_LINEPLOT_PLOT_LEGEND,
+                         palette=colors,
+                         linewidth=CLUSTER_SIZE_LINEPLOT_LINE_WIDTH) 
+
+            sns.scatterplot(data,
+                            x=RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR, 
+                            y=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR, 
+                            hue=GROUP_FIELD_NAME_STR,
+                            palette=colors,
+                            marker=CLUSTER_SIZE_LINEPLOT_MARKER_KIND,
+                            s=CLUSTER_SIZE_LINEPLOT_MARKER_SIZE,
+                            edgecolor=CLUSTER_SIZE_LINEPLOT_MARKER_EDGECOLOR,
+                            linewidth=CLUSTER_SIZE_LINEPLOT_MARKER_EDGEWIDTH,
+                            alpha=CLUSTER_SIZE_LINEPLOT_MARKER_ALPHA,
+                            zorder=3)
+
+        g = sns.FacetGrid(cluster_size_per_group_sorted_and_ranked,
+                          col=DATASET_NAME_FIELD_NAME_STR,
+                          col_wrap=n_cols,
+                          height=RESULT_AGGREGATION_FACET_GRID_HEIGHT,
+                          aspect=RESULT_AGGREGATION_FACET_GRID_ASPECT,
+                          sharex=share_x,
+                          sharey=share_y)
+
+        g.map_dataframe(plot_cluster_size_lineplot)
+
+        g.set_titles('{col_name}') 
+
+        if share_y:
+            y_axis_lim = return_axis_limits(cluster_size_per_group_sorted_and_ranked[RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR],
+                                            statistic_is_pct,
+                                            statistic_is_ratio,
+                                            is_log_scale=x_axis_log_scale)
+            g.set(ylim=y_axis_lim)
+
+        for ax, (dataset_name, facet_data) in zip(g.axes.flat, cluster_size_per_group_sorted_and_ranked.groupby(DATASET_NAME_FIELD_NAME_STR)):
+
+            self._set_axis_labels(ax,
+                                  CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_LABEL,
+                                  CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_LABEL,
+                                  CLUSTER_SIZE_LINEPLOT_X_AXIS_LABEL,
+                                  CLUSTER_SIZE_LINEPLOT_Y_AXIS_LABEL)
+
+            self._set_axis_ticks(ax,
+                                 CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_TICKS,
+                                 CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_TICKS,
+                                 CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_TICK_LABELS,
+                                 CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_TICK_LABELS,
+                                 None,
+                                 None)
+
+            if x_axis_log_scale:
+                self._set_log_scale_axes(ax,
+                                         Axes.Y_AXIS)
+            ax.grid(True,
+                    axis=CLUSTER_SIZE_LINEPLOT_GRID_LINE_AXIS.value,
+                    which='both')
+
+            if not share_x:
+                y_axis_lim = return_axis_limits(facet_data[RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR],
+                                                statistic_is_pct,
+                                                statistic_is_ratio,
+                                                is_log_scale=x_axis_log_scale)
+                ax.set_ylim(*y_axis_lim)
+
+            ax.spines['top'].set_visible(CLUSTER_SIZE_LINEPLOT_SHOW_TOP)
+            ax.spines['bottom'].set_visible(CLUSTER_SIZE_LINEPLOT_SHOW_BOTTOM)
+            ax.spines['left'].set_visible(CLUSTER_SIZE_LINEPLOT_SHOW_LEFT)
+            ax.spines['right'].set_visible(CLUSTER_SIZE_LINEPLOT_SHOW_RIGHT)
+
+        n_groups = cluster_size_per_group[DATASET_NAME_FIELD_NAME_STR].nunique()
+        self._remove_inner_plot_elements_grid(g,
+                                              n_groups,
+                                              n_cols,
+                                              CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_X_AXIS_LABELS,
+                                              CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_Y_AXIS_LABELS,
+                                              CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_X_AXIS_TICKS,
+                                              CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_Y_AXIS_TICKS,
+                                              CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_X_AXIS_TICK_LABELS,
+                                              CLUSTER_SIZE_LINEPLOT_REMOVE_INNER_Y_AXIS_TICK_LABELS)
+        
+        plt.tight_layout()
+        self._save_figure(CLUSTER_SIZE_LINEPLOT_NAME)
+        plt.show(g);
+
     @aggregated_omnibus_test_result_per_dataset_stacked_barplot_decorator
     def plot_aggregated_omnibus_test_result_per_dataset_stacked_barplot(self) -> None:
 
@@ -1871,6 +2180,71 @@ class AggregatedResults():
                                                                                                                 ignore_index=True)
 
         return score_is_correct_relationship_per_dataset_df
+
+    def _return_cluster_size_per_group_per_dataset_df(self) -> pd.DataFrame:
+
+        cluster_size_per_group_per_dataset_df_list = []
+        for file_path in self._path_to_result_tables:
+
+            with open(file_path, 'rb') as f:
+                sequence_cluster_per_group_df = pickle.load(f).sequence_cluster_per_group_df
+                
+            cluster_size_per_group_df = (sequence_cluster_per_group_df.groupby([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, CLUSTER_FIELD_NAME_STR])
+                                                                      .size()
+                                                                      .reset_index(name=RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR))
+
+            cluster_size_per_group_per_dataset_df_list.append(cluster_size_per_group_df)
+
+
+        cluster_size_per_group_per_dataset_df = pd.concat(cluster_size_per_group_per_dataset_df_list, 
+                                                          ignore_index=True)
+        cluster_size_per_group_per_dataset_df.sort_values(by=[DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR, CLUSTER_FIELD_NAME_STR], 
+                                                          inplace=True, 
+                                                          ignore_index=True)
+
+        return cluster_size_per_group_per_dataset_df
+    
+    def _return_cluster_size_per_group_per_dataset_sorted_and_ranked_df(self,
+                                                                        cluster_size_per_group: pd.DataFrame) -> pd.DataFrame:
+
+        cluster_size_per_group = cluster_size_per_group.sort_values(by=[DATASET_NAME_FIELD_NAME_STR,
+                                                                        GROUP_FIELD_NAME_STR,
+                                                                        RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR])
+        df_list = []
+        for (_, _), df in cluster_size_per_group.groupby([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR]):
+            df = df.sort_values(by=[CLUSTER_FIELD_NAME_STR],
+                                key=self._cluster_non_clustered_sorting_function)
+
+            rank = [inflection.ordinalize(i) for i in range(1 , df.shape[0] + 1)]
+
+            contains_non_clusterd = (df[CLUSTER_FIELD_NAME_STR] == -1).any()
+            if contains_non_clusterd: 
+                rank.insert(0, RESULT_AGGREGATION_CLUSTER_SIZE_NON_CLUSTERED_STR)
+                _ = rank.pop(-1)
+
+            df[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR] = rank
+            df_list.append(df)
+
+        cluster_size_per_group_sorted = pd.concat(df_list, 
+                                                  axis=0,
+                                                  ignore_index=True)
+        cluster_ranks = list(np.unique(cluster_size_per_group_sorted.loc[cluster_size_per_group_sorted[CLUSTER_FIELD_NAME_STR]!=-1, 
+                                                                         RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR]))
+        cluster_rank_sorted_levels = ([RESULT_AGGREGATION_CLUSTER_SIZE_NON_CLUSTERED_STR] + 
+                                      cluster_ranks)
+        cluster_size_per_group_sorted[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR] = pd.Categorical(cluster_size_per_group_sorted[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR], 
+                                                                                                                    categories=cluster_rank_sorted_levels, 
+                                                                                                                    ordered=True)
+        return cluster_size_per_group_sorted
+                                                
+    def _cluster_non_clustered_sorting_function(self,
+                                                series: pd.Series) -> pd.Series:
+        """Used for sorting clusters such that non-clustered data will be ranked before clusters and clusters sorted by cluster size keep existing sort order."""
+        if pd.api.types.is_numeric_dtype(series):
+            series = (series >= 0).astype(int) 
+            return series
+        else:
+            return series
     
     def _return_aggregated_omnibus_test_result_per_dataset_df(self) -> pd.DataFrame:
 
@@ -2108,7 +2482,10 @@ class AggregatedResults():
     
     def _sort_groups_by_metric(self,
                                data: pd.DataFrame,
-                               sort_by: List[SequenceStatisticsPlotFields | UniqueSequenceFrequencyStatisticsPlotFields | MeasureAssociationConfIntPlotFields],
+                               sort_by: List[SequenceStatisticsPlotFields 
+                                             | UniqueSequenceFrequencyStatisticsPlotFields 
+                                             | MeasureAssociationConfIntPlotFields
+                                             | ClusterSizePlotFields],
                                sort_metric: SortMetric,
                                sorting_entity: SortingEntity,
                                ascending: bool) -> pd.DataFrame:
@@ -3107,3 +3484,44 @@ class AggregatedResults():
         moa_streng_categories = ['-'.join(i.split('_')) + ' ' + effect_size_str for i in moa_labels_raw]
 
         return moa_streng_categories
+    
+    def _plot_cluster_size_scatter_legend(self,
+                                          g: FacetGrid,
+                                          marker_clustered: str,
+                                          marker_non_clustered: str,
+                                          label_clustered: str,
+                                          label_non_clustered: str,
+                                          edgecolor_clustered: str,
+                                          edgecolor_non_clustered: str,
+                                          markersize_clustered: int | float,
+                                          markersize_non_clustered: int | float) -> None:
+
+        label_clustered = label_clustered.lower()
+        label_non_clustered = label_non_clustered.lower()       
+
+        marker_clustered = Line2D([0], 
+                                    [0], 
+                                    linestyle='',
+                                    marker=marker_clustered, 
+                                    label=label_clustered,
+                                    markerfacecolor='none', 
+                                    markeredgecolor=edgecolor_clustered, 
+                                    markersize=markersize_clustered)
+        marker_non_clustered = Line2D([0], 
+                                        [0], 
+                                        linestyle='',
+                                        marker=marker_non_clustered, 
+                                        label=label_non_clustered,
+                                        markerfacecolor='none', 
+                                        markeredgecolor=edgecolor_non_clustered, 
+                                        markersize=markersize_non_clustered)
+        markers = [marker_clustered,
+                   marker_non_clustered]
+
+        g.figure.legend(handles=markers,
+                        loc='lower center',
+                        bbox_to_anchor=(.5, 1), 
+                        title=None,
+                        ncol=len(markers),
+                        handletextpad=0,
+                        frameon=False)
