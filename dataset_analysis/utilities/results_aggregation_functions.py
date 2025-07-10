@@ -56,6 +56,16 @@ class AggregatedResults():
                                                     False,
                                                     is_log_scale=x_axis_log_scale)
 
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE:
+
+                    data = avg_sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_RAW
+                    x_axis_log_scale = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_LOG_SCALE_X_RAW
+                    x_axis_lim = return_axis_limits(data[field.value],
+                                                    False,
+                                                    False,
+                                                    is_log_scale=x_axis_log_scale)
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
@@ -200,6 +210,17 @@ class AggregatedResults():
                     share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_PCT
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
                     y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE:
+
+                    data = sequence_summary_stats_per_group_per_dataset
+                    y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_RAW
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SUMMARY_SEQUENCE_STATISTICS_SHAREX_RAW
+                    share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_RAW
+                    y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_RAW
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
@@ -389,6 +410,16 @@ class AggregatedResults():
                     share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_PCT
                     x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_PCT
 
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+
+                    data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_RAW
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_RAW
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_RAW
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
@@ -607,6 +638,18 @@ class AggregatedResults():
                     share_y = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREY_PCT
                     x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_PCT
                     data_range_limits = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_DATA_RANGE_LIMITS_PCT
+
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
+                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE:
+
+                    data = sequence_statistics_per_group_per_dataset
+                    x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_X_TICKS_RAW
+                    statistic_is_pct = False 
+                    statistic_is_ratio = False
+                    share_x = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREX_RAW
+                    share_y = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_SHAREY_RAW
+                    x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_RAW
+                    data_range_limits = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_DATA_RANGE_LIMITS_RAW
 
                 case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
                      SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
