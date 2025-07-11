@@ -7,7 +7,6 @@ import random
 from collections import defaultdict
 from itertools import chain, combinations, combinations_with_replacement, product
 import pickle
-import warnings
 import operator
 from abc import ABC
 from bs4 import BeautifulSoup
@@ -51,7 +50,6 @@ from scipy.stats.contingency import expected_freq
 from scipy.spatial.distance import squareform
 from scipy.stats import bootstrap
 import pingouin as pg
-from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
 # scaler
 from sklearn.preprocessing import StandardScaler, RobustScaler, MinMaxScaler
@@ -82,6 +80,11 @@ from statsmodels.graphics.mosaicplot import mosaic
 import matplotlib.ticker as mticker
 import matplotlib.colors as mcolors
 from matplotlib.lines import Line2D
+
+# warnings 
+import warnings
+from scipy.stats import DegenerateDataWarning
+from statsmodels.tools.sm_exceptions import ConvergenceWarning
 
 # libraries for clustering
 from sklearn.base import BaseEstimator
