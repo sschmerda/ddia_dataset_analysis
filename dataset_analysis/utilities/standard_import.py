@@ -27,6 +27,7 @@ from typing import Callable
 from typing import Iterable
 from typing import Dict
 from typing import Tuple
+from typing import Generator
 from numpy.typing import ArrayLike
 from numpy.typing import NDArray
 from typing import DefaultDict
