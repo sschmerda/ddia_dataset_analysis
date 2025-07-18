@@ -102,3 +102,20 @@ class OmnibusTestResults:
     test_result_df: pd.DataFrame 
     measure_of_association_results: list[MeasureAssociationContingencyResults] | list[MeasureAssociationAOVResults]
     measure_of_association_fail_dict: list[DefaultDict[str, int]]
+
+@dataclass
+class SequenceStatisticConfIntResult:
+    statistic_value: float
+    conf_int_lower_bound: float
+    conf_int_upper_bound: float
+    bootstrap_method: str
+    conf_int_level: float
+    n_bootstrap_resamples: int
+    bootstrap_standard_error: np.ndarray  
+
+@dataclass
+class SequenceStatisticConfIntDataControlVars:
+    sample_size: int
+    n_unique_values: int
+    variance: float
+    standard_deviation: float

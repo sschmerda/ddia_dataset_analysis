@@ -53,6 +53,8 @@ class ResultTables():
         A dataframe containing group counts for each preprocessing step
     seq_stats_sequence_count_per_group : pd.DataFrame
         A dataframe containing sequence counts and unique sequence counts per group
+    seq_stat_conf_int_df : pd.DataFrame
+        A dataframe containing confidence intervals for sequence statistics per group
     unique_learning_activity_sequence_stats_per_group : pd.DataFrame
         A dataframe containing statistics for unique sequences per group 
     learning_activity_sequence_stats_per_group : pd.DataFrame
@@ -112,6 +114,7 @@ class ResultTables():
                  seq_filter_sequence_count_per_group: pd.DataFrame,
                  seq_filter_group_count: pd.DataFrame,
                  seq_stats_sequence_count_per_group: pd.DataFrame,
+                 seq_stat_conf_int_df: pd.DataFrame,
                  unique_learning_activity_sequence_stats_per_group: pd.DataFrame,
                  learning_activity_sequence_stats_per_group: pd.DataFrame,
                  best_cluster_results_per_group_df: pd.DataFrame,
@@ -140,6 +143,7 @@ class ResultTables():
         self.seq_filter_sequence_count_per_group = seq_filter_sequence_count_per_group
         self.seq_filter_group_count = seq_filter_group_count
         self.seq_stats_sequence_count_per_group = seq_stats_sequence_count_per_group
+        self.seq_stat_conf_int_df = seq_stat_conf_int_df
         self.unique_learning_activity_sequence_stats_per_group = unique_learning_activity_sequence_stats_per_group
         self.learning_activity_sequence_stats_per_group = learning_activity_sequence_stats_per_group
         self.best_cluster_results_per_group_df = best_cluster_results_per_group_df
@@ -262,6 +266,20 @@ class ResultTables():
 
         else:
             self._seq_stats_sequence_count_per_group = None 
+    
+    @property
+    def seq_stat_conf_int_df(self):
+        return self._seq_stat_conf_int_df
+    
+    @seq_stat_conf_int_df.setter
+    def seq_stat_conf_int_df(self, 
+                             seq_stat_conf_int_df: pd.DataFrame):
+
+        if isinstance(seq_stat_conf_int_df, pd.DataFrame):
+            self._seq_stat_conf_int_df = seq_stat_conf_int_df.copy()
+
+        else:
+            self._seq_stat_conf_int_df = None 
 
     @property
     def unique_learning_activity_sequence_stats_per_group(self):

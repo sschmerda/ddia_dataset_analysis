@@ -938,13 +938,45 @@ RESULT_TABLES_FALSE_STYLE = 'background-color: red; color: white; text-align:cen
 RESULT_TABLES_DASH_STYLE = 'color: white; text-align:center'
 
 ###################################################################################################
+# confidence interval calculation for sequence statistics and average sequence distances
+###################################################################################################
+
+# result df fields
+CONFIDENCE_INTERVAL_SEQUENCE_STATISTIC_FIELD_NAME_STR = 'sequence_statistic'
+CONFIDENCE_INTERVAL_ESTIMATOR_FIELD_NAME_STR = 'estimator'
+CONFIDENCE_INTERVAL_N_BOOTSTRAP_RESAMPLES_FIELD_NAME_STR = 'n_bootstrap_samples'
+CONFIDENCE_INTERVAL_BOOTSTRAP_METHOD_FIELD_NAME_STR = 'bootstrap_method'
+CONFIDENCE_INTERVAL_CONFIDENCE_LEVEL_FIELD_NAME_STR = 'confidence_level'
+CONFIDENCE_INTERVAL_STATISTIC_VALUE_FIELD_NAME_STR = 'statistic_value'
+CONFIDENCE_INTERVAL_CONF_INT_LOWER_BOUND_FIELD_NAME_STR = 'conf_int_lower_bound'
+CONFIDENCE_INTERVAL_CONF_INT_UPPER_BOUND_FIELD_NAME_STR = 'conf_int_upper_bound'
+CONFIDENCE_INTERVAL_SAMPLE_SIZE_FIELD_NAME_STR = 'sample_size'
+CONFIDENCE_INTERVAL_N_UNIQUE_VALUES_FIELD_NAME_STR = 'n_unique_values'
+CONFIDENCE_INTERVAL_VARIANCE_FIELD_NAME_STR = 'variance'
+CONFIDENCE_INTERVAL_STANDARD_DEVIATION_FIELD_NAME_STR = 'standard_deviation'
+CONFIDENCE_INTERVAL_BOOTSTRAP_STANDARD_ERROR_FIELD_NAME_STR = 'bootstrap_standard_error'
+CONFIDENCE_INTERVAL_RESULT_FIELD_NAME_STR = 'conf_int_result_object'
+
+# error messages
+CONFIDENCE_INTERVAL_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = 'Not a valid member of enum: '
+CONFIDENCE_INTERVAL_ERROR_NO_RESULTS_NAME_STR = 'sequence_statistics_conf_int_df is None.\nCalculate confidence intervals first!'
+
+CONFIDENCE_INTERVAL_ESTIMATOR_MEAN_STR = 'mean'
+CONFIDENCE_INTERVAL_ESTIMATOR_MEDIAN_STR = 'median'
+CONFIDENCE_INTERVAL_AVERAGING_METHOD_MEAN_STR = 'mean'
+CONFIDENCE_INTERVAL_AVERAGING_METHOD_MEDIAN_STR = 'median'
+CONFIDENCE_INTERVAL_NO_SELF_DISTANCE_FILTER_STR = 'no self distances filtered out'
+CONFIDENCE_INTERVAL_MAIN_DIAGONAL_SELF_DISTANCE_FILTER_STR = 'main diagonal filtered out'
+CONFIDENCE_INTERVAL_ALL_SELF_DISTANCE_FILTER_STR = 'all self-distances filtered out'
+
+###################################################################################################
 # result aggregation
 ###################################################################################################
 
 # error messages
 RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR = 'Not a valid member of enum: '
 
-# avg_sequence_statistics_per_group_per_dataset averaging method
+# avg_sequence_statistics_per_group_per_dataset averaging method 
 AVG_SEQUENCE_STATISTICS_AVERAGING_METHOD_MEAN = 'mean'
 AVG_SEQUENCE_STATISTICS_AVERAGING_METHOD_MEDIAN = 'median'
 
