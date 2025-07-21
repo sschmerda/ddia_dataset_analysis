@@ -3054,35 +3054,60 @@ class AggregatedResults():
                                                                         RESULT_AGGREGATION_FIG_SIZE_DPI,
                                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_HEIGHT_IN_LINEWIDTH)
 
-        field_data = sequence_statistics_per_group_per_dataset[field.value].values
-        x_min = min(field_data)
-        x_max = max(field_data)
-        first_quartile = np.quantile(field_data, 0.25)
-        third_quartile = np.quantile(field_data, 0.75)
+        # iqr/range box
+        match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOX_KIND:
+            case BoxKind.IQR:
+                iqr_box_data = self._return_iqr_box_data(sequence_statistics_per_group_per_dataset,
+                                                         field,
+                                                         box_height_iqr,
+                                                         shift_value)
+                self._plot_iqr_range(ax,
+                                     iqr_box_data,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGE_LINEWIDTH,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGECOLOR,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_FACECOLOR,
+                                     zorder+0.6)
 
-        iqr_val = third_quartile - first_quartile
-        range_val = x_max - x_min
-        y_start_iqr = shift_value - box_height_iqr / 2
-        y_start_range = shift_value - box_height_range / 2
+            case BoxKind.RANGE:
+                range_box_data = self._return_range_box_data(sequence_statistics_per_group_per_dataset,
+                                                             field,
+                                                             box_height_range,
+                                                             shift_value)
+                self._plot_iqr_range(ax,
+                                     range_box_data,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_EDGE_LINEWIDTH,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_EDGECOLOR,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_FACECOLOR,
+                                     zorder+0.5)
 
-        # iqr
-        rectangle_iqr = Rectangle((first_quartile, y_start_iqr),
-                                  iqr_val,
-                                  box_height_iqr,
-                                  linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGE_LINEWIDTH,
-                                  edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGECOLOR,
-                                  facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_FACECOLOR,
-                                  zorder=zorder+0.6)
-        ax.add_patch(rectangle_iqr)
-        # range 
-        rectangle_range = Rectangle((x_min, y_start_range),
-                                    range_val,
-                                    box_height_range,
-                                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_EDGE_LINEWIDTH,
-                                    edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_EDGECOLOR,
-                                    facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_FACECOLOR,
-                                    zorder=zorder+0.5)
-        ax.add_patch(rectangle_range)
+            case BoxKind.BOTH:
+                iqr_box_data = self._return_iqr_box_data(sequence_statistics_per_group_per_dataset,
+                                                         field,
+                                                         box_height_iqr,
+                                                         shift_value)
+                range_box_data = self._return_range_box_data(sequence_statistics_per_group_per_dataset,
+                                                           field,
+                                                           box_height_range,
+                                                           shift_value)
+                self._plot_iqr_range(ax,
+                                     iqr_box_data,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGE_LINEWIDTH,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGECOLOR,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_FACECOLOR,
+                                     zorder+0.6)
+
+                self._plot_iqr_range(ax,
+                                     range_box_data,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_EDGE_LINEWIDTH,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_EDGECOLOR,
+                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_BOX_FACECOLOR,
+                                     zorder+0.5)
+        
+            case BoxKind.NONE:
+                pass
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{BoxKind.__name__}')
 
         # confidence interval
         match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_KIND:
@@ -3137,8 +3162,45 @@ class AggregatedResults():
                                          dual_conf_int_box_data,
                                          zorder)
 
+            case ConfidenceIntervalKind.NONE:
+                pass
+
             case _:
                 raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfidenceIntervalKind.__name__}')
+
+    def _return_iqr_box_data(self,
+                             sequence_statistics_per_group_per_dataset: pd.DataFrame,
+                             field: SequenceStatisticsPlotFields,
+                             box_height_iqr: float,
+                             shift_value: int | float) -> IQRRangeBoxData:
+
+        field_data = sequence_statistics_per_group_per_dataset[field.value].values
+        first_quartile = np.quantile(field_data, 0.25)
+        third_quartile = np.quantile(field_data, 0.75)
+        y_start_iqr = shift_value - box_height_iqr / 2
+        iqr_val = third_quartile - first_quartile
+
+        return IQRRangeBoxData(first_quartile,
+                               y_start_iqr,
+                               box_height_iqr,
+                               iqr_val)
+
+    def _return_range_box_data(self,
+                               sequence_statistics_per_group_per_dataset: pd.DataFrame,
+                               field: SequenceStatisticsPlotFields,
+                               box_height_range: float,
+                               shift_value: int | float) -> IQRRangeBoxData:
+
+        field_data = sequence_statistics_per_group_per_dataset[field.value].values
+        x_min = min(field_data)
+        x_max = max(field_data)
+        y_start_range = shift_value - box_height_range / 2
+        range_val = x_max - x_min
+
+        return IQRRangeBoxData(x_min,
+                               y_start_range,
+                               box_height_range,
+                               range_val)
 
     def _return_single_conf_int_box_data(self,
                                          seq_stat_conf_int_res: SequenceStatisticConfIntResult,
@@ -3188,6 +3250,23 @@ class AggregatedResults():
                                   statistic_upper_y_value,
                                   statistic_lower_x_value,
                                   statistic_lower_y_value)
+
+    def _plot_iqr_range(self,
+                        ax: matplotlib.axes.Axes,
+                        box_data: IQRRangeBoxData,
+                        linewidth: int | float,
+                        edgecolor: str,
+                        facecolor: str,
+                        zorder: int | float) -> None:
+
+        rectangle = Rectangle((box_data.x_start, box_data.y_start),
+                              box_data.box_width,
+                              box_data.box_height,
+                              linewidth=linewidth,
+                              edgecolor=edgecolor,
+                              facecolor=facecolor,
+                              zorder=zorder)
+        ax.add_patch(rectangle)
 
     def _plot_single_conf_int(self,
                               ax: matplotlib.axes.Axes,

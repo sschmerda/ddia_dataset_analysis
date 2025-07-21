@@ -121,6 +121,13 @@ class SequenceStatisticConfIntDataControlVars:
     standard_deviation: float
 
 @dataclass
+class IQRRangeBoxData:
+    x_start: int | float
+    y_start: int | float
+    box_height: int | float
+    box_width: int | float
+
+@dataclass
 class SingleConfIntBoxData:
     ci_x_start: int | float
     ci_y_start: int | float
