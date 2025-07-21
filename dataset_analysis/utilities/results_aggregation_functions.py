@@ -1,4 +1,6 @@
 from .configs.result_aggregation_config import *
+from .configs.conf_int_config import SequenceType, ConfIntResultFields, ConfIntEstimator
+from .data_classes import *
 from .plotting_functions import *
 from .html_style_functions import *
 
@@ -56,8 +58,8 @@ class AggregatedResults():
                                                     False,
                                                     is_log_scale=x_axis_log_scale)
 
-                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = avg_sequence_statistics_per_group_per_dataset
                     x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_RAW
@@ -67,8 +69,8 @@ class AggregatedResults():
                                                     False,
                                                     is_log_scale=x_axis_log_scale)
 
-                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = avg_sequence_statistics_per_group_per_dataset
                     x_axis_ticks = AVG_SEQUENCE_STATISTICS_PER_GROUP_PER_DATASET_X_TICKS_PCT_RATIO
@@ -211,8 +213,8 @@ class AggregatedResults():
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_PCT
                     y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_PCT
 
-                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = sequence_summary_stats_per_group_per_dataset
                     y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_RAW
@@ -222,8 +224,8 @@ class AggregatedResults():
                     share_y = SUMMARY_SEQUENCE_STATISTICS_SHAREY_RAW
                     y_axis_log_scale = SUMMARY_SEQUENCE_STATISTICS_LOG_SCALE_Y_RAW
 
-                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = sequence_summary_stats_per_group_per_dataset
                     y_axis_ticks = SUMMARY_SEQUENCE_STATISTICS_Y_TICKS_PCT_RATIO
@@ -410,8 +412,8 @@ class AggregatedResults():
                     share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_PCT
                     x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_PCT
 
-                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = sequence_statistics_per_group_per_dataset
                     x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_RAW
@@ -421,8 +423,8 @@ class AggregatedResults():
                     share_y = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_SHAREY_RAW
                     x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_LOG_SCALE_X_RAW
 
-                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = sequence_statistics_per_group_per_dataset
                     x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_BOXPLOT_X_TICKS_PCT_RATIO
@@ -639,8 +641,8 @@ class AggregatedResults():
                     x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_PCT
                     data_range_limits = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_DATA_RANGE_LIMITS_PCT
 
-                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = sequence_statistics_per_group_per_dataset
                     x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_X_TICKS_RAW
@@ -651,8 +653,8 @@ class AggregatedResults():
                     x_axis_log_scale = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_LOG_SCALE_X_RAW
                     data_range_limits = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_DATA_RANGE_LIMITS_RAW
 
-                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
-                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+                case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                     SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                     data = sequence_statistics_per_group_per_dataset
                     x_axis_ticks = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_X_TICKS_PCT_RATIO
@@ -771,19 +773,12 @@ class AggregatedResults():
                     match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_RANGE_CONF_INT_KIND:
                         case RangeIqrConfIntKind.BOX:
                             self._kde_draw_iqr_range_conf_int_box(ax,
+                                                                  dataset_name,
+                                                                  group,
                                                                   df,
                                                                   field,
-                                                                  data_range_limits,
                                                                   shift_value,
                                                                   zorder)
-
-                        case RangeIqrConfIntKind.LINE:
-                            self._kde_draw_iqr_range_conf_int_line(ax,
-                                                                   df,
-                                                                   field,
-                                                                   data_range_limits,
-                                                                   shift_value,
-                                                                   zorder)
                         
                         case RangeIqrConfIntKind.NONE:
                             pass
@@ -2044,10 +2039,42 @@ class AggregatedResults():
             
             learning_activity_sequence_stats_per_group_df_list.append(learning_activity_sequence_stats_per_group)
 
-        summary_stats_per_group_per_dataset = pd.concat(learning_activity_sequence_stats_per_group_df_list)
-        summary_stats_per_group_per_dataset.sort_values([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR], inplace=True)
+        learning_activity_sequence_stats_per_group_per_dataset = pd.concat(learning_activity_sequence_stats_per_group_df_list)
+        learning_activity_sequence_stats_per_group_per_dataset.sort_values([DATASET_NAME_FIELD_NAME_STR, GROUP_FIELD_NAME_STR], inplace=True)
 
-        return summary_stats_per_group_per_dataset
+        return learning_activity_sequence_stats_per_group_per_dataset
+    
+    def _return_sequence_statistics_confidence_interval_per_group_per_dataset_df(self,
+                                                                                 use_unique_sequences: bool) -> pd.DataFrame:
+
+        sequence_statistics_conf_int_df_list = []
+        for file_path in self._path_to_result_tables:
+
+            with open(file_path, 'rb') as f:
+                sequence_statistics_conf_int_df = pickle.load(f).seq_stat_conf_int_df
+            
+            sequence_statistics_conf_int_df_list.append(sequence_statistics_conf_int_df)
+
+        sequence_statistics_conf_int_per_group_per_dataset = pd.concat(sequence_statistics_conf_int_df_list)
+
+        if use_unique_sequences:
+            sequence_type = SequenceType.UNIQUE_SEQUENCES.value
+        else:
+            sequence_type = SequenceType.ALL_SEQUENCES.value
+        
+        seq_type_filter = sequence_statistics_conf_int_per_group_per_dataset[ConfIntResultFields.SEQUENCE_TYPE.value] == sequence_type
+        sequence_statistics_conf_int_per_group_per_dataset = sequence_statistics_conf_int_per_group_per_dataset.loc[seq_type_filter, :]
+
+
+        sort_list = [ConfIntResultFields.DATASET_NAME.value,
+                     ConfIntResultFields.SEQUENCE_TYPE.value,
+                     ConfIntResultFields.SEQUENCE_STATISTIC.value,
+                     ConfIntResultFields.ESTIMATOR.value,
+                     ConfIntResultFields.GROUP.value]
+        sequence_statistics_conf_int_per_group_per_dataset = (sequence_statistics_conf_int_per_group_per_dataset.sort_values(by=sort_list) 
+                                                                                                                .reset_index(drop=True))
+
+        return sequence_statistics_conf_int_per_group_per_dataset
 
     def _return_sequence_statistics_distribution_non_unique_unique_split_per_group_per_dataset_df(self,
                                                                                                   fields_to_plot: list[str]) -> pd.DataFrame:
@@ -2982,8 +3009,8 @@ class AggregatedResults():
                                        data, 
                                        data_upper_reflection])
 
-            case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE |\
-                    SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE:
+            case SequenceStatisticsPlotFields.MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES |\
+                    SequenceStatisticsPlotFields.MEDIAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQUENCES:
 
                 data_lower_reflection = -data
                 data_upper_reflection = 2 - data
@@ -3009,78 +3036,17 @@ class AggregatedResults():
         line_width =  y_1 - y_0
 
         return line_width
-    
-    def _kde_get_x_min_max_cap_adjusted_in_data_coordinates(self,
-                                                            ax: matplotlib.axes.Axes, 
-                                                            dpi: int, 
-                                                            linewidth_in_points: int,
-                                                            x_min: int | float,
-                                                            x_max: int | float) -> Tuple[float, float]:
-        """Adjust the x_min and x_max values to account for the line cap size."""
-
-        linewidth_in_inches = linewidth_in_points / 72
-        linewidth_in_pixels = linewidth_in_inches * dpi
-
-        line_cap_oversize_in_pixels = linewidth_in_pixels / 2
-
-        x_min_pixels = ax.transData.transform((x_min, 0))[0]
-        x_max_pixels = ax.transData.transform((x_max, 0))[0]
-        
-        x_min_pixels_adjusted = x_min_pixels + line_cap_oversize_in_pixels
-        x_max_pixels_adjusted = x_max_pixels - line_cap_oversize_in_pixels
-
-        x_min_adjusted = ax.transData.inverted().transform((x_min_pixels_adjusted, 0))[0]
-        x_max_adjusted = ax.transData.inverted().transform((x_max_pixels_adjusted, 0))[0]
-
-        return x_min_adjusted, x_max_adjusted
-
-    def _kde_get_x_min_max_cap_adjusted_in_data_coordinates_if_threshold_is_exceeded(self,
-                                                                                     ax: matplotlib.axes.Axes, 
-                                                                                     dpi: int, 
-                                                                                     linewidth_in_points: int,
-                                                                                     x_min: int | float,
-                                                                                     x_min_threshold: int | float,
-                                                                                     x_max: int | float,
-                                                                                     x_max_threshold) -> Tuple[float, float]:
-        """Adjusts the x_min and x_max values to account for the line cap oversize if the oversize is larger than the x_min and x_max thresholds."""
-
-        linewidth_in_inches = linewidth_in_points / 72
-        linewidth_in_pixels = linewidth_in_inches * dpi
-
-        line_cap_oversize_in_pixels = linewidth_in_pixels / 2
-
-        x_min_pixels = ax.transData.transform((x_min, 0))[0]
-        x_max_pixels = ax.transData.transform((x_max, 0))[0]
-        
-        x_min_pixels_plus_cap = x_min_pixels - line_cap_oversize_in_pixels
-        x_max_pixels_plus_cap = x_max_pixels + line_cap_oversize_in_pixels
-
-        x_min_pixels_adjusted = x_min_pixels + line_cap_oversize_in_pixels
-        x_max_pixels_adjusted = x_max_pixels - line_cap_oversize_in_pixels
-
-        x_min_plus_cap = ax.transData.inverted().transform((x_min_pixels_plus_cap, 0))[0]
-        x_max_plus_cap = ax.transData.inverted().transform((x_max_pixels_plus_cap, 0))[0]
-
-        x_min_adjusted = ax.transData.inverted().transform((x_min_pixels_adjusted, 0))[0]
-        x_max_adjusted = ax.transData.inverted().transform((x_max_pixels_adjusted, 0))[0]
-
-        if x_min_plus_cap < x_min_threshold:
-            x_min = x_min_adjusted
-
-        if x_max_plus_cap > x_max_threshold:
-            x_max = x_max_adjusted
-
-        return x_min, x_max
 
     def _kde_draw_iqr_range_conf_int_box(self,
                                          ax: matplotlib.axes.Axes,
+                                         dataset_name: str,
+                                         group: int,
                                          sequence_statistics_per_group_per_dataset: pd.DataFrame,
                                          field: SequenceStatisticsPlotFields,
-                                         data_range_limits: Tuple[int | float],
                                          shift_value: int | float,
                                          zorder: int | float) -> None:
 
-        # iqr and range plot 
+        # iqr and range plot data 
         box_height_iqr = self._kde_get_line_width_in_data_coordinates(ax,
                                                                       RESULT_AGGREGATION_FIG_SIZE_DPI,
                                                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_HEIGHT_IN_LINEWIDTH)
@@ -3098,27 +3064,6 @@ class AggregatedResults():
         range_val = x_max - x_min
         y_start_iqr = shift_value - box_height_iqr / 2
         y_start_range = shift_value - box_height_range / 2
-
-        # ci mean and median plot
-        ci_lower_mean, ci_upper_mean = self._calculate_conf_int_per_sequence_statistic(sequence_statistics_per_group_per_dataset,
-                                                                                       field,
-                                                                                       ConfidenceIntervalType.MEAN,
-                                                                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONFIDENCE_INTERVAL_LEVEL,
-                                                                                       data_range_limits)
-
-        ci_lower_median, ci_upper_median = self._calculate_conf_int_per_sequence_statistic(sequence_statistics_per_group_per_dataset,
-                                                                                           field,
-                                                                                           ConfidenceIntervalType.MEDIAN,
-                                                                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONFIDENCE_INTERVAL_LEVEL,
-                                                                                           data_range_limits)
-        conf_int_center = box_height_iqr / 4
-        mean_value = np.mean(field_data)
-        median_value = np.median(field_data)
-        ci_mean_y_start = shift_value
-        ci_median_y_start = shift_value - box_height_iqr / 2
-        ci_box_height = box_height_iqr / 2
-        ci_mean_width = ci_upper_mean - ci_lower_mean
-        ci_median_width = ci_upper_median - ci_lower_median
 
         # iqr
         rectangle_iqr = Rectangle((first_quartile, y_start_iqr),
@@ -3140,252 +3085,208 @@ class AggregatedResults():
         ax.add_patch(rectangle_range)
 
         # confidence interval
-        # mean
-        rectangle_conf_int_mean = Rectangle((ci_lower_mean, ci_mean_y_start),
-                                            ci_mean_width,
-                                            ci_box_height,
-                                            linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_EDGE_LINEWIDTH,
-                                            edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_EDGECOLOR,
-                                            facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_FACECOLOR,
-                                            zorder=zorder+0.7)
-        ax.add_patch(rectangle_conf_int_mean)
-        sns.scatterplot(x=[mean_value],
-                        y=[shift_value+conf_int_center],
-                        legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_BOX_SCATTER_EDGECOLOR,
-                        zorder=zorder+0.9)
-        # median
-        rectangle_conf_int_median = Rectangle((ci_lower_median, ci_median_y_start),
-                                              ci_median_width,
-                                              ci_box_height,
-                                              linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_EDGE_LINEWIDTH,
-                                              edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_EDGECOLOR,
-                                              facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_FACECOLOR,
-                                              zorder=zorder+0.7)
-        ax.add_patch(rectangle_conf_int_median)
-        sns.scatterplot(x=[median_value],
-                        y=[shift_value-conf_int_center],
-                        legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_BOX_SCATTER_EDGECOLOR,
-                        zorder=zorder+0.9)
+        match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_KIND:
+            case ConfidenceIntervalKind.MEAN:
+                seq_stat_conf_int_res = self._calculate_conf_int_per_sequence_statistic(dataset_name,
+                                                                                        SequenceType.ALL_SEQUENCES,
+                                                                                        field,
+                                                                                        ConfIntEstimator.MEAN,
+                                                                                        group)
 
-    def _kde_draw_iqr_range_conf_int_line(self,
-                                          ax: matplotlib.axes.Axes,
-                                          sequence_statistics_per_group_per_dataset: pd.DataFrame,
-                                          field: SequenceStatisticsPlotFields,
-                                          data_range_limits: Tuple[int | float],
-                                          shift_value: int | float,
-                                          zorder: int | float) -> None:
+                single_conf_int_box_data = self._return_single_conf_int_box_data(seq_stat_conf_int_res,
+                                                                                 box_height_iqr,
+                                                                                 shift_value)
+                self._plot_single_conf_int(ax,
+                                           single_conf_int_box_data,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_UPPER_BOX_FACECOLOR,
+                                           zorder)
 
+            case ConfidenceIntervalKind.MEDIAN:
+                seq_stat_conf_int_res = self._calculate_conf_int_per_sequence_statistic(dataset_name,
+                                                                                        SequenceType.ALL_SEQUENCES,
+                                                                                        field,
+                                                                                        ConfIntEstimator.MEDIAN,
+                                                                                        group)
 
-        field_data = sequence_statistics_per_group_per_dataset[field.value].values
-        x_min = min(field_data)
-        x_max = max(field_data)
-        first_quartile = np.quantile(field_data, 0.25)
-        third_quartile = np.quantile(field_data, 0.75)
+                single_conf_int_box_data = self._return_single_conf_int_box_data(seq_stat_conf_int_res,
+                                                                                 box_height_iqr,
+                                                                                 shift_value)
+                self._plot_single_conf_int(ax,
+                                           single_conf_int_box_data,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_LOWER_BOX_FACECOLOR,
+                                           zorder)
 
-        # ci mean and median plot
-        ci_lower_mean, ci_upper_mean = self._calculate_conf_int_per_sequence_statistic(sequence_statistics_per_group_per_dataset,
-                                                                                       field,
-                                                                                       ConfidenceIntervalType.MEAN,
-                                                                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONFIDENCE_INTERVAL_LEVEL,
-                                                                                       data_range_limits)
+            case ConfidenceIntervalKind.BOTH:
+                upper_seq_stat_conf_int_res = self._calculate_conf_int_per_sequence_statistic(dataset_name,
+                                                                                              SequenceType.ALL_SEQUENCES,
+                                                                                              field,
+                                                                                              ConfIntEstimator.MEAN,
+                                                                                              group)
 
-        ci_lower_median, ci_upper_median = self._calculate_conf_int_per_sequence_statistic(sequence_statistics_per_group_per_dataset,
-                                                                                           field,
-                                                                                           ConfidenceIntervalType.MEDIAN,
-                                                                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONFIDENCE_INTERVAL_LEVEL,
-                                                                                           data_range_limits)
-        box_height_iqr = self._kde_get_line_width_in_data_coordinates(ax,
-                                                                      RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_OUTER_LINEPLOT_LINEWIDTH)
-        conf_int_center = box_height_iqr / 4
-        mean_value = np.mean(field_data)
-        median_value = np.median(field_data)
+                lower_seq_stat_conf_int_res = self._calculate_conf_int_per_sequence_statistic(dataset_name,
+                                                                                              SequenceType.ALL_SEQUENCES,
+                                                                                              field,
+                                                                                              ConfIntEstimator.MEDIAN,
+                                                                                              group)
 
-        match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_RANGE_CONF_INT_LINE_CAP_ADJUST:
-            case LineCapSizeAdjustment.NONE:
-                pass
-
-            case LineCapSizeAdjustment.ALL:
-                x_min, x_max = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates(ax,
-                                                                                        RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                        SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                        x_min,
-                                                                                        x_max)
-                first_quartile, third_quartile = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates(ax,
-                                                                                                          RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                          first_quartile,
-                                                                                                          third_quartile)
-
-                ci_lower_mean, ci_upper_mean = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates(ax,
-                                                                                                        RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                        SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                        ci_lower_mean,
-                                                                                                        ci_upper_mean)
-                ci_lower_median, ci_upper_median = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates(ax,
-                                                                                                            RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                            SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                            ci_lower_median,
-                                                                                                            ci_upper_median)
-            case LineCapSizeAdjustment.THRESHOLD:
-                x_min, x_max = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates_if_threshold_is_exceeded(ax,
-                                                                                                                 RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                                 x_min,
-                                                                                                                 data_range_limits[0],
-                                                                                                                 x_max,
-                                                                                                                 data_range_limits[1])
-                first_quartile, third_quartile = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates_if_threshold_is_exceeded(ax,
-                                                                                                                                   RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                                                   first_quartile,
-                                                                                                                                   data_range_limits[0],
-                                                                                                                                   third_quartile,
-                                                                                                                                   data_range_limits[1])
-
-                ci_lower_mean, ci_upper_mean = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates_if_threshold_is_exceeded(ax,
-                                                                                                                                 RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                                                 ci_lower_mean,
-                                                                                                                                 data_range_limits[0],
-                                                                                                                                 ci_upper_mean,
-                                                                                                                                 data_range_limits[1])
-                ci_lower_median, ci_upper_median = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates_if_threshold_is_exceeded(ax,
-                                                                                                                                     RESULT_AGGREGATION_FIG_SIZE_DPI,
-                                                                                                                                     SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_OUTER_LINEPLOT_LINEWIDTH,
-                                                                                                                                     ci_lower_median,
-                                                                                                                                     data_range_limits[0],
-                                                                                                                                     ci_upper_median,
-                                                                                                                                     data_range_limits[1])
+                dual_conf_int_box_data = self._return_dual_conf_int_box_data(upper_seq_stat_conf_int_res,
+                                                                             lower_seq_stat_conf_int_res,
+                                                                             box_height_iqr,
+                                                                             shift_value)
+                self._plot_dual_conf_int(ax,
+                                         dual_conf_int_box_data,
+                                         zorder)
 
             case _:
-                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{LineCapSizeAdjustment.__name__}')
-        
-        # data range and iqr
-        # iqr
-        sns.lineplot(x=[first_quartile, third_quartile],
-                     y=[shift_value, shift_value],
-                     legend=False,
-                     color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_OUTER_LINEPLOT_COLOR,
-                     linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_OUTER_LINEPLOT_LINEWIDTH,
-                     zorder=zorder+0.6)
-        sns.lineplot(x=[first_quartile, third_quartile],
-                     y=[shift_value, shift_value],
-                     legend=False,
-                     color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_INNER_LINEPLOT_COLOR,
-                     linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_INNER_LINEPLOT_LINEWIDTH,
-                     zorder=zorder+0.6)
-        
-        # range
-        sns.lineplot(x=[x_min, x_max],
-                    y=[shift_value, shift_value],
-                    legend=False,
-                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_OUTER_LINEPLOT_COLOR,
-                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_OUTER_LINEPLOT_LINEWIDTH,
-                    zorder=zorder+0.5)
-        sns.lineplot(x=[x_min, x_max],
-                    y=[shift_value, shift_value],
-                    legend=False,
-                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_INNER_LINEPLOT_COLOR,
-                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_RANGE_INNER_LINEPLOT_LINEWIDTH,
-                    zorder=zorder+0.5)
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfidenceIntervalKind.__name__}')
+
+    def _return_single_conf_int_box_data(self,
+                                         seq_stat_conf_int_res: SequenceStatisticConfIntResult,
+                                         box_height_iqr: float,
+                                         shift_value: int | float) -> SingleConfIntBoxData:
+        ci_x_start = seq_stat_conf_int_res.conf_int_lower_bound
+        ci_y_start = shift_value - box_height_iqr / 2
+        ci_box_height = box_height_iqr
+        ci_width = seq_stat_conf_int_res.conf_int_upper_bound - seq_stat_conf_int_res.conf_int_lower_bound
+        statistic_x_value = seq_stat_conf_int_res.statistic_value
+        statistic_y_value = ci_y_start + ci_box_height / 2
+
+        return SingleConfIntBoxData(ci_x_start,
+                                    ci_y_start,
+                                    ci_box_height,
+                                    ci_width,
+                                    statistic_x_value,
+                                    statistic_y_value)
+
+    def _return_dual_conf_int_box_data(self,
+                                       upper_seq_stat_conf_int_res: SequenceStatisticConfIntResult,
+                                       lower_seq_stat_conf_int_res: SequenceStatisticConfIntResult,
+                                       box_height_iqr: float,
+                                       shift_value: int | float) -> DualConfIntBoxData:
+
+        ci_upper_x_start = upper_seq_stat_conf_int_res.conf_int_lower_bound
+        ci_upper_y_start = shift_value 
+        ci_lower_x_start = lower_seq_stat_conf_int_res.conf_int_lower_bound
+        ci_lower_y_start = shift_value - box_height_iqr / 2
+        ci_box_height = box_height_iqr / 2
+        ci_upper_width = upper_seq_stat_conf_int_res.conf_int_upper_bound - upper_seq_stat_conf_int_res.conf_int_lower_bound
+        ci_lower_width = lower_seq_stat_conf_int_res.conf_int_upper_bound - lower_seq_stat_conf_int_res.conf_int_lower_bound
+        statistic_upper_x_value = upper_seq_stat_conf_int_res.statistic_value
+        statistic_upper_y_value = ci_upper_y_start + ci_box_height / 2
+        statistic_lower_x_value = lower_seq_stat_conf_int_res.statistic_value
+        statistic_lower_y_value = ci_lower_y_start + ci_box_height / 2
 
 
-        # confidence interval
-        # mean
-        sns.lineplot(x=[ci_lower_mean, ci_upper_mean],
-                    y=[shift_value+conf_int_center, shift_value+conf_int_center],
-                    legend=False,
-                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_OUTER_LINEPLOT_COLOR,
-                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_OUTER_LINEPLOT_LINEWIDTH,
-                    zorder=zorder+0.7)
-        sns.lineplot(x=[ci_lower_mean, ci_upper_mean],
-                    y=[shift_value+conf_int_center, shift_value+conf_int_center],
-                    legend=False,
-                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_INNER_LINEPLOT_COLOR,
-                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_INNER_LINEPLOT_LINEWIDTH,
-                    zorder=zorder+0.8)
+        return DualConfIntBoxData(ci_upper_x_start,
+                                  ci_upper_y_start,
+                                  ci_lower_x_start,
+                                  ci_lower_y_start,
+                                  ci_box_height,
+                                  ci_upper_width,
+                                  ci_lower_width,
+                                  statistic_upper_x_value,
+                                  statistic_upper_y_value,
+                                  statistic_lower_x_value,
+                                  statistic_lower_y_value)
 
-        sns.scatterplot(x=[mean_value],
-                        y=[shift_value+conf_int_center],
+    def _plot_single_conf_int(self,
+                              ax: matplotlib.axes.Axes,
+                              single_conf_int_box_data: SingleConfIntBoxData,
+                              box_facecolor: str,
+                              zorder: int | float) -> None:
+
+        rectangle_single_conf_int = Rectangle((single_conf_int_box_data.ci_x_start, single_conf_int_box_data.ci_y_start),
+                                              single_conf_int_box_data.ci_box_width,
+                                              single_conf_int_box_data.ci_box_height,
+                                              linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                              edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
+                                              facecolor=box_facecolor,
+                                              alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                              zorder=zorder+0.7)
+        ax.add_patch(rectangle_single_conf_int)
+        sns.scatterplot(x=[single_conf_int_box_data.statistic_x_value],
+                        y=[single_conf_int_box_data.statistic_y_value],
                         legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_SCATTER_EDGECOLOR,
-                        zorder=zorder+0.9)
-        # median
-        sns.lineplot(x=[ci_lower_median, ci_upper_median],
-                    y=[shift_value-conf_int_center, shift_value-conf_int_center],
-                    legend=False,
-                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_OUTER_LINEPLOT_COLOR,
-                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_OUTER_LINEPLOT_LINEWIDTH,
-                    zorder=zorder+0.7)
-        sns.lineplot(x=[ci_lower_median, ci_upper_median],
-                    y=[shift_value-conf_int_center, shift_value-conf_int_center],
-                    legend=False,
-                    color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_INNER_LINEPLOT_COLOR,
-                    linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_INNER_LINEPLOT_LINEWIDTH,
-                    zorder=zorder+0.8)
-
-        sns.scatterplot(x=[median_value],
-                        y=[shift_value-conf_int_center],
-                        legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEDIAN_SCATTER_EDGECOLOR,
+                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
+                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_SIZE,
+                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                        marker=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_MARKER,
                         zorder=zorder+0.9)
 
+    def _plot_dual_conf_int(self,
+                            ax: matplotlib.axes.Axes,
+                            dual_conf_int_box_data: DualConfIntBoxData,
+                            zorder: int | float) -> None:
 
-                        # ci_mean_width = ci_upper_mean - ci_lower_mean 
-                        # ci_mean_height = box_height_iqr / 2 
-                        # ci_mean_y_start = shift_value
-                    # ci_mean_y_end = shift_value + box_height_iqr / 2
-                    # ci_lower_mean, ci_upper_mean = self._kde_get_x_min_max_cap_adjusted_in_data_coordinates(ax,
-                    #                                                                                         RESULT_AGGREGATION_FIG_SIZE_DPI,
-                    #                                                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_MEAN_OUTER_LINEPLOT_LINEWIDTH,
-                    #                                                                                         ci_lower_mean,
-                    #                                                                                         ci_upper_mean)
-        pass
+        # upper
+        rectangle_upper_conf_int = Rectangle((dual_conf_int_box_data.ci_upper_x_start, dual_conf_int_box_data.ci_upper_y_start),
+                                             dual_conf_int_box_data.ci_upper_width,
+                                             dual_conf_int_box_data.ci_box_height,
+                                             linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                             edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
+                                             facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_UPPER_BOX_FACECOLOR,
+                                             alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                             zorder=zorder+0.7)
+        ax.add_patch(rectangle_upper_conf_int)
+        sns.scatterplot(x=[dual_conf_int_box_data.statistic_upper_x_value],
+                        y=[dual_conf_int_box_data.statistic_upper_y_value],
+                        legend=False,
+                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
+                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_BOX_SCATTER_SIZE,
+                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                        marker=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_UPPER_BOX_SCATTER_MARKER,
+                        zorder=zorder+0.9)
+        # lower
+        rectangle_lower_conf_int = Rectangle((dual_conf_int_box_data.ci_lower_x_start, dual_conf_int_box_data.ci_lower_y_start),
+                                              dual_conf_int_box_data.ci_lower_width,
+                                              dual_conf_int_box_data.ci_box_height,
+                                              linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                              edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
+                                              facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_LOWER_BOX_FACECOLOR,
+                                              alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                              zorder=zorder+0.7)
+        ax.add_patch(rectangle_lower_conf_int)
+        sns.scatterplot(x=[dual_conf_int_box_data.statistic_lower_x_value],
+                        y=[dual_conf_int_box_data.statistic_lower_y_value],
+                        legend=False,
+                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
+                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_BOX_SCATTER_SIZE,
+                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                        marker=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_LOWER_BOX_SCATTER_MARKER,
+                        zorder=zorder+0.9)
 
     def _calculate_conf_int_per_sequence_statistic(self,
-                                                   sequence_statistics_per_group_per_dataset: pd.DataFrame,
+                                                   dataset_name: str,
+                                                   sequence_type: SequenceType,
                                                    field: SequenceStatisticsPlotFields,
-                                                   conf_int_type: ConfidenceIntervalType,
-                                                   confidence: float,
-                                                   data_range_limits: Tuple[int | float]) -> Tuple[float, float]:
+                                                   estimator: ConfIntEstimator,
+                                                   group: int) -> SequenceStatisticConfIntResult:
 
-        match conf_int_type:
-            case ConfidenceIntervalType.MEAN:
-                conf_int_type_func = np.mean
+        match sequence_type:
+            case SequenceType.UNIQUE_SEQUENCES:
+                use_unique_sequences = True
 
-            case ConfidenceIntervalType.MEDIAN:
-                conf_int_type_func = np.median
+            case SequenceType.ALL_SEQUENCES:
+                use_unique_sequences = False
 
             case _:
-                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfidenceIntervalType.__name__}')
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SequenceType.__name__}')
 
-        field_data = sequence_statistics_per_group_per_dataset[field.value].values
+        seq_stat_conf_int_df = self._return_sequence_statistics_confidence_interval_per_group_per_dataset_df(use_unique_sequences)
 
-        # conf int
-        conf_int_statistic_value = conf_int_type_func(field_data)
-        n = len(field_data)
-        std_err = sp.stats.sem(field_data)  # Standard error: std / sqrt(n)
-        deg_fred = n - 1
-        ci = sp.stats.t.interval(confidence, deg_fred, loc=conf_int_statistic_value, scale=std_err)
-        ci_lower = max(ci[0], data_range_limits[0])
-        ci_upper = min(ci[1], data_range_limits[1])
+        dataset_filter = seq_stat_conf_int_df[ConfIntResultFields.DATASET_NAME.value] == dataset_name
+        field_filter = seq_stat_conf_int_df[ConfIntResultFields.SEQUENCE_STATISTIC.value] == field.value
+        estimator_filter = seq_stat_conf_int_df[ConfIntResultFields.ESTIMATOR.value] == estimator.value
+        group_filter = seq_stat_conf_int_df[ConfIntResultFields.GROUP.value] == group
 
-        return ci_lower, ci_upper
+        seq_stat_conf_int_df_filter = dataset_filter & field_filter & estimator_filter & group_filter
+
+        seq_stat_conf_int_result = seq_stat_conf_int_df.loc[seq_stat_conf_int_df_filter, ConfIntResultFields.RESULT.value].iloc[0]
+
+        return seq_stat_conf_int_result
 
     def _return_moa_conf_int_plot_x_label(self,
                                           x_label_kind: OmnibusTestResultMeasureAssociationConfIntXLabelKind,

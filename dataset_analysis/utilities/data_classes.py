@@ -119,3 +119,26 @@ class SequenceStatisticConfIntDataControlVars:
     n_unique_values: int
     variance: float
     standard_deviation: float
+
+@dataclass
+class SingleConfIntBoxData:
+    ci_x_start: int | float
+    ci_y_start: int | float
+    ci_box_height: int | float
+    ci_box_width: int | float
+    statistic_x_value: int | float
+    statistic_y_value: int | float
+
+@dataclass
+class DualConfIntBoxData:
+    ci_upper_x_start: int | float
+    ci_upper_y_start: int | float
+    ci_lower_x_start: int | float
+    ci_lower_y_start: int | float
+    ci_box_height: int | float
+    ci_upper_width: int | float
+    ci_lower_width: int | float
+    statistic_upper_x_value: int | float
+    statistic_upper_y_value: int | float
+    statistic_lower_x_value: int | float
+    statistic_lower_y_value: int | float
