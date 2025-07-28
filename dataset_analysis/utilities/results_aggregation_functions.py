@@ -703,63 +703,31 @@ class AggregatedResults():
                 shift_value = 0
                 zorder = 10000
 
-                for i, ((group, df), color) in enumerate(zip(data.groupby(GROUP_FIELD_NAME_STR), colors)): 
+                for (group, df), color in zip(data.groupby(GROUP_FIELD_NAME_STR), colors): 
 
                     field_data = df[field.value].values
 
-                    x_min = min(field_data)
-                    x_max = max(field_data)
+                    self._plot_kde(field_data,
+                                   field,
+                                   data_range_limits,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_COLOR,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_LINEWIDTH,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_ALPHA,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_COLOR,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_LINEWIDTH,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_ALPHA,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_COLOR,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_LINEWIDTH,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_ALPHA,
+                                   color,
+                                   None,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INCLUDE_KDE_BOTTOM_LINE,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_APPLY_BOUNDARY_REFLECTION,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_METHOD,
+                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_CUT,
+                                   shift_value,
+                                   zorder)
 
-                    # kde
-                    if SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_APPLY_BOUNDARY_REFLECTION:
-                        field_data = self._kde_reflect_data(field_data,
-                                                            field)
-                    kde = sp.stats.gaussian_kde(field_data, 
-                                                bw_method=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_METHOD)
-
-                    bandwidth = kde.factor * np.std(field_data)
-                    x_lower_bound = max(x_min - bandwidth * SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_CUT, data_range_limits[0])
-                    x_upper_bound = min(x_max + bandwidth * SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_CUT, data_range_limits[1])
-
-                    x_vals = np.linspace(x_lower_bound, 
-                                         x_upper_bound, 
-                                         10000)
-                    y_vals = kde(x_vals)
-                    y_vals = y_vals / np.max(y_vals) # normalization to density of 1: y_vals = y_vals / np.trapz(y_vals, x_vals)
-
-                    # ensure that borders of the densities are drawn at the min and max value of the data
-                    y_vals[0] = 0
-                    y_vals[-1] = 0
-                    
-                    # shift the y values for correct position on y axis
-                    y_vals_shifted = y_vals + shift_value
-
-                    # kde
-                    sns.lineplot(x=x_vals, 
-                                 y=y_vals_shifted,
-                                 color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_COLOR,
-                                 linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_LINEWIDTH,
-                                 alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_ALPHA,
-                                 zorder=zorder)
-                    sns.lineplot(x=x_vals, 
-                                 y=y_vals_shifted,
-                                 color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_COLOR,
-                                 linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_LINEWIDTH,
-                                 alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_ALPHA,
-                                 zorder=zorder+0.5)
-                    if SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INCLUDE_KDE_BOTTOM_LINE:
-                        sns.lineplot(x=x_vals, 
-                                     y=np.zeros_like(x_vals) + shift_value,
-                                     color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_COLOR,
-                                     linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_LINEWIDTH,
-                                     alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_ALPHA,
-                                     zorder=zorder+0.5)
-                    plt.fill_between(x_vals, 
-                                     y_vals_shifted, 
-                                     shift_value, 
-                                     color=color, 
-                                     zorder=zorder)
-                                    
                     shift_value -= SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_Y_AXIS_TICK_SHIFT_INCREMENT 
                     zorder += 1
 
@@ -861,6 +829,180 @@ class AggregatedResults():
             title = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_PLOT_NAME + field.value
             self._save_figure(title)
             plt.show(g);
+
+    @sequence_statistics_distribution_ridgeplot_mockup_decorator
+    def plot_sequence_statistics_distribution_ridgeplot_mockup(self) -> None:
+        
+        mock_up_data = self._return_mock_up_dist_data(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_MU,
+                                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_SIMGA,
+                                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_RANGE_LIMITS,
+                                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_N_POINTS)
+
+        shift_value = 0
+        zorder = 10000
+
+        self._plot_kde_mockup(mock_up_data.x_values,
+                              mock_up_data.y_values,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_OUTER_LINEPLOT_COLOR,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_OUTER_LINEPLOT_LINEWIDTH,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_OUTER_LINEPLOT_ALPHA,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_INNER_LINEPLOT_COLOR,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_INNER_LINEPLOT_LINEWIDTH,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_INNER_LINEPLOT_ALPHA,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_BOTTOM_LINEPLOT_COLOR,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_BOTTOM_LINEPLOT_LINEWIDTH,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_BOTTOM_LINEPLOT_ALPHA,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_FILL_COLOR,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_FILL_ALPHA,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_INCLUDE_KDE_BOTTOM_LINE,
+                              shift_value,
+                              zorder)
+
+        ax = plt.gca()
+
+        box_height_iqr = self._kde_get_line_width_in_data_coordinates(ax,
+                                                                      RESULT_AGGREGATION_FIG_SIZE_DPI,
+                                                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_IQR_BOX_HEIGHT_IN_LINEWIDTH)
+        box_height_range = self._kde_get_line_width_in_data_coordinates(ax,
+                                                                        RESULT_AGGREGATION_FIG_SIZE_DPI,
+                                                                        SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_RANGE_BOX_HEIGHT_IN_LINEWIDTH)
+
+        iqr_box_data = self._return_iqr_box_data_mockup(mock_up_data.mu,
+                                                        mock_up_data.sigma, 
+                                                        box_height_iqr,
+                                                        shift_value)
+        range_box_data = self._return_range_box_data_mockup(mock_up_data.mu,
+                                                            mock_up_data.sigma,
+                                                            SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_RANGE_LOWER_QUANTILE,
+                                                            SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_RANGE_UPPER_QUANTILE,
+                                                            box_height_range,
+                                                            shift_value)
+        self._plot_iqr_range(ax,
+                             iqr_box_data,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_IQR_BOX_EDGE_LINEWIDTH,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_IQR_BOX_EDGECOLOR,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_IQR_BOX_FACECOLOR,
+                             zorder+0.6)
+
+        self._plot_iqr_range(ax,
+                             range_box_data,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_RANGE_BOX_EDGE_LINEWIDTH,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_RANGE_BOX_EDGECOLOR,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_RANGE_BOX_FACECOLOR,
+                             zorder+0.5)
+
+        seq_stat_conf_int_res_mean = self._return_conf_int_mock_up(mock_up_data.mu,
+                                                                   iqr_box_data.box_width,
+                                                                   ConfIntEstimator.MEAN)
+
+        single_conf_int_box_data_mean = self._return_single_conf_int_box_data(seq_stat_conf_int_res_mean,
+                                                                              box_height_iqr,
+                                                                              shift_value)
+
+        seq_stat_conf_int_res_median = self._return_conf_int_mock_up(mock_up_data.mu,
+                                                                     iqr_box_data.box_width,
+                                                                     ConfIntEstimator.MEDIAN)
+
+        single_conf_int_box_data_median = self._return_single_conf_int_box_data(seq_stat_conf_int_res_median,
+                                                                                box_height_iqr,
+                                                                                shift_value)
+
+        dual_conf_int_box_data = self._return_dual_conf_int_box_data(seq_stat_conf_int_res_mean,
+                                                                     seq_stat_conf_int_res_median,
+                                                                     box_height_iqr,
+                                                                     shift_value)
+
+        # confidence interval
+        match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_KIND:
+            case ConfidenceIntervalKind.MEAN:
+                self._plot_single_conf_int(ax,
+                                           single_conf_int_box_data_mean,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_EDGECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_UPPER_BOX_FACECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_ALPHA,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_COLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_SINGLE_BOX_SCATTER_SIZE,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_SINGLE_BOX_SCATTER_MARKER,
+                                           zorder)
+
+            case ConfidenceIntervalKind.MEDIAN:
+                self._plot_single_conf_int(ax,
+                                           single_conf_int_box_data_median,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_EDGECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_LOWER_BOX_FACECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_ALPHA,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_COLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_SINGLE_BOX_SCATTER_SIZE,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_SINGLE_BOX_SCATTER_MARKER,
+                                           zorder)
+
+            case ConfidenceIntervalKind.BOTH:
+                self._plot_dual_conf_int(ax,
+                                         dual_conf_int_box_data,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_EDGECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_UPPER_BOX_FACECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_LOWER_BOX_FACECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_ALPHA,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_COLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_DUAL_BOX_SCATTER_SIZE,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_DUAL_UPPER_BOX_SCATTER_MARKER,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_DUAL_LOWER_BOX_SCATTER_MARKER,
+                                         zorder)
+
+            case ConfidenceIntervalKind.NONE:
+                pass
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfidenceIntervalKind.__name__}')
+
+        # annotations
+        self._add_mock_up_annotations(ax,
+                                      single_conf_int_box_data_mean,
+                                      single_conf_int_box_data_median,
+                                      dual_conf_int_box_data,
+                                      mock_up_data,
+                                      iqr_box_data,
+                                      range_box_data,
+                                      zorder)
+
+        self._set_axis_labels(ax,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_X_AXIS_LABEL,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_Y_AXIS_LABEL,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_X_AXIS_LABEL,
+                              SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_Y_AXIS_LABEL)
+
+        self._set_axis_ticks(ax,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_X_AXIS_TICKS,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_Y_AXIS_TICKS,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_X_AXIS_TICK_LABELS,
+                             SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_Y_AXIS_TICK_LABELS,
+                             None,
+                             None)
+
+        ax.grid(False,
+                axis=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_GRID_LINE_AXIS.value,
+                which='both')
+
+        ax.spines['top'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_SHOW_TOP)
+        ax.spines['bottom'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_SHOW_BOTTOM)
+        ax.spines['left'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_SHOW_LEFT)
+        ax.spines['right'].set_visible(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_SHOW_RIGHT)
+
+        ax.margins(x=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_X_AXIS_MARGIN, 
+                   y=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_Y_AXIS_MARGIN)
+
+        plt.tight_layout()
+        self._save_figure(SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_PLOT_NAME)
+        plt.show(ax);
 
     @sequence_count_per_group_per_dataset_decorator
     def plot_sequence_count_per_group_per_dataset(self) -> None:
@@ -2988,6 +3130,128 @@ class AggregatedResults():
 
         return colors
     
+    def _plot_kde(self,
+                  field_data: np.ndarray,
+                  field: SequenceStatisticsPlotFields,
+                  data_range_limits: Tuple[float],
+                  outer_color: str,
+                  outer_linewidth: int | float,
+                  outer_alpha: float,
+                  inner_color: str,
+                  inner_linewidth: int | float,
+                  inner_alpha: float,
+                  bottom_color: str,
+                  bottom_linewidth: int | float,
+                  bottom_alpha: float,
+                  fill_color: Tuple[float],
+                  fill_alpha: int | float | None,
+                  include_bottom_line: bool,
+                  apply_boundary_reflection: bool, 
+                  bw_method: str | int | float,
+                  bw_cut: int | float,
+                  shift_value: int | float,
+                  zorder: int | float) -> None:
+
+        x_min = min(field_data)
+        x_max = max(field_data)
+
+        # kde
+        if apply_boundary_reflection:
+            field_data = self._kde_reflect_data(field_data,
+                                                field)
+        kde = sp.stats.gaussian_kde(field_data, 
+                                    bw_method=bw_method)
+
+        bandwidth = kde.factor * np.std(field_data)
+        x_lower_bound = max(x_min - bandwidth * bw_cut, data_range_limits[0])
+        x_upper_bound = min(x_max + bandwidth * bw_cut, data_range_limits[1])
+
+        x_vals = np.linspace(x_lower_bound, 
+                             x_upper_bound, 
+                             10000)
+        y_vals = kde(x_vals)
+        y_vals = y_vals / np.max(y_vals) # normalization to density of 1: y_vals = y_vals / np.trapz(y_vals, x_vals)
+
+        # ensure that borders of the densities are drawn at the min and max value of the data
+        y_vals[0] = 0
+        y_vals[-1] = 0
+        
+        # shift the y values for correct position on y axis
+        y_vals_shifted = y_vals + shift_value
+
+        # kde
+        sns.lineplot(x=x_vals, 
+                     y=y_vals_shifted,
+                     color=outer_color,
+                     linewidth=outer_linewidth,
+                     alpha=outer_alpha,
+                     zorder=zorder)
+        sns.lineplot(x=x_vals, 
+                     y=y_vals_shifted,
+                     color=inner_color,
+                     linewidth=inner_linewidth,
+                     alpha=inner_alpha,
+                     zorder=zorder+0.5)
+        if include_bottom_line:
+            sns.lineplot(x=x_vals, 
+                         y=np.zeros_like(x_vals) + shift_value,
+                         color=bottom_color,
+                         linewidth=bottom_linewidth,
+                         alpha=bottom_alpha,
+                         zorder=zorder+0.5)
+        plt.fill_between(x_vals, 
+                         y_vals_shifted, 
+                         shift_value, 
+                         color=fill_color, 
+                         zorder=zorder,
+                         alpha=fill_alpha)
+
+    def _plot_kde_mockup(self,
+                         x_vals: np.ndarray,
+                         y_vals: np.ndarray,
+                         outer_color: str,
+                         outer_linewidth: int | float,
+                         outer_alpha: float,
+                         inner_color: str,
+                         inner_linewidth: int | float,
+                         inner_alpha: float,
+                         bottom_color: str,
+                         bottom_linewidth: int | float,
+                         bottom_alpha: float,
+                         fill_color: Tuple[float],
+                         fill_alpha: int | float | None,
+                         include_bottom_line: bool,
+                         shift_value: int | float,
+                         zorder: int | float) -> None:
+
+
+        # kde
+        sns.lineplot(x=x_vals, 
+                     y=y_vals,
+                     color=outer_color,
+                     linewidth=outer_linewidth,
+                     alpha=outer_alpha,
+                     zorder=zorder)
+        sns.lineplot(x=x_vals, 
+                     y=y_vals,
+                     color=inner_color,
+                     linewidth=inner_linewidth,
+                     alpha=inner_alpha,
+                     zorder=zorder+0.5)
+        if include_bottom_line:
+            sns.lineplot(x=x_vals, 
+                         y=np.zeros_like(x_vals),
+                         color=bottom_color,
+                         linewidth=bottom_linewidth,
+                         alpha=bottom_alpha,
+                         zorder=zorder+0.5)
+        plt.fill_between(x_vals, 
+                         y_vals, 
+                         shift_value, 
+                         color=fill_color, 
+                         zorder=zorder,
+                         alpha=fill_alpha)
+    
     def _kde_reflect_data(self,
                           data: NDArray,
                           field: SequenceStatisticsPlotFields) -> NDArray[np.number]:
@@ -3045,6 +3309,8 @@ class AggregatedResults():
                                          field: SequenceStatisticsPlotFields,
                                          shift_value: int | float,
                                          zorder: int | float) -> None:
+        
+        field_data = sequence_statistics_per_group_per_dataset[field.value].values
 
         # iqr and range plot data 
         box_height_iqr = self._kde_get_line_width_in_data_coordinates(ax,
@@ -3057,8 +3323,7 @@ class AggregatedResults():
         # iqr/range box
         match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOX_KIND:
             case BoxKind.IQR:
-                iqr_box_data = self._return_iqr_box_data(sequence_statistics_per_group_per_dataset,
-                                                         field,
+                iqr_box_data = self._return_iqr_box_data(field_data,
                                                          box_height_iqr,
                                                          shift_value)
                 self._plot_iqr_range(ax,
@@ -3069,8 +3334,7 @@ class AggregatedResults():
                                      zorder+0.6)
 
             case BoxKind.RANGE:
-                range_box_data = self._return_range_box_data(sequence_statistics_per_group_per_dataset,
-                                                             field,
+                range_box_data = self._return_range_box_data(field_data,
                                                              box_height_range,
                                                              shift_value)
                 self._plot_iqr_range(ax,
@@ -3081,14 +3345,12 @@ class AggregatedResults():
                                      zorder+0.5)
 
             case BoxKind.BOTH:
-                iqr_box_data = self._return_iqr_box_data(sequence_statistics_per_group_per_dataset,
-                                                         field,
+                iqr_box_data = self._return_iqr_box_data(field_data,
                                                          box_height_iqr,
                                                          shift_value)
-                range_box_data = self._return_range_box_data(sequence_statistics_per_group_per_dataset,
-                                                           field,
-                                                           box_height_range,
-                                                           shift_value)
+                range_box_data = self._return_range_box_data(field_data,
+                                                             box_height_range,
+                                                             shift_value)
                 self._plot_iqr_range(ax,
                                      iqr_box_data,
                                      SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_IQR_BOX_EDGE_LINEWIDTH,
@@ -3123,7 +3385,15 @@ class AggregatedResults():
                                                                                  shift_value)
                 self._plot_single_conf_int(ax,
                                            single_conf_int_box_data,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
                                            SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_UPPER_BOX_FACECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_SIZE,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_MARKER,
                                            zorder)
 
             case ConfidenceIntervalKind.MEDIAN:
@@ -3138,7 +3408,15 @@ class AggregatedResults():
                                                                                  shift_value)
                 self._plot_single_conf_int(ax,
                                            single_conf_int_box_data,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
                                            SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_LOWER_BOX_FACECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_SIZE,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                                           SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_MARKER,
                                            zorder)
 
             case ConfidenceIntervalKind.BOTH:
@@ -3160,6 +3438,17 @@ class AggregatedResults():
                                                                              shift_value)
                 self._plot_dual_conf_int(ax,
                                          dual_conf_int_box_data,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_UPPER_BOX_FACECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_LOWER_BOX_FACECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_BOX_SCATTER_SIZE,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_UPPER_BOX_SCATTER_MARKER,
+                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_LOWER_BOX_SCATTER_MARKER,
                                          zorder)
 
             case ConfidenceIntervalKind.NONE:
@@ -3169,36 +3458,86 @@ class AggregatedResults():
                 raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfidenceIntervalKind.__name__}')
 
     def _return_iqr_box_data(self,
-                             sequence_statistics_per_group_per_dataset: pd.DataFrame,
-                             field: SequenceStatisticsPlotFields,
+                             field_data: np.ndarray,
                              box_height_iqr: float,
                              shift_value: int | float) -> IQRRangeBoxData:
 
-        field_data = sequence_statistics_per_group_per_dataset[field.value].values
         first_quartile = np.quantile(field_data, 0.25)
         third_quartile = np.quantile(field_data, 0.75)
         y_start_iqr = shift_value - box_height_iqr / 2
+        y_end_iqr = shift_value + box_height_iqr / 2
         iqr_val = third_quartile - first_quartile
 
         return IQRRangeBoxData(first_quartile,
+                               third_quartile,
                                y_start_iqr,
+                               y_end_iqr,
                                box_height_iqr,
                                iqr_val)
 
     def _return_range_box_data(self,
-                               sequence_statistics_per_group_per_dataset: pd.DataFrame,
-                               field: SequenceStatisticsPlotFields,
+                               field_data: np.ndarray,
                                box_height_range: float,
                                shift_value: int | float) -> IQRRangeBoxData:
 
-        field_data = sequence_statistics_per_group_per_dataset[field.value].values
         x_min = min(field_data)
         x_max = max(field_data)
         y_start_range = shift_value - box_height_range / 2
+        y_end_range = shift_value + box_height_range / 2
         range_val = x_max - x_min
 
         return IQRRangeBoxData(x_min,
+                               x_max,
                                y_start_range,
+                               y_end_range,
+                               box_height_range,
+                               range_val)
+
+    def _return_iqr_box_data_mockup(self,
+                                    mu: int | float,
+                                    sigma: int | float,
+                                    box_height_iqr: float,
+                                    shift_value: int | float) -> IQRRangeBoxData:
+
+        first_quartile = sp.stats.norm.ppf(0.25, 
+                                           loc=mu, 
+                                           scale=sigma)
+        third_quartile = sp.stats.norm.ppf(0.75, 
+                                           loc=mu, 
+                                           scale=sigma)
+        y_start_iqr = shift_value - box_height_iqr / 2
+        y_end_iqr = shift_value + box_height_iqr / 2
+        iqr_val = third_quartile - first_quartile
+
+        return IQRRangeBoxData(first_quartile,
+                               third_quartile,
+                               y_start_iqr,
+                               y_end_iqr,
+                               box_height_iqr,
+                               iqr_val)
+
+    def _return_range_box_data_mockup(self,
+                                      mu: int | float,
+                                      sigma: int | float,
+                                      lower_quantile: float,
+                                      upper_quantile: float,
+                                      box_height_range: float,
+                                      shift_value: int | float) -> IQRRangeBoxData:
+
+        x_min = sp.stats.norm.ppf(lower_quantile, 
+                                  loc=mu, 
+                                  scale=sigma)
+        x_max = sp.stats.norm.ppf(upper_quantile, 
+                                  loc=mu, 
+                                  scale=sigma)
+        y_start_range = shift_value - box_height_range / 2
+        y_end_range = shift_value + box_height_range / 2
+        range_val = x_max - x_min
+
+        return IQRRangeBoxData(x_min,
+                               x_max,
+                               y_start_range,
+                               y_end_range,
                                box_height_range,
                                range_val)
 
@@ -3207,14 +3546,18 @@ class AggregatedResults():
                                          box_height_iqr: float,
                                          shift_value: int | float) -> SingleConfIntBoxData:
         ci_x_start = seq_stat_conf_int_res.conf_int_lower_bound
+        ci_x_end = seq_stat_conf_int_res.conf_int_upper_bound
         ci_y_start = shift_value - box_height_iqr / 2
+        ci_y_end = shift_value + box_height_iqr / 2
         ci_box_height = box_height_iqr
         ci_width = seq_stat_conf_int_res.conf_int_upper_bound - seq_stat_conf_int_res.conf_int_lower_bound
         statistic_x_value = seq_stat_conf_int_res.statistic_value
         statistic_y_value = ci_y_start + ci_box_height / 2
 
         return SingleConfIntBoxData(ci_x_start,
+                                    ci_x_end,
                                     ci_y_start,
+                                    ci_y_end,
                                     ci_box_height,
                                     ci_width,
                                     statistic_x_value,
@@ -3271,70 +3614,89 @@ class AggregatedResults():
     def _plot_single_conf_int(self,
                               ax: matplotlib.axes.Axes,
                               single_conf_int_box_data: SingleConfIntBoxData,
+                              box_linewidth: int | float,
+                              box_edgecolor: 'str',
                               box_facecolor: str,
+                              box_alpha: float,
+                              marker_color: str,
+                              marker_size: int | float,
+                              marker_linewidth: int | float,
+                              marker_edgecolor: str,
+                              marker_kind: str,
                               zorder: int | float) -> None:
 
-        rectangle_single_conf_int = Rectangle((single_conf_int_box_data.ci_x_start, single_conf_int_box_data.ci_y_start),
-                                              single_conf_int_box_data.ci_box_width,
-                                              single_conf_int_box_data.ci_box_height,
-                                              linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
-                                              edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
+        rectangle_single_conf_int = Rectangle((single_conf_int_box_data.x_start, single_conf_int_box_data.y_start),
+                                              single_conf_int_box_data.box_width,
+                                              single_conf_int_box_data.box_height,
+                                              linewidth=box_linewidth,
+                                              edgecolor=box_edgecolor,
                                               facecolor=box_facecolor,
-                                              alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                              alpha=box_alpha,
                                               zorder=zorder+0.7)
         ax.add_patch(rectangle_single_conf_int)
         sns.scatterplot(x=[single_conf_int_box_data.statistic_x_value],
                         y=[single_conf_int_box_data.statistic_y_value],
                         legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
-                        marker=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_SINGLE_BOX_SCATTER_MARKER,
+                        color=marker_color,
+                        s=marker_size,
+                        linewidth=marker_linewidth,
+                        edgecolor=marker_edgecolor,
+                        marker=marker_kind,
                         zorder=zorder+0.9)
 
     def _plot_dual_conf_int(self,
                             ax: matplotlib.axes.Axes,
                             dual_conf_int_box_data: DualConfIntBoxData,
+                            box_linewidth: int | float,
+                            box_edgecolor: 'str',
+                            box_facecolor_upper: str,
+                            box_facecolor_lower: str,
+                            box_alpha: float,
+                            marker_color: str,
+                            marker_size: int | float,
+                            marker_linewidth: int | float,
+                            marker_edgecolor: str,
+                            marker_kind_upper: str,
+                            marker_kind_lower: str,
                             zorder: int | float) -> None:
 
         # upper
         rectangle_upper_conf_int = Rectangle((dual_conf_int_box_data.ci_upper_x_start, dual_conf_int_box_data.ci_upper_y_start),
                                              dual_conf_int_box_data.ci_upper_width,
                                              dual_conf_int_box_data.ci_box_height,
-                                             linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
-                                             edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
-                                             facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_UPPER_BOX_FACECOLOR,
-                                             alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                             linewidth=box_linewidth,
+                                             edgecolor=box_edgecolor,
+                                             facecolor=box_facecolor_upper,
+                                             alpha=box_alpha,
                                              zorder=zorder+0.7)
         ax.add_patch(rectangle_upper_conf_int)
         sns.scatterplot(x=[dual_conf_int_box_data.statistic_upper_x_value],
                         y=[dual_conf_int_box_data.statistic_upper_y_value],
                         legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_BOX_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
-                        marker=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_UPPER_BOX_SCATTER_MARKER,
+                        color=marker_color,
+                        s=marker_size,
+                        linewidth=marker_linewidth,
+                        edgecolor=marker_edgecolor,
+                        marker=marker_kind_upper,
                         zorder=zorder+0.9)
         # lower
         rectangle_lower_conf_int = Rectangle((dual_conf_int_box_data.ci_lower_x_start, dual_conf_int_box_data.ci_lower_y_start),
                                               dual_conf_int_box_data.ci_lower_width,
                                               dual_conf_int_box_data.ci_box_height,
-                                              linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGE_LINEWIDTH,
-                                              edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_EDGECOLOR,
-                                              facecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_LOWER_BOX_FACECOLOR,
-                                              alpha=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_ALPHA,
+                                              linewidth=box_linewidth,
+                                              edgecolor=box_edgecolor,
+                                              facecolor=box_facecolor_lower,
+                                              alpha=box_alpha,
                                               zorder=zorder+0.7)
         ax.add_patch(rectangle_lower_conf_int)
         sns.scatterplot(x=[dual_conf_int_box_data.statistic_lower_x_value],
                         y=[dual_conf_int_box_data.statistic_lower_y_value],
                         legend=False,
-                        color=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_COLOR,
-                        s=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_BOX_SCATTER_SIZE,
-                        linewidth=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_LINEWIDTH,
-                        edgecolor=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_BOX_SCATTER_EDGECOLOR,
-                        marker=SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_CONF_INT_DUAL_LOWER_BOX_SCATTER_MARKER,
+                        color=marker_color,
+                        s=marker_size,
+                        linewidth=marker_linewidth,
+                        edgecolor=marker_edgecolor,
+                        marker=marker_kind_lower,
                         zorder=zorder+0.9)
 
     def _calculate_conf_int_per_sequence_statistic(self,
@@ -3366,6 +3728,342 @@ class AggregatedResults():
         seq_stat_conf_int_result = seq_stat_conf_int_df.loc[seq_stat_conf_int_df_filter, ConfIntResultFields.RESULT.value].iloc[0]
 
         return seq_stat_conf_int_result
+
+    def _return_conf_int_mock_up(self,
+                                 mu: int | float,
+                                 iqr_box_width: float,
+                                 conf_int_estimator: ConfIntEstimator) -> SequenceStatisticConfIntResult:
+
+        match conf_int_estimator:
+            case ConfIntEstimator.MEAN:
+                conf_int_multiplier = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_CI_MEAN_RATIO_OF_BOX_WIDTH
+
+            case ConfIntEstimator.MEDIAN:
+                conf_int_multiplier = SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_DATA_CI_MEDIAN_RATIO_OF_BOX_WIDTH
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfIntEstimator.__name__}')
+
+        conf_int_width = iqr_box_width * conf_int_multiplier
+
+        ci_lower = mu - conf_int_width / 2
+        ci_upper = mu + conf_int_width / 2
+
+        return SequenceStatisticConfIntResult(mu,
+                                              ci_lower,
+                                              ci_upper,
+                                              None,
+                                              None,
+                                              None,
+                                              None)
+    
+    def _return_mock_up_dist_data(self,
+                                  mu: int | float,
+                                  sigma: int | float,
+                                  data_range_limits: Tuple[int | float],
+                                  n_data_points: int) -> MockUpDistData:
+
+        x_vals = np.linspace(data_range_limits[0], 
+                             data_range_limits[1], 
+                             n_data_points)
+        y_vals = sp.stats.norm.pdf(x_vals, 
+                                   loc=mu, 
+                                   scale=sigma)
+
+        return MockUpDistData(mu,
+                              sigma,
+                              x_vals,
+                              y_vals)
+    
+    def _add_mock_up_annotation_box_bracket(self,
+                                            ax: matplotlib.axes.Axes,
+                                            box_data: IQRRangeBoxData | SingleConfIntBoxData,
+                                            y_offset_from_box: int | float,
+                                            annotation_is_below_element: bool,
+                                            bracket_height: int | float,
+                                            text_y_offset_from_arrow: int | float,
+                                            annotation_str: str,
+                                            str_fontsize: int,
+                                            str_box_linewidth: int | float,
+                                            box_style: str,
+                                            arrow_linewidth: int | float,
+                                            zorder: int | float) -> None:
+
+        x_coordinates = [box_data.x_start,
+                         box_data.x_start,
+                         box_data.x_end,
+                         box_data.x_end]
+        
+        if annotation_is_below_element:
+            y_offset_from_box *= -1
+            bracket_height *= -1
+            text_y_offset_from_arrow *= -1
+        else:
+            y_offset_from_box += box_data.box_height
+
+
+        y_start = box_data.y_start + y_offset_from_box
+        y_end = box_data.y_start + y_offset_from_box + bracket_height
+        
+        y_coordinates = [y_start,
+                         y_end,
+                         y_end,
+                         y_start]
+
+        ax.plot(x_coordinates,
+                y_coordinates, 
+                color='k', 
+                lw=arrow_linewidth,
+                zorder=zorder)
+
+        ax.annotate(annotation_str,
+                    xy=((box_data.x_start + box_data.x_end)/2, y_end),
+                    xytext=((box_data.x_start + box_data.x_end)/2, y_end + text_y_offset_from_arrow),
+                    ha='center', 
+                    va='center',
+                    bbox=dict(boxstyle=f'{box_style},pad=0.3', fc='white', ec='black', lw=str_box_linewidth),
+                    fontsize=str_fontsize,
+                    arrowprops=dict(arrowstyle='-', color='black', lw=arrow_linewidth),
+                    annotation_clip=False,
+                    zorder=zorder)
+
+    def _add_mock_up_annotation_arrow_single_central_tendency_marker(self,
+                                                                     ax: matplotlib.axes.Axes,
+                                                                     box_data: SingleConfIntBoxData,
+                                                                     figure_proportion_text: Tuple[float, float],
+                                                                     annotation_str: str,
+                                                                     str_fontsize: int,
+                                                                     str_box_linewidth: int | float,
+                                                                     box_style: str,
+                                                                     arrow_linewidth: int | float,
+                                                                     zorder: int | float) -> None:
+        
+        ax.annotate(annotation_str,
+                    xy=(box_data.statistic_x_value, box_data.statistic_y_value),
+                    xytext=figure_proportion_text,
+                    xycoords='data',
+                    textcoords='figure fraction',
+                    ha='center', 
+                    va='center',
+                    bbox=dict(boxstyle=f'{box_style},pad=0.3', fc='white', ec='black', lw=str_box_linewidth),
+                    fontsize=str_fontsize,
+                    arrowprops=dict(arrowstyle='->', color='black', lw=arrow_linewidth),
+                    annotation_clip=False,
+                    zorder=zorder)
+
+    def _add_mock_up_annotation_arrow_dual_central_tendency_marker(self,
+                                                                   ax: matplotlib.axes.Axes,
+                                                                   box_data: DualConfIntBoxData,
+                                                                   figure_proportion_upper_text: Tuple[float, float],
+                                                                   figure_proportion_lower_text: Tuple[float, float],
+                                                                   annotation_str_upper: str,
+                                                                   annotation_str_lower: str,
+                                                                   str_fontsize: int,
+                                                                   str_box_linewidth: int | float,
+                                                                   box_style: str,
+                                                                   arrow_linewidth: int | float,
+                                                                   zorder: int | float) -> None:
+        
+        ax.annotate(annotation_str_upper,
+                    xy=(box_data.statistic_upper_x_value, box_data.statistic_upper_y_value),
+                    xytext=figure_proportion_upper_text,
+                    xycoords='data',
+                    textcoords='figure fraction',
+                    ha='center', 
+                    va='center',
+                    bbox=dict(boxstyle=f'{box_style},pad=0.3', fc='white', ec='black', lw=str_box_linewidth),
+                    fontsize=str_fontsize,
+                    arrowprops=dict(arrowstyle='->', color='black', lw=arrow_linewidth),
+                    annotation_clip=False,
+                    zorder=zorder)
+
+        ax.annotate(annotation_str_lower,
+                    xy=(box_data.statistic_lower_x_value, box_data.statistic_lower_y_value),
+                    xytext=figure_proportion_lower_text,
+                    xycoords='data',
+                    textcoords='figure fraction',
+                    ha='center', 
+                    va='center',
+                    bbox=dict(boxstyle=f'{box_style},pad=0.3', fc='white', ec='black', lw=str_box_linewidth),
+                    fontsize=str_fontsize,
+                    arrowprops=dict(arrowstyle='->', color='black', lw=arrow_linewidth),
+                    annotation_clip=False,
+                    zorder=zorder)
+
+    def _add_mock_up_annotation_arrow_kde(self,
+                                          ax: matplotlib.axes.Axes,
+                                          mock_up_dist_data: MockUpDistData,
+                                          quantile_of_data: float,
+                                          figure_proportion_text: Tuple[float, float],
+                                          annotation_str: str,
+                                          str_fontsize: int,
+                                          str_box_linewidth: int | float,
+                                          box_style: str,
+                                          arrow_linewidth: int | float,
+                                          zorder: int | float) -> None:
+        
+        x_value = np.quantile(mock_up_dist_data.x_values,
+                              quantile_of_data,
+                              method='closest_observation')
+        index_quantile = np.where(mock_up_dist_data.x_values == x_value)[0][0]
+        y_value = mock_up_dist_data.y_values[index_quantile]
+        
+        ax.annotate(annotation_str,
+                    xy=(x_value, y_value),
+                    xytext=figure_proportion_text,
+                    xycoords='data',
+                    textcoords='figure fraction',
+                    ha='center', 
+                    va='center',
+                    bbox=dict(boxstyle=f'{box_style},pad=0.3', fc='white', ec='black', lw=str_box_linewidth),
+                    fontsize=str_fontsize,
+                    arrowprops=dict(arrowstyle='->', color='black', lw=arrow_linewidth),
+                    annotation_clip=False,
+                    zorder=zorder)
+
+    def _add_mock_up_annotations(self,
+                                 ax: matplotlib.axes.Axes,
+                                 single_conf_int_box_data_mean: SingleConfIntBoxData,
+                                 single_conf_int_box_data_median: SingleConfIntBoxData,
+                                 dual_conf_int_box_data: DualConfIntBoxData,
+                                 mock_up_data: MockUpDistData,
+                                 iqr_box_data: IQRRangeBoxData,
+                                 range_box_data: IQRRangeBoxData,
+                                 zorder) -> None:
+
+        match SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_CONF_INT_KIND:
+            case ConfidenceIntervalKind.MEAN:
+
+                self._add_mock_up_annotation_arrow_single_central_tendency_marker(ax,
+                                                                                  single_conf_int_box_data_mean,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEAN_MARKER_TEXT_POSITION_PROPORTION,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEAN_MARKER_TEXT_STR,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                                                  zorder+1)
+
+                self._add_mock_up_annotation_box_bracket(ax,
+                                                         single_conf_int_box_data_mean,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_Y_OFFSET_FROM_BOX,
+                                                         True,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_BRACKET_HEIGTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_Y_OFFSET_FROM_BRACKET ,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_STR,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         zorder+1)
+
+            case ConfidenceIntervalKind.MEDIAN:
+
+                self._add_mock_up_annotation_arrow_single_central_tendency_marker(ax,
+                                                                                  single_conf_int_box_data_median,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEDIAN_MARKER_TEXT_POSITION_PROPORTION,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEDIAN_MARKER_TEXT_STR,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                                                  zorder+1)
+
+                self._add_mock_up_annotation_box_bracket(ax,
+                                                         single_conf_int_box_data_median,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_Y_OFFSET_FROM_BOX,
+                                                         True,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_BRACKET_HEIGTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_Y_OFFSET_FROM_BRACKET,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_STR,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         zorder+1)
+
+            case ConfidenceIntervalKind.BOTH:
+
+                self._add_mock_up_annotation_arrow_dual_central_tendency_marker(ax,
+                                                                                dual_conf_int_box_data,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_UPPER_MARKER_TEXT_POSITION_PROPORTION,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_LOWER_MARKER_TEXT_POSITION_PROPORTION,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_UPPER_MARKER_TEXT_STR,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_LOWER_MARKER_TEXT_STR,
+                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                                                zorder+1)
+
+                self._add_mock_up_annotation_box_bracket(ax,
+                                                         single_conf_int_box_data_mean,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_Y_OFFSET_FROM_BOX,
+                                                         False,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_BRACKET_HEIGTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_Y_OFFSET_FROM_BRACKET ,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_STR,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         zorder+1)
+
+                self._add_mock_up_annotation_box_bracket(ax,
+                                                         single_conf_int_box_data_median,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_Y_OFFSET_FROM_BOX,
+                                                         True,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_BRACKET_HEIGTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_Y_OFFSET_FROM_BRACKET,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_STR,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         zorder+1)
+
+            case ConfidenceIntervalKind.NONE:
+                pass
+
+            case _:
+                raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{ConfidenceIntervalKind.__name__}')
+
+        self._add_mock_up_annotation_arrow_kde(ax,
+                                               mock_up_data,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_KDE_ARROW_POSITION_QUANTILE,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_KDE_ARROW_TEXT_POSITION_PROPORTION,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_KDE_ARROW_TEXT_STR,
+                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                               zorder+1)
+
+        self._add_mock_up_annotation_box_bracket(ax,
+                                                 iqr_box_data,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_Y_OFFSET_FROM_BOX,
+                                                 True,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_BRACKET_HEIGTH,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_TEXT_Y_OFFSET_FROM_BRACKET,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_TEXT_STR,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                 zorder+1)
+
+        self._add_mock_up_annotation_box_bracket(ax,
+                                                 range_box_data,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_Y_OFFSET_FROM_BOX,
+                                                 True,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_BRACKET_HEIGTH,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_TEXT_Y_OFFSET_FROM_BRACKET,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_TEXT_STR ,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                 zorder+1)
 
     def _return_moa_conf_int_plot_x_label(self,
                                           x_label_kind: OmnibusTestResultMeasureAssociationConfIntXLabelKind,

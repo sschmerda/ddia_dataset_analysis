@@ -123,16 +123,20 @@ class SequenceStatisticConfIntDataControlVars:
 @dataclass
 class IQRRangeBoxData:
     x_start: int | float
+    x_end: int | float
     y_start: int | float
+    y_end: int | float
     box_height: int | float
     box_width: int | float
 
 @dataclass
 class SingleConfIntBoxData:
-    ci_x_start: int | float
-    ci_y_start: int | float
-    ci_box_height: int | float
-    ci_box_width: int | float
+    x_start: int | float
+    x_end: int | float
+    y_start: int | float
+    y_end: int | float
+    box_height: int | float
+    box_width: int | float
     statistic_x_value: int | float
     statistic_y_value: int | float
 
@@ -149,3 +153,10 @@ class DualConfIntBoxData:
     statistic_upper_y_value: int | float
     statistic_lower_x_value: int | float
     statistic_lower_y_value: int | float
+
+@dataclass
+class MockUpDistData:
+    mu:  int | float
+    sigma: int | float
+    x_values: np.ndarray
+    y_values: np.ndarray
