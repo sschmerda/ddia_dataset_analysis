@@ -1,6 +1,7 @@
+from .configs.sequence_distance_config import *
+from .constants.constants import *
 from .standard_import import *
 from .preprocessing_functions import *
-from .constants import *
 from .io_functions import *
 
 class SeqDist:
