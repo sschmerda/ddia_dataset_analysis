@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 from .sequence_statistics_functions import *
 from .plotting_functions import *
 
@@ -167,7 +167,7 @@ def get_nas_in_data(interactions: pd.DataFrame):
     print(STAR_STRING)
 
 def map_new_to_old_values(interactions: pd.DataFrame,
-                          group_field: str,
+                          group_field: str | None,
                           user_field: str,
                           learning_activity_field: str) -> tuple[pd.DataFrame]:
     """Map new column values to old ones for the group, user and learning_activity fields(categorical variables). New values range from [0] to [#unique values in the respective fields -1].
@@ -251,10 +251,10 @@ def drop_na_by_fields(interactions: pd.DataFrame,
     return interactions
 
 def drop_learning_activity_sequence_if_contains_na_in_field(interactions: pd.DataFrame, 
-                                                            group_field: str, 
+                                                            group_field: str | None, 
                                                             user_field: str, 
-                                                            field_list=[], 
-                                                            field_value_tuple_filter_list=[]) -> tuple:
+                                                            field_list: list[str] = [], 
+                                                            field_value_tuple_filter_list: list[tuple[str, str]] = []) -> tuple:
     """Drops sequences groupwise from a dataframe that contain NAs in fields specified in field_list. Certain values in fields ((field, value) tuple in field_value_tuple_filter_list) can be ommited such that the sequences they are contained in will not be dropped. 
 
     Parameters
@@ -348,7 +348,7 @@ def drop_learning_activity_sequence_if_contains_na_in_field(interactions: pd.Dat
     return interactions, na_indices_list
 
 def sort_by_timestamp(interactions: pd.DataFrame,
-                      group_field: str,
+                      group_field: str | None,
                       user_field: str,
                       timestamp_field: str,
                       order_field: str):
@@ -381,7 +381,7 @@ def sort_by_timestamp(interactions: pd.DataFrame,
     return interactions
 
 def add_sequence_id_field(interactions: pd.DataFrame,
-                          group_field: str) -> pd.DataFrame:
+                          group_field: str | None) -> pd.DataFrame:
     """Adds a sequence_id field to the interactions dataframe. An unique id is mapped to each unique sequence of learning
     activities, indicating to which sequence a (group,user,learning_activity) entry belongs to. The sequence_id is of type int.
 
@@ -419,7 +419,7 @@ def add_sequence_id_field(interactions: pd.DataFrame,
     return interactions
 
 def rename_fields(interactions: pd.DataFrame,
-                  group_field: str,
+                  group_field: str | None,
                   user_field: str,
                   learning_activity_field: str,
                   timestamp_field: str) -> tuple[pd.DataFrame]:
@@ -473,11 +473,11 @@ def rename_fields(interactions: pd.DataFrame,
     return interactions, fields_mapping_df
 
 def typecast_fields(interactions: pd.DataFrame,
-                    timestamp_field: str,
-                    group_field: str,
-                    user_field: str,
-                    learning_activity_field: str,
-                    **kwargs):
+                    timestamp_field: str | None,
+                    group_field: str | None,
+                    user_field: str | None,
+                    learning_activity_field: str | None,
+                    **kwargs) -> pd.DataFrame:
     """Change the datatype of columns to the appropriate one.
     (categorical variables into str type, timestamp variable into datetime)
 
@@ -600,7 +600,7 @@ class SequenceFilter():
     def __init__(self,
                  dataset_name: str, 
                  interactions: pd.DataFrame,
-                 group_field,
+                 group_field: str | None,
                  min_pct_unique_learning_activities_per_group_in_seq_threshold: int,
                  max_pct_repeated_learning_activities_in_seq_threshold: int,
                  min_sequence_number_per_group_threshold: int,
@@ -1040,16 +1040,16 @@ class SequenceFilter():
                                               [threshold_min_unique_str, threshold_max_repeated_str])
 
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
-                                              LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
-                                              LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                              LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR,
+                                              LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_LABEL_NAME_STR,
                                               self.min_pct_unique_learning_activities_per_group_in_seq)
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
-                                              LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                              LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR,
                                               LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
                                               self.max_pct_repeated_learning_activities_in_seq)
 
-        min_pct_unique_learning_activities_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR] >= self.min_pct_unique_learning_activities_per_group_in_seq
-        max_pct_repeated_learning_activities_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR] <= self.max_pct_repeated_learning_activities_in_seq
+        min_pct_unique_learning_activities_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR] >= self.min_pct_unique_learning_activities_per_group_in_seq
+        max_pct_repeated_learning_activities_filter = self.unique_learning_activity_sequence_stats_per_group[LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR] <= self.max_pct_repeated_learning_activities_in_seq
         row_filter = (min_pct_unique_learning_activities_filter & max_pct_repeated_learning_activities_filter)
 
         self.unique_learning_activity_sequence_stats_per_group = self.unique_learning_activity_sequence_stats_per_group.loc[row_filter, :]
