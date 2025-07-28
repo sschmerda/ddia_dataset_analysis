@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 
 def save_interaction_and_mapping_df(interactions: pd.DataFrame,
                                     field_mapping_dataframe: pd.DataFrame,
