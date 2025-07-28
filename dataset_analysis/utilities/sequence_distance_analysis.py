@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 from .preprocessing_functions import *
 from .sequence_distance import *
 from .io_functions import *
@@ -880,9 +880,9 @@ class SequenceDistanceAnalytics:
                                              True,
                                              True)
             plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
-                                             LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_NAME_STR,
+                                             LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR,
                                              distance_measure,
-                                             LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_LABEL_NAME_STR,
+                                             LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_LABEL_NAME_STR,
                                              label,
                                              True,
                                              distance_measure_is_pct,
@@ -892,7 +892,7 @@ class SequenceDistanceAnalytics:
                                              True,
                                              True)
             plot_stat_scatter_plot_per_group(self.unique_learning_activity_sequence_stats_per_group,
-                                             LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_NAME_STR,
+                                             LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR,
                                              distance_measure,
                                              LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
                                              label,
