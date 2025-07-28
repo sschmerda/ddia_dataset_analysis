@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 
 def return_object_size(dataset_name: str,
                        globals_dict: list,
