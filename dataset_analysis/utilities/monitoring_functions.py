@@ -82,6 +82,6 @@ def return_object_size(dataset_name: str,
     # add data to result tables
     object_size_df_filter = object_size_df[MONITORING_OBJECT_NAME_FIELD_NAME_STR].isin(MONITORING_RESULT_TABLES_LIST)
     object_size_df_filtered = object_size_df.loc[object_size_df_filter, :].reset_index(drop=True).copy()
-    result_tables.object_size_df = object_size_df_filtered
+    result_tables.object_size_df = object_size_df_filtered.copy()
 
     return object_size_df
