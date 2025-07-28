@@ -1,6 +1,6 @@
+from .configs.general_config import *
+from .constants.constants import *
 from .standard_import import *
-from .constants import *
-from .config import *
 from .preprocessing_functions import *
 from .plotting_functions import *
 
