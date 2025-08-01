@@ -1,4 +1,5 @@
 from .configs.general_config import *
+from .configs.preprocessing_config import *
 from .constants.constants import *
 from .standard_import import *
 from .sequence_statistics_functions import *
@@ -667,20 +668,35 @@ class SequenceFilter():
 
     @staticmethod
     def _plot_sequence_filter_thresholds(learning_activity_sequence_stats_per_group: pd.DataFrame,
+                                         preprocessing_base: SequencePreprocessingBase,
                                          sequence_statistic: str,
                                          sequence_statistic_label: str,
                                          threshold: Union[int, list[tuple[float]]]) -> None:
-        if isinstance(threshold, int):
-            title_str = f'{sequence_statistic}{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_FILTER_TITLE_STR}{threshold}%'
-            share_x_axis = True
-            axis_xlim = return_axis_limits(learning_activity_sequence_stats_per_group[sequence_statistic],
-                                          True)
-        elif isinstance(threshold, list):
-            title_str = f'{sequence_statistic}{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_LENGTH_OUTLIER_TITLE_STR}'
-            share_x_axis = True
-            axis_xlim = None
-        else:
-            raise TypeError('threshold needs to be int or list!')
+
+        match preprocessing_base:
+            case (SequencePreprocessingBase.PCT_UNIQUE_LEARNING_RESOURCES | 
+                  SequencePreprocessingBase.PCT_REPEATED_LEARNING_RESOURCES):
+
+                title_str = f'{sequence_statistic}{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_FILTER_TITLE_STR}{threshold}%'
+                share_x_axis = PLOT_SEQUENCE_FILTER_THRESHOLDS_DATA_IS_PCT_SHARE_X_AXIS
+                if share_x_axis:
+                    axis_xlim = return_axis_limits(learning_activity_sequence_stats_per_group[sequence_statistic],
+                                                   True)
+                else:
+                    axis_xlim = None
+
+            case SequencePreprocessingBase.SEQUENCE_LENGTH:
+
+                title_str = f'{sequence_statistic}{LEARNING_ACTIVITY_SEQUENCE_PREPROCESS_SEQUENCE_LENGTH_OUTLIER_TITLE_STR}'
+                share_x_axis = PLOT_SEQUENCE_FILTER_THRESHOLDS_DATA_IS_NOT_PCT_SHARE_X_AXIS
+                if share_x_axis:
+                    axis_xlim = return_axis_limits(learning_activity_sequence_stats_per_group[sequence_statistic],
+                                                   False)
+                else: 
+                    axis_xlim = None
+
+            case _:
+                raise ValueError(LEARNING_ACTIVITY_SEQUENCE_FILTER_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{SequencePreprocessingBase.__name__}')
         
         n_cols = set_facet_grid_column_number(learning_activity_sequence_stats_per_group[GROUP_FIELD_NAME_STR],
                                               SEABORN_SEQUENCE_FILTER_FACET_GRID_N_COLUMNS)
@@ -1041,10 +1057,12 @@ class SequenceFilter():
                                               [threshold_min_unique_str, threshold_max_repeated_str])
 
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
+                                              SequencePreprocessingBase.PCT_UNIQUE_LEARNING_RESOURCES,
                                               LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR,
                                               LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_LABEL_NAME_STR,
                                               self.min_pct_unique_learning_activities_per_group_in_seq)
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
+                                              SequencePreprocessingBase.PCT_REPEATED_LEARNING_RESOURCES,
                                               LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR,
                                               LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_PCT_LABEL_NAME_STR,
                                               self.max_pct_repeated_learning_activities_in_seq)
@@ -1087,6 +1105,7 @@ class SequenceFilter():
                 seq_to_keep_per_group_dict[group] = self.unique_learning_activity_sequence_stats_per_group[SEQUENCE_ID_FIELD_NAME_STR].values
 
         self._plot_sequence_filter_thresholds(self.learning_activity_sequence_stats_per_group,
+                                              SequencePreprocessingBase.SEQUENCE_LENGTH,
                                               LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
                                               LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR,
                                               threshold_tuples_list)
