@@ -456,6 +456,9 @@ class SequenceStatistics():
                           marginal_kws={'alpha': SEABORN_PLOT_OBJECT_ALPHA,
                                         'bins': SEABORN_HISTOGRAM_BIN_CALC_METHOD})
         
+        for collection in g.ax_joint.collections:
+            collection.set_zorder(2)
+        
         sns.histplot(data=count_df, x=LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, ax=g.ax_marg_x, color=SEABORN_DEFAULT_RGB_TUPLE, alpha=SEABORN_PLOT_OBJECT_ALPHA, kde=False)
         sns.histplot(data=count_df, y=LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR, ax=g.ax_marg_y, color=SEABORN_DEFAULT_RGB_TUPLE, alpha=SEABORN_PLOT_OBJECT_ALPHA, kde=False, orientation="horizontal")
 
@@ -478,7 +481,7 @@ class SequenceStatistics():
                           slope=1, 
                           color=SEABORN_LINE_COLOR_ORANGE, 
                           linewidth=SEABORN_LINE_WIDTH_JOINTPLOT, 
-                          zorder=0)
+                          zorder=1)
         g.ax_joint.legend(loc='center left', 
                           bbox_to_anchor=(1.25, 0.5),
                           title=GROUP_FIELD_NAME_STR)
