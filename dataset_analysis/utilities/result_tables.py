@@ -124,6 +124,7 @@ class ResultTables():
                  object_size_df: pd.DataFrame) -> None: 
 
         # data to be calculated
+        self.group_list = None
         self.available_fields_df = None
         self.summary_statistics_df = None
         self.sequence_statistics_df = None
@@ -164,6 +165,7 @@ class ResultTables():
             self._interactions = interactions.copy() 
 
             # calculated upon interactions initialization
+            self.group_list = self._gen_group_list()
             self.available_fields_df = self._gen_available_fields_df()
             self.summary_statistics_df = self._gen_summary_statistics_df()
             self.sequence_statistics_df = self._gen_sequence_statistics_df()
@@ -171,6 +173,7 @@ class ResultTables():
         else:
             self._interactions = None 
 
+            self.group_list = None
             self.available_fields_df = None
             self.summary_statistics_df = None
             self.sequence_statistics_df = None
@@ -378,6 +381,18 @@ class ResultTables():
 
         else:
             self._object_size_df = None 
+
+    def _gen_group_list(self) -> List[int]:
+        """Returns a list containing the group labels which are integers.
+
+        Returns
+        -------
+        List
+            A list containing the group labels which are integers
+        """        
+        group_list = np.unique(self.interactions[GROUP_FIELD_NAME_STR]).tolist()
+
+        return group_list
 
     def _gen_available_fields_df(self) -> pd.DataFrame:
         """Returns a dataframe which contains information about what fields are available in the input interactions dataframe.
