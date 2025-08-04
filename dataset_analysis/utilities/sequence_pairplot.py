@@ -825,18 +825,20 @@ class LearningActivitySequencePairplot():
                                            slope_is_none: bool,
                                            slope_is_zero: bool) -> pd.DataFrame:
 
+        x_data_second_highest = plotting_df[x_var].sort_values(ascending=True).iloc[-2]
         x_min = x_lim[0] + x_lim[1] * proportion_ax_lim
-        x_max = x_lim[1] - x_lim[1] * proportion_ax_lim
+        if x_min > x_data_second_highest:
+            x_min = -np.inf
 
+        y_data_second_highest = plotting_df[y_var].sort_values(ascending=True).iloc[-2]
         y_min = y_lim[0] + y_lim[1] * proportion_ax_lim
-        y_max = y_lim[1] - y_lim[1] * proportion_ax_lim
+        if y_min > y_data_second_highest:
+            y_min = -np.inf
 
         x_min_filter = plotting_df[x_var] >= x_min 
-        # x_max_filter = plotting_df[x_var] <= x_max 
         x_lim_filter = x_min_filter
 
         y_min_filter = plotting_df[y_var] >= y_min 
-        # y_max_filter = plotting_df[y_var] <= y_max 
         y_lim_filter = y_min_filter
 
         if slope_is_none:
@@ -1204,10 +1206,14 @@ class LearningActivitySequencePairplot():
                                                                                  x_var,
                                                                                  y_var)
         
-        r = round(variable_relationship.corr, PAIRPLOT_PEARSON_CORRELATION_AND_PARAMS_ROUND_DIGITS)
-        p = round(variable_relationship.p_value, PAIRPLOT_P_VALUE_ROUND_DIGITS)
-        slope = round(variable_relationship.slope, PAIRPLOT_PEARSON_CORRELATION_AND_PARAMS_ROUND_DIGITS)
-        intercept = round(variable_relationship.intercept, PAIRPLOT_PEARSON_CORRELATION_AND_PARAMS_ROUND_DIGITS)
+        r = self._round_value(variable_relationship.corr, 
+                              PAIRPLOT_PEARSON_CORRELATION_AND_PARAMS_ROUND_DIGITS)
+        p = self._round_value(variable_relationship.p_value, 
+                              PAIRPLOT_P_VALUE_ROUND_DIGITS)
+        slope = self._round_value(variable_relationship.slope, 
+                                  PAIRPLOT_PEARSON_CORRELATION_AND_PARAMS_ROUND_DIGITS)
+        intercept = self._round_value(variable_relationship.intercept, 
+                                      PAIRPLOT_PEARSON_CORRELATION_AND_PARAMS_ROUND_DIGITS)
 
         if include_slope:
             ax.set_title(f'r = {r}, slope = {slope}', fontsize=PAIRPLOT_HEADER_FONTSIZE)
@@ -1241,3 +1247,13 @@ class LearningActivitySequencePairplot():
         fields_to_plot_data_kind += eval_metric_data_kind
 
         return fields_to_plot_data_kind
+    
+    def _round_value(self,
+                     value: float,
+                     decimals: int) -> float:
+
+        if value is not None:        
+            value = np.round(value, 
+                             decimals)
+        
+        return value
