@@ -47,6 +47,10 @@ def return_axis_limits(data: ArrayLike | None,
                 max_val = max(data)
                 min_val = min(data)
 
+                # handle the edge case where max_val is 0
+                if max_val == 0:
+                    max_val = 1
+
                 axis_upper_limit = float(max_val * (1 + pct / 100))
 
                 if min_val < 0: 
@@ -635,7 +639,11 @@ def plot_stat_hist_plot_per_group(sequence_stats_per_group_df: pd.DataFrame,
                     bins=SEABORN_HISTOGRAM_BIN_CALC_METHOD,
                     alpha=SEABORN_PLOT_OBJECT_ALPHA)
     for ax in g.axes.flat:
-        ax.lines[0].set_color(SEABORN_LINE_COLOR_RED)
+        try:
+            ax.lines[0].set_color(SEABORN_LINE_COLOR_RED)
+        except:
+            pass
+
     g.map_dataframe(sns.rugplot, 
                     x=statistic,
                     height=SEABORN_RUG_PLOT_HEIGHT_PROPORTION_FACET,
