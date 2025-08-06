@@ -707,26 +707,28 @@ class AggregatedResults():
 
                     field_data = df[field.value].values
 
-                    self._plot_kde(field_data,
-                                   field,
-                                   data_range_limits,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_COLOR,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_LINEWIDTH,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_ALPHA,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_COLOR,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_LINEWIDTH,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_ALPHA,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_COLOR,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_LINEWIDTH,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_ALPHA,
-                                   color,
-                                   None,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INCLUDE_KDE_BOTTOM_LINE,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_APPLY_BOUNDARY_REFLECTION,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_METHOD,
-                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_CUT,
-                                   shift_value,
-                                   zorder)
+                    # only plot kde if there is mo:e than one unique value in the field data
+                    if len(np.unique(field_data)) > 1:
+                        self._plot_kde(field_data,
+                                       field,
+                                       data_range_limits,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_COLOR,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_LINEWIDTH,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_OUTER_LINEPLOT_ALPHA,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_COLOR,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_LINEWIDTH,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INNER_LINEPLOT_ALPHA,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_COLOR,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_LINEWIDTH,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BOTTOM_LINEPLOT_ALPHA,
+                                       color,
+                                       None,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_INCLUDE_KDE_BOTTOM_LINE,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_APPLY_BOUNDARY_REFLECTION,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_METHOD,
+                                       SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_BANDWIDTH_CUT,
+                                       shift_value,
+                                       zorder)
 
                     shift_value -= SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_Y_AXIS_TICK_SHIFT_INCREMENT 
                     zorder += 1
