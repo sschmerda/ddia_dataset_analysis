@@ -71,7 +71,7 @@ class Cohen1988MeasureAssociationStrengthContingency(MeasureAssociationStrength)
     """
 
     # upper bounds not inclusive
-    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.1),
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (-np.inf, 0.1),
                                    MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.3),
                                    MeasureAssociationStrengthValuesEnum.MEDIUM: (0.3, 0.5),
                                    MeasureAssociationStrengthValuesEnum.LARGE: (0.5, np.inf)}
@@ -84,7 +84,7 @@ class GignacSzodorai2016MeasureAssociationStrengthContingency(MeasureAssociation
     """
 
     # upper bounds not inclusive
-    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.1),
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (-np.inf, 0.1),
                                    MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.2),
                                    MeasureAssociationStrengthValuesEnum.MEDIUM: (0.2, 0.3),
                                    MeasureAssociationStrengthValuesEnum.LARGE: (0.3, np.inf)}
@@ -97,7 +97,7 @@ class FunderOzer2019MeasureAssociationStrengthContingency(MeasureAssociationStre
     """
 
     # upper bounds not inclusive
-    association_strength_values = {MeasureAssociationStrengthValuesEnum.TINY: (0, 0.05),
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.TINY: (-np.inf, 0.05),
                                    MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0.05, 0.1),
                                    MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.2),
                                    MeasureAssociationStrengthValuesEnum.MEDIUM: (0.2, 0.3),
@@ -112,7 +112,7 @@ class LovakovAgadullina2021MeasureAssociationStrengthContingency(MeasureAssociat
     """
 
     # upper bounds not inclusive
-    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.12),
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (-np.inf, 0.12),
                                    MeasureAssociationStrengthValuesEnum.SMALL: (0.12, 0.24),
                                    MeasureAssociationStrengthValuesEnum.MEDIUM: (0.24, 0.41),
                                    MeasureAssociationStrengthValuesEnum.LARGE: (0.41, np.inf)}
@@ -125,7 +125,7 @@ class Cohen1988MeasureAssociationStrengthAOV(MeasureAssociationStrength):
     """
 
     # upper bounds not inclusive
-    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.0099),
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (-np.inf, 0.0099),
                                    MeasureAssociationStrengthValuesEnum.SMALL: (0.0099, 0.0588),
                                    MeasureAssociationStrengthValuesEnum.MEDIUM: (0.0588, 0.1379),
                                    MeasureAssociationStrengthValuesEnum.LARGE: (0.1379, np.inf)}
@@ -137,7 +137,7 @@ class Cohen1988FMeasureAssociationStrengthAOV(MeasureAssociationStrength):
     """
 
     # upper bounds not inclusive
-    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (0, 0.1),
+    association_strength_values = {MeasureAssociationStrengthValuesEnum.VERY_SMALL: (-np.inf, 0.1),
                                    MeasureAssociationStrengthValuesEnum.SMALL: (0.1, 0.25),
                                    MeasureAssociationStrengthValuesEnum.MEDIUM: (0.25, 0.4),
                                    MeasureAssociationStrengthValuesEnum.LARGE: (0.4, np.inf)}

@@ -1792,6 +1792,9 @@ class AggregatedResults():
                 if upper_bound == np.inf:
                     upper_bound = 1
 
+                if lower_bound == -np.inf:
+                    lower_bound = 0
+
                 plt.axvspan(lower_bound,
                             upper_bound,
                             facecolor=moa_strength_color,
