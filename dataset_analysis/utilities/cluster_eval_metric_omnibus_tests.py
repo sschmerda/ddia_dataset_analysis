@@ -989,7 +989,8 @@ class ClusterEvalMetricOmnibusTest():
         
         omega_squared = (ss_between - (n_groups - 1) * mean_squared_error) / (ss_within + ss_between + mean_squared_error)
 
-        omega_squared = max(omega_squared, 0.0)
+        # force omega squared to be non-negative(would introduce slight bias)
+        # omega_squared = max(omega_squared, 0.0)
     
         return omega_squared
 
