@@ -1705,14 +1705,14 @@ class AggregatedResults():
                                                               OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_COLOR_PALETTE,
                                                               OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_COLOR_ALPHA,
                                                               OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_COLOR_SATURATION)
-        data = self._filter_data_by_significant_groups(data)
+        data = self._filter_data_by_significance_of_groups(data)
 
         field = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_FIELD
         field_lower_bound = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_LOWER_BOUND_FIELD
         field_upper_bound = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_EFFECT_SIZE_VALUE_UPPER_BOUND_FIELD
 
         x_axis_ticks = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_X_TICKS_PCT_RATIO
-        statistic_is_pct = False 
+        statistic_is_pct = True 
         statistic_is_ratio = True
         share_x = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHAREX_PCT_RATIO
         share_y = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHAREY_PCT_RATIO
@@ -1722,49 +1722,65 @@ class AggregatedResults():
 
         def plot_moa_conf_int(data, **kwargs):
 
-            dataset_name = data[DATASET_NAME_FIELD_NAME_STR].iloc[0]
-            if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_CONFIDENCE_INTERVALS:
-                data = self._sort_groups_by_metric(data,
-                                                   [field, OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_SECOND_SORT_FIELD],
-                                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_METRIC,
-                                                   SortingEntity.GROUP,
-                                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_ASCENDING)
+            is_dummmy_data = data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_IS_DUMMY_FRAME].iloc[0]
 
-            colors = self._return_colors(data,
-                                         ColorPaletteAggregationLevel.GROUP,
-                                         dataset_name,
-                                         color_dict)
+            if not is_dummmy_data:
+                dataset_name = data[DATASET_NAME_FIELD_NAME_STR].iloc[0]
+                if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_CONFIDENCE_INTERVALS:
+                    data = self._sort_groups_by_metric(data,
+                                                    [field, OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_SECOND_SORT_FIELD],
+                                                    OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_METRIC,
+                                                    SortingEntity.GROUP,
+                                                    OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_ASCENDING)
 
-            x_array = data[field.value].to_numpy()
-            y_array = data[GROUP_FIELD_NAME_STR].to_numpy()
-            y_array_numerical = self._return_y_array_numerical(y_array)
+                colors = self._return_colors(data,
+                                            ColorPaletteAggregationLevel.GROUP,
+                                            dataset_name,
+                                            color_dict)
 
-            distance_lower_bound = (x_array - 
-                                    data[field_lower_bound.value])
-            distance_upper_bound = (data[field_upper_bound.value] - 
-                                    x_array)
+                x_array = data[field.value].to_numpy()
+                y_array = data[GROUP_FIELD_NAME_STR].to_numpy()
+                y_array_numerical = self._return_y_array_numerical(y_array)
+
+                distance_lower_bound = (x_array - 
+                                        data[field_lower_bound.value])
+                distance_upper_bound = (data[field_upper_bound.value] - 
+                                        x_array)
 
 
-            sns.scatterplot(data=data,
-                            x=field.value,
-                            y=y_array_numerical,
-                            hue=GROUP_FIELD_NAME_STR,
-                            palette=colors,
-                            s=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_SIZE,
-                            edgecolor=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_EDGECOLOR,
-                            linewidth=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_EDGEWIDTH,
-                            legend=False,
-                            zorder=2)
+                sns.scatterplot(data=data,
+                                x=field.value,
+                                y=y_array_numerical,
+                                hue=GROUP_FIELD_NAME_STR,
+                                palette=colors,
+                                s=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_SIZE,
+                                edgecolor=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_EDGECOLOR,
+                                linewidth=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SCATTER_MARKER_EDGEWIDTH,
+                                legend=False,
+                                zorder=2)
 
-            plt.errorbar(x=x_array, 
-                         y=y_array_numerical, 
-                         xerr=[distance_lower_bound, distance_upper_bound], 
-                         fmt='none', 
-                         capsize=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_CAP_SIZE,
-                         capthick=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_CAP_THICKNESS,
-                         ecolor=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_BAR_COLOR, 
-                         elinewidth=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_BAR_LINEWIDTH,
-                         zorder=1)
+                plt.errorbar(x=x_array, 
+                            y=y_array_numerical, 
+                            xerr=[distance_lower_bound, distance_upper_bound], 
+                            fmt='none', 
+                            capsize=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_CAP_SIZE,
+                            capthick=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_CAP_THICKNESS,
+                            ecolor=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_BAR_COLOR, 
+                            elinewidth=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_ERRORBAR_BAR_LINEWIDTH,
+                            zorder=1)
+            
+            else:
+                plt.annotate(RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_NO_SIGNIFICANT_GROUPS_NAME_STR,
+                             xy=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_FILTERED_OUT_GROUPS_ANNOTATION_TEXT_POSITION,
+                             xycoords='axes fraction',
+                             ha='center', 
+                             va='center',
+                             bbox=dict(boxstyle=f'{OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_FILTERED_OUT_GROUPS_ANNOTATION_TEXTBOX_STYLE},pad=0.3', 
+                                                   fc='white', 
+                                                   ec='black', 
+                                                   lw=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_FILTERED_OUT_GROUPS_ANNOTATION_TEXTBOX_LINEWIDTH),
+                             fontsize=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_FILTERED_OUT_GROUPS_ANNOTATION_TEXT_FONTSIZE,
+                             annotation_clip=False)
             
             plt.margins(y=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_Y_AXIS_MARGIN)
 
@@ -1823,50 +1839,72 @@ class AggregatedResults():
 
         for ax, (dataset_name, facet_data) in zip(g.axes.flat, data.groupby(DATASET_NAME_FIELD_NAME_STR)):
 
+            is_dummmy_data = facet_data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_IS_DUMMY_FRAME].iloc[0]
+        
             # x_label can be set statically or dynamically
             x_label = self._return_moa_conf_int_plot_x_label(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_X_AXIS_LABEL,
                                                              facet_data)
-
-            if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_CONFIDENCE_INTERVALS:
-                facet_data = self._sort_groups_by_metric(facet_data,
-                                                         [field, OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_SECOND_SORT_FIELD],
-                                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_METRIC,
-                                                         SortingEntity.GROUP,
-                                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_ASCENDING)
-
-            y_array = facet_data[GROUP_FIELD_NAME_STR].to_numpy()
-            y_array_numerical = self._return_y_array_numerical(y_array)
-
             self._set_axis_labels(ax,
                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_LABEL,
                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_LABEL,
                                   x_label,
                                   OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_Y_AXIS_LABEL)
 
-            self._set_axis_ticks(ax,
-                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICKS,
-                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_TICKS,
-                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICK_LABELS,
-                                 OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_TICK_LABELS,
-                                 x_axis_ticks,
-                                 y_array,
-                                 x_axis_ticks_position=None,
-                                 y_axis_ticks_position=y_array_numerical)
-
             ax.grid(True,
                     axis=OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_GRID_LINE_AXIS.value,
                     which='both')
-
-            if not share_x:
-                x_axis_lim = return_axis_limits(facet_data[field_upper_bound.value],
-                                                statistic_is_pct,
-                                                statistic_is_ratio)
-                ax.set_xlim(*x_axis_lim)
 
             ax.spines['top'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_TOP)
             ax.spines['bottom'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_BOTTOM)
             ax.spines['left'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_LEFT)
             ax.spines['right'].set_visible(OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SHOW_RIGHT)
+
+            # per facet customization if no significant groups exist
+            if is_dummmy_data:
+                if not share_x:
+                    x_axis_lim = return_axis_limits(None,
+                                                    True,
+                                                    True)
+                    ax.set_xlim(*x_axis_lim)
+                
+                self._set_axis_ticks(ax,
+                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICKS,
+                                     False,
+                                     OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICK_LABELS,
+                                     False,
+                                     x_axis_ticks,
+                                     None,
+                                     x_axis_ticks_position=None,
+                                     y_axis_ticks_position=None)
+
+            # per facet customization if significant groups exist
+            else:
+                if not share_x:
+                    x_axis_lim = return_axis_limits(facet_data[field_upper_bound.value],
+                                                    statistic_is_pct,
+                                                    statistic_is_ratio)
+                    ax.set_xlim(*x_axis_lim)
+
+                if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_CONFIDENCE_INTERVALS:
+                    facet_data = self._sort_groups_by_metric(facet_data,
+                                                             [field, OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_SECOND_SORT_FIELD],
+                                                             OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_METRIC,
+                                                             SortingEntity.GROUP,
+                                                             OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_SORT_ASCENDING)
+
+                    y_array = facet_data[GROUP_FIELD_NAME_STR].to_numpy()
+                    y_array_numerical = self._return_y_array_numerical(y_array)
+
+
+                    self._set_axis_ticks(ax,
+                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICKS,
+                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_TICKS,
+                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_X_AXIS_TICK_LABELS,
+                                         OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_Y_AXIS_TICK_LABELS,
+                                         x_axis_ticks,
+                                         y_array,
+                                         x_axis_ticks_position=None,
+                                         y_axis_ticks_position=y_array_numerical)
 
         n_groups = data[DATASET_NAME_FIELD_NAME_STR].nunique()
         self._remove_inner_plot_elements_grid(g,
@@ -1880,6 +1918,7 @@ class AggregatedResults():
                                               OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_REMOVE_INNER_Y_AXIS_TICK_LABELS)
         
         # plot the legend with matching colors
+        # for now assumes that categorical and continuous eval metrics have the same strength categories
         if OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_PLOT_LEGEND:
 
             moa_strength_cat_interval_mapping = data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR].iloc[0]
@@ -2605,26 +2644,101 @@ class AggregatedResults():
 
         return omnibus_test_result_per_group_per_dataset_moa_conf_int_df
     
-    def _filter_data_by_significant_groups(self,
-                                           data: pd.DataFrame) -> pd.DataFrame:
+    def _filter_data_by_significance_of_groups(self,
+                                               data: pd.DataFrame) -> pd.DataFrame:
+
+        data[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_IS_DUMMY_FRAME] = False
 
         group_inclusion = OMNIBUS_TEST_RESULT_MEASURE_ASSOCIATION_GROUP_INCLUSION
+        p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
+        p_val_is_significant = data[p_val_is_significant_field_name]
 
         match group_inclusion:
             case OmnibusTestResultMeasureAssociationConfIntGroupInclusion.ALL_GROUPS:
                 pass
 
             case OmnibusTestResultMeasureAssociationConfIntGroupInclusion.SIGNIFICANT_GROUPS:
-                p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
-                data = data.loc[data[p_val_is_significant_field_name], :]
+                filtered_out_datasets = self._return_filtered_out_datasets(data,
+                                                                           p_val_is_significant)
+                moa_strength_guidelines = self._return_data_field_value_filtered_out_datasets(data,
+                                                                                              filtered_out_datasets,
+                                                                                              RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR)
+                moa_kind = self._return_data_field_value_filtered_out_datasets(data,
+                                                                               filtered_out_datasets,
+                                                                               RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_KIND_NAME_STR)
+                data = data.loc[p_val_is_significant, :]
+                data = self._add_dummy_rows_for_filtered_out_datasets(data,
+                                                                      filtered_out_datasets,
+                                                                      moa_kind,
+                                                                      moa_strength_guidelines)
 
             case OmnibusTestResultMeasureAssociationConfIntGroupInclusion.NON_SIGNIFICANT_GROUPS:
-                p_val_is_significant_field_name = self._return_p_val_is_significant_field_name()
-                data = data.loc[~data[p_val_is_significant_field_name], :]
+                filtered_out_datasets = self._return_filtered_out_datasets(data,
+                                                                           ~p_val_is_significant)
+                moa_strength_guidelines = self._return_data_field_value_filtered_out_datasets(data,
+                                                                                              filtered_out_datasets,
+                                                                                              RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR)
+                moa_kind = self._return_data_field_value_filtered_out_datasets(data,
+                                                                               filtered_out_datasets,
+                                                                               RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_KIND_NAME_STR)
+                data = data.loc[~p_val_is_significant, :]
+                data = self._add_dummy_rows_for_filtered_out_datasets(data,
+                                                                      filtered_out_datasets,
+                                                                      moa_kind,
+                                                                      moa_strength_guidelines)
 
             case _:
                 raise ValueError(RESULT_AGGREGATION_ERROR_ENUM_NON_VALID_MEMBER_NAME_STR + f'{OmnibusTestResultMeasureAssociationConfIntGroupInclusion.__name__}')
             
+        return data
+    
+    def _return_filtered_out_datasets(self,
+                                      data: pd.DataFrame,
+                                      group_filter: pd.Series) -> List[str]:
+
+        datasets_before_filter = set(data[DATASET_NAME_FIELD_NAME_STR])
+        datasets_after_filter = set(data.loc[group_filter, :][DATASET_NAME_FIELD_NAME_STR])
+
+        filtered_out_datasets = list(datasets_before_filter.difference(datasets_after_filter))
+
+        return filtered_out_datasets
+
+    def _return_data_field_value_filtered_out_datasets(self,
+                                                       data: pd.DataFrame,
+                                                       filtered_out_datasets: List[str],
+                                                       field: str) -> List:
+
+        moa_strength_guideline_boundaries = [self._return_data_field_value(data, dataset_name, field) for dataset_name in filtered_out_datasets]
+
+        return moa_strength_guideline_boundaries
+
+    def _return_data_field_value(self,
+                                 data: pd.DataFrame,
+                                 dataset_name: str,
+                                 field: str) -> dict[MeasureAssociationStrengthValuesEnum, Tuple[float, float]]:
+
+        dataset_name_filter = data[DATASET_NAME_FIELD_NAME_STR] == dataset_name
+        return data.loc[dataset_name_filter, field].iloc[0]
+        
+    def _add_dummy_rows_for_filtered_out_datasets(self,
+                                                  data: pd.DataFrame,
+                                                  filtered_out_datasets: List[str],
+                                                  moa_kind: List[str],
+                                                  moa_strength_guidelines: List[dict[MeasureAssociationStrengthValuesEnum, Tuple[float, float]]]) -> pd.DataFrame:
+        
+        n_filtered_out_datasets = len(filtered_out_datasets)
+        dummy_frame = pd.DataFrame(columns=data.columns, 
+                                   data=[[None] * len(data.columns) for _ in range(n_filtered_out_datasets)])
+
+        dummy_frame[DATASET_NAME_FIELD_NAME_STR] = filtered_out_datasets
+        dummy_frame[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_KIND_NAME_STR] = moa_kind
+        dummy_frame[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_STRENGTH_GUIDELINE_BOUNDARIES_NAME_STR] = moa_strength_guidelines
+        dummy_frame[RESULT_AGGREGATION_OMNIBUS_TEST_RESULT_MOA_IS_DUMMY_FRAME] = True
+        data = pd.concat([dummy_frame, data], 
+                         ignore_index=True)
+        data.sort_values(by=DATASET_NAME_FIELD_NAME_STR, 
+                         inplace=True)
+
         return data
 
     def _return_aggregated_omnibus_test_result_per_dataset_df_display(self,
@@ -3943,10 +4057,10 @@ class AggregatedResults():
                                                                                   single_conf_int_box_data_mean,
                                                                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEAN_MARKER_TEXT_POSITION_PROPORTION,
                                                                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEAN_MARKER_TEXT_STR,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                                                   zorder+1)
 
                 self._add_mock_up_annotation_box_bracket(ax,
@@ -3956,10 +4070,10 @@ class AggregatedResults():
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_BRACKET_HEIGTH,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_Y_OFFSET_FROM_BRACKET ,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_STR,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                          zorder+1)
 
             case ConfidenceIntervalKind.MEDIAN:
@@ -3968,10 +4082,10 @@ class AggregatedResults():
                                                                                   single_conf_int_box_data_median,
                                                                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEDIAN_MARKER_TEXT_POSITION_PROPORTION,
                                                                                   SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_SINGLE_CONF_INT_MEDIAN_MARKER_TEXT_STR,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                                                  EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                                                   zorder+1)
 
                 self._add_mock_up_annotation_box_bracket(ax,
@@ -3981,10 +4095,10 @@ class AggregatedResults():
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_BRACKET_HEIGTH,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_Y_OFFSET_FROM_BRACKET,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_STR,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                          zorder+1)
 
             case ConfidenceIntervalKind.BOTH:
@@ -3995,10 +4109,10 @@ class AggregatedResults():
                                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_LOWER_MARKER_TEXT_POSITION_PROPORTION,
                                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_UPPER_MARKER_TEXT_STR,
                                                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_DUAL_CONF_INT_LOWER_MARKER_TEXT_STR,
-                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                                                EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                                                 zorder+1)
 
                 self._add_mock_up_annotation_box_bracket(ax,
@@ -4008,10 +4122,10 @@ class AggregatedResults():
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_BRACKET_HEIGTH,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_Y_OFFSET_FROM_BRACKET ,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEAN_TEXT_STR,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                          zorder+1)
 
                 self._add_mock_up_annotation_box_bracket(ax,
@@ -4021,10 +4135,10 @@ class AggregatedResults():
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_BRACKET_HEIGTH,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_Y_OFFSET_FROM_BRACKET,
                                                          SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_CONF_INT_MEDIAN_TEXT_STR,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                         EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                         SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                          zorder+1)
 
             case ConfidenceIntervalKind.NONE:
@@ -4038,10 +4152,10 @@ class AggregatedResults():
                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_KDE_ARROW_POSITION_QUANTILE,
                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_KDE_ARROW_TEXT_POSITION_PROPORTION,
                                                SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_KDE_ARROW_TEXT_STR,
-                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                               EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                               SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                zorder+1)
 
         self._add_mock_up_annotation_box_bracket(ax,
@@ -4051,10 +4165,10 @@ class AggregatedResults():
                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_BRACKET_HEIGTH,
                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_TEXT_Y_OFFSET_FROM_BRACKET,
                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_IQR_TEXT_STR,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                  zorder+1)
 
         self._add_mock_up_annotation_box_bracket(ax,
@@ -4064,10 +4178,10 @@ class AggregatedResults():
                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_BRACKET_HEIGTH,
                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_TEXT_Y_OFFSET_FROM_BRACKET,
                                                  SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_RANGE_TEXT_STR ,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
-                                                 EQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXT_FONTSIZE,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_LINEWIDTH,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_TEXTBOX_STYLE,
+                                                 SEQUENCE_STATISTICS_DISTRIBUTION_RIDGEPLOT_MOCKUP_ANNOTATION_ARROW_LINEWIDTH,
                                                  zorder+1)
 
     def _return_moa_conf_int_plot_x_label(self,
