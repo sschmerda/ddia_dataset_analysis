@@ -2490,7 +2490,6 @@ class AggregatedResults():
         cluster_ranks_sorted = sorted(cluster_ranks, key=self._return_int_from_ordinal_string_numbers)
         cluster_rank_sorted_levels = ([RESULT_AGGREGATION_CLUSTER_SIZE_NON_CLUSTERED_STR] + 
                                       cluster_ranks_sorted)
-        print(cluster_rank_sorted_levels)
         cluster_size_per_group_sorted[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR] = pd.Categorical(cluster_size_per_group_sorted[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR], 
                                                                                                                     categories=cluster_rank_sorted_levels, 
                                                                                                                     ordered=True)
