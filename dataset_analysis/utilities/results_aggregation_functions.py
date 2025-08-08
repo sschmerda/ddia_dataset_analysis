@@ -1388,6 +1388,7 @@ class AggregatedResults():
                                   CLUSTER_SIZE_LINEPLOT_X_AXIS_LABEL,
                                   CLUSTER_SIZE_LINEPLOT_Y_AXIS_LABEL)
 
+            x_ticks = np.unique(facet_data[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR])
             self._set_axis_ticks(ax,
                                  CLUSTER_SIZE_LINEPLOT_PLOT_X_AXIS_TICKS,
                                  CLUSTER_SIZE_LINEPLOT_PLOT_Y_AXIS_TICKS,
@@ -1403,7 +1404,7 @@ class AggregatedResults():
                     axis=CLUSTER_SIZE_LINEPLOT_GRID_LINE_AXIS.value,
                     which='both')
 
-            if not share_x:
+            if not share_y:
                 y_axis_lim = return_axis_limits(facet_data[RESULT_AGGREGATION_CLUSTER_SIZE_SEQUENCE_COUNT_PER_CLUSTER_FIELD_NAME_STR],
                                                 statistic_is_pct,
                                                 statistic_is_ratio,
@@ -2486,12 +2487,21 @@ class AggregatedResults():
                                                   ignore_index=True)
         cluster_ranks = list(np.unique(cluster_size_per_group_sorted.loc[cluster_size_per_group_sorted[CLUSTER_FIELD_NAME_STR]!=-1, 
                                                                          RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR]))
+        cluster_ranks_sorted = sorted(cluster_ranks, key=self._return_int_from_ordinal_string_numbers)
         cluster_rank_sorted_levels = ([RESULT_AGGREGATION_CLUSTER_SIZE_NON_CLUSTERED_STR] + 
-                                      cluster_ranks)
+                                      cluster_ranks_sorted)
+        print(cluster_rank_sorted_levels)
         cluster_size_per_group_sorted[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR] = pd.Categorical(cluster_size_per_group_sorted[RESULT_AGGREGATION_CLUSTER_SIZE_CLUSTER_RANK_FIELD_NAME_STR], 
                                                                                                                     categories=cluster_rank_sorted_levels, 
                                                                                                                     ordered=True)
         return cluster_size_per_group_sorted
+    
+    def _return_int_from_ordinal_string_numbers(self,
+                                                ordinal_number: str) -> int:
+
+        digit_chars = [char for char in ordinal_number if char.isdigit()]
+
+        return int(''.join(digit_chars))
                                                 
     def _cluster_non_clustered_sorting_function(self,
                                                 series: pd.Series) -> pd.Series:
