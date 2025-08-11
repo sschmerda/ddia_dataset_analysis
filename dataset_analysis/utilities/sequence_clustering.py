@@ -452,9 +452,6 @@ class SequenceDistanceClustersPerGroup():
 
         # groups
         self.groups = self.sequence_distance_analytics.unique_learning_activity_sequence_stats_per_group[GROUP_FIELD_NAME_STR].unique()
-        #TODO: delete
-        # self.groups = [12, 13, 15, 22, 31, 36, 37]
-        # self.groups = [12, 13, 15]
 
         # cluster results field list
         self._cluster_results_list = [CLUSTERING_CLUSTER_LABELS_NAME_STR, 
