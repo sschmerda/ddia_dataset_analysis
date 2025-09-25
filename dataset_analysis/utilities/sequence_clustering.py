@@ -1,200 +1,10 @@
 from .configs.general_config import *
+from .configs.cluster_config import *
 from .constants.constants import *
 from .standard_import import *
 from .validators import *
 from .data_classes import *
 from .plotting_functions import *
-
-class ParameterGridGenerator():
-    """Class for generating a parameter grid used for hyperparameter tuning of the clustering algorithm"""
-    def __init__(self):
-        # parameter dict list
-        self.parameter_dict_list = []
-
-    def add_parameter(self,
-                      param_name: str,
-                      is_numeric: bool,
-                      is_int: bool,
-                      range_min: int | float | None,
-                      range_max: int | float | None,
-                      n_candidates: int | None,
-                      categorical_values: List[str] |  List[int] | List[float] | List[bool] | None) -> None:
-        """Adds a parameter to the parameter grid
-
-        Parameters
-        ----------
-        param_name : str
-            The name of the parameter
-        is_numeric : bool
-            A flag indicating whether the parameter is numeric
-        is_int : bool
-            A flag indicating whether the parameter is an integer
-        range_min : int | float | None
-            The minimum value of the parameter
-        range_max : int | float | None
-            The maximum value of the parameter
-        n_candidates : int | None
-            The number of possible parameter candidates within the min/max range
-        categorical_values : List[str] | List[int] | List[float] | List[bool] | None
-            A list of possible categorical values for the parameter
-        """
-        param_dict = {CLUSTERING_PARAMETER_TUNING_PARAMETER_NAME_NAME_STR: param_name,
-                      CLUSTERING_PARAMETER_TUNING_IS_NUMERIC_NAME_STR: is_numeric,
-                      CLUSTERING_PARAMETER_TUNING_IS_INT_NAME_STR: is_int,
-                      CLUSTERING_PARAMETER_TUNING_RANGE_MIN_NAME_STR: range_min,
-                      CLUSTERING_PARAMETER_TUNING_RANGE_MAX_NAME_STR: range_max,
-                      CLUSTERING_PARAMETER_TUNING_NUMBER_CANDIDATES_NAME_STR: n_candidates,
-                      CLUSTERING_PARAMETER_TUNING_CATEGORICAL_VALUES_NAME_STR: categorical_values}
-
-        self.parameter_dict_list.append(param_dict)
-
-    def return_parameter_grid(self) -> Iterable[Dict[str, Any]]:
-        """Returns a parameter grid for specified parameter values
-
-        Returns
-        -------
-        Iterable[Dict[str, Any]]
-            The parameter grid
-
-        Raises
-        ------
-        ValueError
-            If no input parameter has been specified
-        ValueError
-            If one or more parameters were misspecified 
-        """        
-        if not self.parameter_dict_list:
-            raise ValueError(CLUSTERING_PARAMETER_TUNING_ERROR_NO_INPUT_PARAMETER_NAME_STR)
-
-        try:
-            grid_dict = {}
-            for param in self.parameter_dict_list:
-
-                if param[CLUSTERING_PARAMETER_TUNING_IS_NUMERIC_NAME_STR]:
-
-                    if param[CLUSTERING_PARAMETER_TUNING_IS_INT_NAME_STR]:
-                        data_type = 'int'
-                    else:
-                        data_type = 'float'
-
-                    linspace_input = (param[CLUSTERING_PARAMETER_TUNING_RANGE_MIN_NAME_STR], 
-                                      param[CLUSTERING_PARAMETER_TUNING_RANGE_MAX_NAME_STR], 
-                                      param[CLUSTERING_PARAMETER_TUNING_NUMBER_CANDIDATES_NAME_STR])
-
-                    parameter_range = np.linspace(*linspace_input, 
-                                                  dtype=data_type) 
-                    parameter_range = np.unique(parameter_range)
-                else:
-                    parameter_range = param[CLUSTERING_PARAMETER_TUNING_CATEGORICAL_VALUES_NAME_STR]
-                
-                grid_dict[param[CLUSTERING_PARAMETER_TUNING_PARAMETER_NAME_NAME_STR]] = parameter_range
-
-            param_grid = ParameterGrid(grid_dict)
-
-            return param_grid
-
-        except:
-            raise ValueError(CLUSTERING_PARAMETER_TUNING_ERROR_MISSPECIFIED_INPUT_PARAMETER_NAME_STR)
-    
-    def return_parameters(self) -> tuple[str]:
-        """Returns a tuple containing the parameter names of the grid
-
-        Returns
-        -------
-        tuple
-            A tuple containing the parameter names of the parameter grid
-
-        Raises
-        ------
-        ValueError
-            If no input parameter has been specified
-        """
-        if not self.parameter_dict_list:
-            raise ValueError(CLUSTERING_PARAMETER_TUNING_ERROR_NO_INPUT_PARAMETER_NAME_STR)
-
-        return tuple([param_dict[CLUSTERING_PARAMETER_TUNING_PARAMETER_NAME_NAME_STR] for param_dict in self.parameter_dict_list])
-
-
-class ParaGrid(ABC):
-    """Abstract class which allows for building a class for generating a parameter grid used for hyperparameter tuning of the clustering algorithm. 
-    Parameter values can be a function of the input dimensions of the respective distance matrix via using the number_samples, number_features attributes."""
-
-    def __init__(self, 
-                 distance_matrix: pd.DataFrame | None):
-        """
-        Parameters
-        ----------
-        distance_matrix : pd.DataFrame | None
-            The distance matrix used for clustering
-        """
-
-        self.distance_matrix = distance_matrix
-        self.para_grid_generator = ParameterGridGenerator()
-
-        if self.distance_matrix is not None:
-            self.dimensions = distance_matrix.shape[1]
-        else:
-            self.dimensions = None
-
-        # add parameter configuration to ParameterGridGenerator object
-        self._add_parameters()
-    
-    def _return_dim_pct(self,
-                        pct: int | float) -> int | None:
-        """Return a percentage of the dimensions of the distance matrix
-
-        Parameters
-        ----------
-        pct : int | float
-            The percentage 
-
-        Returns
-        -------
-        int
-            Percentage of distance matrix dimensions
-        """
-        pct_of_dim = None
-        if self.distance_matrix is not None:
-            pct_of_dim = round(self.dimensions * pct / 100)
-        
-        return pct_of_dim
-
-    def _add_parameters(self):
-        # fill with add_parameter operations for the respective dimensionality reduction or clustering algorithm
-        pass
-
-    def return_param_grid(self):
-        """Returns a parameter grid for specified parameter values
-
-        Returns
-        -------
-        Iterable[Dict[str, Any]]
-            The parameter grid
-
-        Raises
-        ------
-        ValueError
-            If no input parameter has been specified
-        ValueError
-            If one or more parameters were misspecified 
-        """        
-
-        # return parameter grid
-        para_grid = self.para_grid_generator.return_parameter_grid()
-
-        return para_grid
-    
-    def return_params(self) -> tuple[str]:
-        """Returns a tuple containing the names of parameters of the grid
-
-        Returns
-        -------
-        tuple
-            A tuple containing parameter names
-        """
-        params = self.para_grid_generator.return_parameters()
-
-        return params
 
 class SequenceDistanceClusters():
     """Performs hyperparameter tuning of a clustering algorithm on a distance matrix"""
@@ -246,7 +56,9 @@ class SequenceDistanceClusters():
                                                  distance_matrix: np.ndarray,
                                                  dimensionality_reduction_params: dict) -> Tuple[pd.DataFrame, dict]:
 
-        reducer = self._dimensionality_reduction_function(**dimensionality_reduction_params)
+        dimensionality_reduction_params_praefix_removed = ({remove_param_praefix(k, ParaGridParaType.DIM_REDUCTION): v 
+                                                            for k, v in dimensionality_reduction_params.items()})
+        reducer = self._dimensionality_reduction_function(**dimensionality_reduction_params_praefix_removed)
         reduced_matrix = reducer.fit_transform(distance_matrix).astype('double')
         has_dim_reduction = True
         reducer_name = self._dimensionality_reduction_function.__name__
@@ -302,9 +114,11 @@ class SequenceDistanceClusters():
 
             for func, para_grid in cluster_val_iter:
                 para_dict = list(para_grid)[0]
+                para_dict_praefix_removed = ({remove_param_praefix(k, ParaGridParaType.VALIDATION): v 
+                                             for k, v in para_dict.items()})
                 score = func(distance_matrix, 
                              cluster_labels,
-                             **para_dict)
+                             **para_dict_praefix_removed)
                 score_name = func.__name__
 
                 cluster_validation_dict[score_name] = score
@@ -325,12 +139,13 @@ class SequenceDistanceClusters():
         return cluster_base_dict
 
     def _return_cluster_results(self,
-                                distance_matrix: np.ndarray,
+                                matrix: np.ndarray,
                                 cluster_params: dict,
                                 dimensionality_reduction_results: dict) -> dict:
-
-        clusterer = self._cluster_function(**cluster_params)
-        clusterer.fit(distance_matrix)
+        cluster_params_praefix_removed = ({remove_param_praefix(k, ParaGridParaType.CLUSTERING): v 
+                                          for k, v in cluster_params.items()})
+        clusterer = self._cluster_function(**cluster_params_praefix_removed)
+        clusterer.fit(matrix)
 
         cluster_labels = clusterer.labels_
         clustered = (cluster_labels >= 0)
@@ -352,7 +167,7 @@ class SequenceDistanceClusters():
                                                                  clustered,
                                                                  cluster_params)
 
-        cluster_validation_dict = self._return_cluster_validation_dict(distance_matrix,
+        cluster_validation_dict = self._return_cluster_validation_dict(matrix,
                                                                        cluster_labels,
                                                                        clusterer)
         
@@ -364,17 +179,17 @@ class SequenceDistanceClusters():
         return result_dict
 
     def _do_clustering_parameter_grid_search(self,
-                                             distance_matrix: np.ndarray,
+                                             matrix: np.ndarray,
                                              dimensionality_reduction_results: dict) -> List[Dict]:
 
         if self._parallelize_computation:
             results = (Parallel(n_jobs=NUMBER_OF_CORES)
-                       (delayed(self._return_cluster_results)(distance_matrix, params, dimensionality_reduction_results) 
+                       (delayed(self._return_cluster_results)(matrix, params, dimensionality_reduction_results) 
                                 for params in self._cluster_param_grid))
         else:
             results = []
             for params in self._cluster_param_grid:
-                results.append(self._return_cluster_results(distance_matrix,
+                results.append(self._return_cluster_results(matrix,
                                                             params,
                                                             dimensionality_reduction_results))
         
@@ -401,8 +216,8 @@ class SequenceDistanceClusters():
             matrices = ((self._distance_matrix, dimensionality_reduction_results),)
 
         results_list = []
-        for distance_matrix, dimensionality_reduction_results in matrices:
-            results = self._do_clustering_parameter_grid_search(distance_matrix,
+        for matrix, dimensionality_reduction_results in matrices:
+            results = self._do_clustering_parameter_grid_search(matrix,
                                                                 dimensionality_reduction_results)
             results_list.extend(results)
 
@@ -428,8 +243,8 @@ class SequenceDistanceClustersPerGroup():
                  cluster_function: Callable,
                  dimensionality_reduction_function: Callable | None,
                  cluster_validation_functions: Tuple[Callable] | None,
-                 cluster_param_grid_generator: Callable,
-                 dimensionality_reduction_param_grid_generator: Callable | None,
+                 cluster_param_grid_generator: Type[ParaGrid],
+                 dimensionality_reduction_param_grid_generator: Type[ParaGrid] | None,
                  cluster_validation_parameters: Tuple[ParameterGrid] | None,
                  cluster_validation_attributes: Tuple[str] | None,
                  parallelize_computation: bool):
@@ -471,7 +286,8 @@ class SequenceDistanceClustersPerGroup():
             self.seq_dist_entity = CLUSTERING_CLUSTER_SEQ_DIST_ENTITY_USER_VALUE_NAME_STR
 
         # sequence counts per group dict
-        seq_count_field_list = [LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR]
+        seq_count_field_list = [LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR, 
+                                LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR]
         self.seq_count_dict = self.sequence_distance_analytics.unique_learning_activity_sequence_stats_per_group.groupby(GROUP_FIELD_NAME_STR)[seq_count_field_list].first().to_dict()
         
         # user - sequence_id mapping per group dict
@@ -503,12 +319,16 @@ class SequenceDistanceClustersPerGroup():
 
         # algorithm parameters
         if self.cluster_param_grid_generator:
-            self.cluster_para_fields = list(self.cluster_param_grid_generator(None).return_params())
+            self.cluster_para_fields = list(self.cluster_param_grid_generator(None, 
+                                                                              ParaGridParaType.CLUSTERING)
+                                                .return_params())
         else:
             self.cluster_para_fields = None
 
         if self.dimensionality_reduction_param_grid_generator:
-            self.dim_reduct_para_fields = list(self.dimensionality_reduction_param_grid_generator(None).return_params())
+            self.dim_reduct_para_fields = list(self.dimensionality_reduction_param_grid_generator(None,
+                                                                                                  ParaGridParaType.DIM_REDUCTION)
+                                                   .return_params())
         else:
             self.dim_reduct_para_fields = None
     
@@ -530,8 +350,8 @@ class SequenceDistanceClustersPerGroup():
         _ = check_value_in_iterable(cluster_validation_metric,
                                     self.cluster_validation_algo_names)
 
-        cluster_results_per_group_df = self._return_cluster_results_per_group_df(cluster_validation_metric,
-                                                                                 cluster_validation_lower_is_better)
+        cluster_results_per_group_df = self._return_best_cluster_results_per_group_df(cluster_validation_metric,
+                                                                                      cluster_validation_lower_is_better)
         return cluster_results_per_group_df
 
     def return_cluster_results_per_group_df(self) -> pd.DataFrame:
@@ -620,8 +440,8 @@ class SequenceDistanceClustersPerGroup():
         _ = check_value_in_iterable(cluster_validation_metric,
                                     self.cluster_validation_algo_names)
         
-        cluster_results_per_group_df = self._return_cluster_results_per_group_df(cluster_validation_metric,
-                                                                                 cluster_validation_lower_is_better)
+        cluster_results_per_group_df = self._return_best_cluster_results_per_group_df(cluster_validation_metric,
+                                                                                      cluster_validation_lower_is_better)
 
         sequence_cluster_per_group_df = self._return_sequence_cluster_per_group_df(cluster_validation_metric,
                                                                                    cluster_validation_lower_is_better)
@@ -641,6 +461,9 @@ class SequenceDistanceClustersPerGroup():
                                                   cluster_param_2: str,
                                                   cluster_validation_metric: str,
                                                   cluster_validation_lower_is_better: bool) -> None:
+
+        cluster_param_1 = add_param_praefix(cluster_param_1, ParaGridParaType.CLUSTERING)
+        cluster_param_2 = add_param_praefix(cluster_param_2, ParaGridParaType.CLUSTERING)
 
         _ = check_value_not_none(self.cluster_results_per_group,
                                  CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
@@ -756,12 +579,17 @@ class SequenceDistanceClustersPerGroup():
                         text.set_color('black')
 
     def plot_cluster_hyperparameter_tuning_parallel_coordinates(self,
-                                                                param_list: List[str],
+                                                                dim_reduction_param_list: List[str],
+                                                                cluster_param_list: List[str],
                                                                 groups_to_include: list[int] | None,
                                                                 cluster_validation_metric: str,
                                                                 additional_cluster_validation_metrics: str | list[str] | None,
                                                                 cluster_validation_lower_is_better: bool,
                                                                 select_only_best_embedding: bool) -> None:
+
+        dim_reduction_param_list = [add_param_praefix(par, ParaGridParaType.DIM_REDUCTION) for par in dim_reduction_param_list]
+        cluster_param_list = [add_param_praefix(par, ParaGridParaType.CLUSTERING) for par in cluster_param_list]
+        param_list = dim_reduction_param_list + cluster_param_list
 
         _ = check_value_not_none(self.cluster_results_per_group,
                                  CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)
@@ -814,8 +642,8 @@ class SequenceDistanceClustersPerGroup():
                 val_range = [min_val, max_val]
 
                 coordinate_data = dict(range = val_range,
-                                    label = label, 
-                                    values = values)
+                                       label = label, 
+                                       values = values)
                 dimensions_data_list.append(coordinate_data)
             
             line_dict = dict(color = data[cluster_validation_metric],
@@ -1068,12 +896,14 @@ class SequenceDistanceClustersPerGroup():
                                                            use_unique_sequence_distances)
 
             if self.dimensionality_reduction_param_grid_generator:
-                dim_reduction_para_grid_generator = self.dimensionality_reduction_param_grid_generator(distance_matrix)
+                dim_reduction_para_grid_generator = self.dimensionality_reduction_param_grid_generator(distance_matrix,
+                                                                                                       ParaGridParaType.DIM_REDUCTION)
                 dim_reduction_grid = dim_reduction_para_grid_generator.return_param_grid()
             else:
                 dim_reduction_grid = None
 
-            cluster_para_grid_generator = self.cluster_param_grid_generator(distance_matrix)
+            cluster_para_grid_generator = self.cluster_param_grid_generator(distance_matrix,
+                                                                            ParaGridParaType.CLUSTERING)
             cluster_para_grid = cluster_para_grid_generator.return_param_grid()
 
             clusterer = SequenceDistanceClusters(distance_matrix,
@@ -1287,14 +1117,16 @@ class SequenceDistanceClustersPerGroup():
                                                        self.use_unique_sequence_distances)
         if use_best_dimension_reduction_params:
             params_dict = cluster_results.best_dim_reduction_parameters
-            _ = params_dict.pop(CLUSTERING_N_COMPONENTS_NAME_STR)
+            params_dict_praefix_removed = ({remove_param_praefix(k, ParaGridParaType.DIM_REDUCTION): v 
+                                                                for k, v in params_dict.items()})
+            _ = params_dict_praefix_removed.pop(CLUSTERING_N_COMPONENTS_NAME_STR)
         else:
-            params_dict = {}
+            params_dict_praefix_removed = {}
 
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', UserWarning)
             dim_reducer = reducer(n_components=2,
-                                  **params_dict)
+                                  **params_dict_praefix_removed)
 
             embedding_2D = dim_reducer.fit_transform(distance_matrix.values)
 
@@ -1369,9 +1201,9 @@ class SequenceDistanceClustersPerGroup():
         
         return cluster_results_dict
     
-    def _return_cluster_results_per_group_df(self,
-                                             cluster_validation_metric: str,
-                                             cluster_validation_lower_is_better: bool) -> pd.DataFrame:
+    def _return_best_cluster_results_per_group_df(self,
+                                                  cluster_validation_metric: str,
+                                                  cluster_validation_lower_is_better: bool) -> pd.DataFrame:
 
         _ = check_value_not_none(self.cluster_results_per_group,
                                  CLUSTERING_PARAMETER_TUNING_ERROR_NO_RESULTS_NAME_STR)

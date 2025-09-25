@@ -725,6 +725,11 @@ CLUSTERING_PARAMETER_TUNING_RANGE_MAX_NAME_STR = 'range_max'
 CLUSTERING_PARAMETER_TUNING_NUMBER_CANDIDATES_NAME_STR = 'n_candidates'
 CLUSTERING_PARAMETER_TUNING_CATEGORICAL_VALUES_NAME_STR = 'categorical_values'
 
+# hyperparameter praefixes
+CLUSTERING_HYPERPARAM_PRAEFIX_DIM_REDUCTION_STR = 'dim_reduction_'
+CLUSTERING_HYPERPARAM_PRAEFIX_CLUSTERING_STR = 'clustering_'
+CLUSTERING_HYPERPARAM_PRAEFIX_VALIDATION_STR = 'validation_'
+
 ###################################################################################################
 # Omnibus tests
 ###################################################################################################
