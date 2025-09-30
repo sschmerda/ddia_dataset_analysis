@@ -1,6 +1,7 @@
 from .configs.general_config import *
 from .configs.conf_int_config import *
 from .constants.constants import *
+from .constants.enums import *
 from .standard_import import *
 from .sequence_distance_analysis import SequenceDistanceAnalytics
 from .sequence_statistics_functions import SequenceStatistics

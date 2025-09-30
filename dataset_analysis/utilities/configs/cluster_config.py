@@ -1,23 +1,8 @@
 from .general_config import *
 from ..constants.constants import *
+from ..constants.enums import *
 from ..standard_import import *
-
-########################################################################################################################
-### option enums ###
-########################################################################################################################
-
-class ParaGridParaType(Enum):
-    DIM_REDUCTION = CLUSTERING_HYPERPARAM_PRAEFIX_DIM_REDUCTION_STR
-    CLUSTERING = CLUSTERING_HYPERPARAM_PRAEFIX_CLUSTERING_STR
-    VALIDATION = CLUSTERING_HYPERPARAM_PRAEFIX_VALIDATION_STR
-
-# class ParameterKind(Enum):
-#     NUMERIC = 0
-#     CATEGORICAL = 1
-
-# class ParameterKind(Enum):
-#     NUM_ABSOLUT_VALUE = 0
-#     PCT_OF_N_OBS = AVG_SEQUENCE_STATISTICS_AVERAGING_METHOD_MEDIAN
+from ..data_classes import ClusterParameter
 
 ########################################################################################################################
 ### param grid base classes ###
@@ -38,9 +23,17 @@ def remove_param_praefix(param_name: str,
 class ParameterGridGenerator():
     """Class for generating a parameter grid used for hyperparameter tuning of the clustering algorithm"""
     def __init__(self,
+                 distance_matrix: pd.DataFrame | None,
                  param_type: ParaGridParaType):
-        # parameter dict list
+        self.distance_matrix = distance_matrix
         self.param_type = param_type
+
+        if self.distance_matrix is not None:
+            self.dimensions = distance_matrix.shape[1]
+        else:
+            self.dimensions = None
+
+        # parameter dict list
         self.parameter_dict_list = []
 
     def add_parameter(self,
@@ -148,34 +141,8 @@ class ParameterGridGenerator():
             raise ValueError(CLUSTERING_PARAMETER_TUNING_ERROR_NO_INPUT_PARAMETER_NAME_STR)
 
         return tuple([param_dict[CLUSTERING_PARAMETER_TUNING_PARAMETER_NAME_NAME_STR] for param_dict in self.parameter_dict_list])
-
-
-class ParaGrid(ABC):
-    """Abstract class which allows for building a class for generating a parameter grid used for hyperparameter tuning of the clustering algorithm. 
-    Parameter values can be a function of the input dimensions of the respective distance matrix via using the number_samples, number_features attributes."""
-
-    def __init__(self, 
-                 distance_matrix: pd.DataFrame | None,
-                 param_type: ParaGridParaType):
-        """
-        Parameters
-        ----------
-        distance_matrix : pd.DataFrame | None
-            The distance matrix used for clustering
-        """
-
-        self.distance_matrix = distance_matrix
-        self.param_type = param_type
-        self.para_grid_generator = ParameterGridGenerator(self.param_type)
-
-        if self.distance_matrix is not None:
-            self.dimensions = distance_matrix.shape[1]
-        else:
-            self.dimensions = None
-
-        # add parameter configuration to ParameterGridGenerator object
-        self._add_parameters()
     
+
     def _return_dim_pct(self,
                         pct: int | float) -> int | None:
         """Return a percentage of the dimensions of the distance matrix
@@ -195,6 +162,34 @@ class ParaGrid(ABC):
             pct_of_dim = round(self.dimensions * pct / 100)
         
         return pct_of_dim
+
+
+class ParaGrid(ABC):
+    """Abstract class which allows for building a class for generating a parameter grid used for hyperparameter tuning of the clustering algorithm. 
+    Parameter values can be a function of the input dimensions of the respective distance matrix via using the number_samples, number_features attributes."""
+
+    def __init__(self, 
+                 distance_matrix: pd.DataFrame | None,
+                 param_type: ParaGridParaType):
+        """
+        Parameters
+        ----------
+        distance_matrix : pd.DataFrame | None
+            The distance matrix used for clustering
+        """
+
+        self.distance_matrix = distance_matrix
+        self.param_type = param_type
+        self.para_grid_generator = ParameterGridGenerator(self.distance_matrix,
+                                                          self.param_type)
+
+        if self.distance_matrix is not None:
+            self.dimensions = distance_matrix.shape[1]
+        else:
+            self.dimensions = None
+
+        # add parameter configuration to ParameterGridGenerator object
+        self._add_parameters()
 
     def _add_parameters(self):
         # fill with add_parameter operations for the respective dimensionality reduction or clustering algorithm
@@ -243,36 +238,72 @@ class ParaGrid(ABC):
 # umap parameter values:
 
 # n_components -> should not be tied to number of observations in order to prevent the curse of dimensionality
-CLUSTERING_UMAP_N_COMPONENTS_NAME_STR = 'n_components'
-CLUSTERING_UMAP_N_COMPONENTS_MIN_VALUE = 5
-CLUSTERING_UMAP_N_COMPONENTS_MAX_VALUE = 20
-CLUSTERING_UMAP_N_COMPONENTS_NUMBER_OF_CANDIDATES = 4
+DIM_REDUCTION_UMAP_N_COMPONENTS_NAME_STR = 'n_components'
+dim_reduction_par_umap_n_components = ClusterParameter(DIM_REDUCTION_UMAP_N_COMPONENTS_NAME_STR,
+                                                       True,
+                                                       True,
+                                                       5,
+                                                       20,
+                                                       4,
+                                                       None)
 # n_neighbors
-CLUSTERING_UMAP_N_NEIGHBORS_NAME_STR = 'n_neighbors'
-CLUSTERING_UMAP_N_NEIGHBORS_MIN_VALUE = 5
-CLUSTERING_UMAP_N_NEIGHBORS_MAX_VALUE = 15
-CLUSTERING_UMAP_N_NEIGHBORS_NUMBER_OF_CANDIDATES = 6
+DIM_REDUCTION_UMAP_N_NEIGHBORS_NAME_STR = 'n_neighbors'
+dim_reduction_par_umap_n_neighbors = ClusterParameter(DIM_REDUCTION_UMAP_N_NEIGHBORS_NAME_STR,
+                                                      True,
+                                                      True,
+                                                      5,
+                                                      15,
+                                                      5,
+                                                      None)
 # min_dist
-CLUSTERING_UMAP_MIN_DIST_NAME_STR = 'min_dist'
-CLUSTERING_UMAP_MIN_DIST_NAME_VALUE = [0] # needs to be very small to 0 for clustering
+DIM_REDUCTION_UMAP_MIN_DIST_NAME_STR = 'min_dist'
+dim_reduction_par_umap_min_dist = ClusterParameter(DIM_REDUCTION_UMAP_MIN_DIST_NAME_STR,
+                                                   False,
+                                                   False,
+                                                   None,
+                                                   None,
+                                                   None,
+                                                   [0]) # needs to be very small to 0 for clustering
 # metric
-CLUSTERING_UMAP_METRIC_NAME_STR = 'metric'
-CLUSTERING_UMAP_METRIC_VALUE = ['precomputed'] # [euclidean | precomputed] -> since we pass dist mat it should be precomputed
+DIM_REDUCTION_UMAP_METRIC_NAME_STR = 'metric'
+dim_reduction_par_umap_metric = ClusterParameter(DIM_REDUCTION_UMAP_METRIC_NAME_STR,
+                                                 False,
+                                                 False,
+                                                 None,
+                                                 None,
+                                                 None,
+                                                 ['precomputed']) # [euclidean | precomputed] -> since we pass dist mat it should be precomputed
 # random state
-CLUSTERING_UMAP_RANDOM_STATE_NAME_STR = 'random_state'
-CLUSTERING_UMAP_RANDOM_STATE_VALUE = [RNG_SEED] # set to a fixed value for reproducibility
+DIM_REDUCTION_UMAP_RANDOM_STATE_NAME_STR = 'random_state'
+dim_reduction_par_umap_random_state = ClusterParameter(DIM_REDUCTION_UMAP_RANDOM_STATE_NAME_STR,
+                                                       False,
+                                                       False,
+                                                       None,
+                                                       None,
+                                                       None,
+                                                       [RNG_SEED]) # set to a fixed value for reproducibility
 # verbose
-CLUSTERING_UMAP_VERBOSE_NAME_STR = 'verbose'
-CLUSTERING_UMAP_VERBOSE_VALUE = [False]
+DIM_REDUCTION_UMAP_VERBOSE_NAME_STR = 'verbose'
+dim_reduction_par_umap_verbose = ClusterParameter(DIM_REDUCTION_UMAP_VERBOSE_NAME_STR,
+                                                  False,
+                                                  False,
+                                                  None,
+                                                  None,
+                                                  None,
+                                                  [False])
 
 # clustering algos
 # hdbscan parameter values:
 
 # min_cluster_size
 CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_NAME_STR = 'min_cluster_size'
-CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_MIN_VALUE_AS_PCT_OF_OBSERVATIONS = 5
-CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_MAX_VALUE_AS_PCT_OF_OBSERVATIONS = 15
-CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_NUMBER_OF_CANDIDATES = 10
+clustering_par_hdbscan_n_components = ClusterParameter(CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_NAME_STR,
+                                                       True,
+                                                       True,
+                                                       5,
+                                                       15,
+                                                       10,
+                                                       None)
 # min_samples
 CLUSTERING_HDBSCAN_MIN_SAMPLES_NAME_STR = 'min_samples'
 CLUSTERING_HDBSCAN_MIN_SAMPLES_MIN_VALUE_AS_PCT_OF_OBSERVATIONS = 5
@@ -297,15 +328,15 @@ class DimReductionParaGrid(ParaGrid):
 
     def _add_parameters(self):
 
-        self.para_grid_generator.add_parameter(CLUSTERING_UMAP_N_COMPONENTS_NAME_STR,
-                                               True,
-                                               True,
+        self.para_grid_generator.add_parameter(DIM_REDUCTION_UMAP_N_COMPONENTS_NAME_STR,
+                                               CLUSTERING_UMAP_N_COMPONENTS_IS_NUMERIC,
+                                               CLUSTERING_UMAP_N_COMPONENTS_IS_INT,
                                                CLUSTERING_UMAP_N_COMPONENTS_MIN_VALUE,
                                                CLUSTERING_UMAP_N_COMPONENTS_MAX_VALUE,
                                                CLUSTERING_UMAP_N_COMPONENTS_NUMBER_OF_CANDIDATES,
-                                               None)
+                                               CLUSTERING_UMAP_N_COMPONENTS_CATEGORICAL_VALUES)
 
-        self.para_grid_generator.add_parameter(CLUSTERING_UMAP_N_NEIGHBORS_NAME_STR,
+        self.para_grid_generator.add_parameter(DIM_REDUCTION_UMAP_N_NEIGHBORS_NAME_STR,
                                                True,
                                                True,
                                                5,
@@ -313,7 +344,7 @@ class DimReductionParaGrid(ParaGrid):
                                                5,
                                                None)
 
-        self.para_grid_generator.add_parameter(CLUSTERING_UMAP_MIN_DIST_NAME_STR,
+        self.para_grid_generator.add_parameter(DIM_REDUCTION_UMAP_MIN_DIST_NAME_STR,
                                                False,
                                                False,
                                                None,
@@ -321,7 +352,7 @@ class DimReductionParaGrid(ParaGrid):
                                                None,
                                                CLUSTERING_UMAP_MIN_DIST_NAME_VALUE)
 
-        self.para_grid_generator.add_parameter(CLUSTERING_UMAP_METRIC_NAME_STR,
+        self.para_grid_generator.add_parameter(DIM_REDUCTION_UMAP_METRIC_NAME_STR,
                                                False,
                                                False,
                                                None,
@@ -329,7 +360,7 @@ class DimReductionParaGrid(ParaGrid):
                                                None,
                                                CLUSTERING_UMAP_METRIC_VALUE)
 
-        self.para_grid_generator.add_parameter(CLUSTERING_UMAP_RANDOM_STATE_NAME_STR,
+        self.para_grid_generator.add_parameter(DIM_REDUCTION_UMAP_RANDOM_STATE_NAME_STR,
                                                False,
                                                False,
                                                None,
@@ -337,7 +368,7 @@ class DimReductionParaGrid(ParaGrid):
                                                None,
                                                CLUSTERING_UMAP_RANDOM_STATE_VALUE)
 
-        self.para_grid_generator.add_parameter(CLUSTERING_UMAP_VERBOSE_NAME_STR,
+        self.para_grid_generator.add_parameter(DIM_REDUCTION_UMAP_VERBOSE_NAME_STR,
                                                False,
                                                False,
                                                None,
@@ -473,8 +504,8 @@ CLUSTERING_HYPERPARAMETER_TUNING_MATRIX_PLOT_PARAMETER_2_NAME_STR = CLUSTERING_H
 CLUSTERING_PARALLEL_COORDINATES_PLOT_ADDITIONAL_VALIDATION_METRIC_NAME_STR = CLUSTERING_HDBSCAN_RELATIVE_VALIDITY_ATTRIBUTE_NAME_STR
 CLUSTERING_PARALLEL_COORDINATES_PLOT_SELECT_ONLY_BEST_EMBEDDINGS_NAME_STR = False
 
-parallel_coordinates_dim_reduction_param_list = [CLUSTERING_UMAP_N_COMPONENTS_NAME_STR, 
-                                                 CLUSTERING_UMAP_N_NEIGHBORS_NAME_STR]
+parallel_coordinates_dim_reduction_param_list = [DIM_REDUCTION_UMAP_N_COMPONENTS_NAME_STR, 
+                                                 DIM_REDUCTION_UMAP_N_NEIGHBORS_NAME_STR]
 parallel_coordinates_cluster_param_list = [CLUSTERING_HDBSCAN_MIN_CLUSTER_SIZE_NAME_STR, 
                                            CLUSTERING_HDBSCAN_MIN_SAMPLES_NAME_STR]
 

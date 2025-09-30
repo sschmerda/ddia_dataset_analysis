@@ -1,5 +1,6 @@
 # constants 
 from .constants.constants import *
+from .constants.enums import *
 # utilities
 from .preprocessing_functions import *
 from .evaluation_functions import *

@@ -1,6 +1,7 @@
 from .configs.general_config import *
 from .configs.preprocessing_config import *
 from .constants.constants import *
+from .constants.enums import *  
 from .standard_import import *
 from .sequence_statistics_functions import *
 from .plotting_functions import *

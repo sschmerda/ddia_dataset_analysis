@@ -2,15 +2,6 @@ from ..standard_import import *
 from ..constants.constants import *
 
 ########################################################################################################################
-### option enums ###
-########################################################################################################################
-
-class SequencePreprocessingBase(Enum):
-    PCT_UNIQUE_LEARNING_RESOURCES = LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR
-    PCT_REPEATED_LEARNING_RESOURCES = LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR
-    SEQUENCE_LENGTH = LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR
-
-########################################################################################################################
 ### general ###
 ########################################################################################################################
 

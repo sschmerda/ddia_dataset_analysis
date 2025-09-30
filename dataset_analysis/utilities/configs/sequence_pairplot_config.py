@@ -1,29 +1,13 @@
 from ..standard_import import *
 from ..constants import *
+from ..constants.enums import *
 from .general_config import *
 
 ########################################################################################################################
-### option enums ###
+### pairplot option enums ###
 ########################################################################################################################
 
-class PairplotFieldsToPlot(Enum):
-    PCT_REPEATED_LEARNING_ACTIVITIES = LEARNING_ACTIVITY_SEQUENCE_PCT_REPEATED_LEARNING_ACTIVITIES_NAME_STR
-    NUMBER_REPEATED_LEARNING_ACTIVITIES = LEARNING_ACTIVITY_SEQUENCE_REPEATED_LEARNING_ACTIVITIES_NAME_STR
-    PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP = LEARNING_ACTIVITY_SEQUENCE_PCT_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR
-    NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP = LEARNING_ACTIVITY_SEQUENCE_NUMBER_UNIQUE_LEARNING_ACTIVITIES_PER_GROUP_IN_SEQ_NAME_STR
-    SEQUENCE_LENGTH = LEARNING_ACTIVITY_SEQUENCE_LENGTH_NAME_STR
-    MEAN_SEQUENCE_DISTANCE = LEARNING_ACTIVITY_MEAN_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR
-    MEAN_NORMALIZED_SEQUENCE_DISTANCE = LEARNING_ACTIVITY_MEAN_NORMALIZED_SEQUENCE_DISTANCE_ALL_SEQ_NAME_STR
-
-class PairplotGroupingVariable(Enum):
-    GROUP = GROUP_FIELD_NAME_STR
-    CLUSTER = CLUSTER_FIELD_NAME_STR
-
-class PairplotVariableScaler(Enum):
-    STANDARD_SCALER = StandardScaler
-    ROBUST_SCALER = RobustScaler
-    MIN_MAX_SCALER = MinMaxScaler
-
+# relates sequence statistic to 
 def return_plot_field_data_kind(plot_field: PairplotFieldsToPlot) -> Tuple[bool, bool]:
     match plot_field:
         case PairplotFieldsToPlot.PCT_REPEATED_LEARNING_ACTIVITIES:

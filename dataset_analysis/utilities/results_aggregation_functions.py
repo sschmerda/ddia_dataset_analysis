@@ -1,5 +1,5 @@
 from .configs.result_aggregation_config import *
-from .configs.conf_int_config import SequenceType, ConfIntResultFields, ConfIntEstimator
+from .constants.enums import *
 from .data_classes import *
 from .plotting_functions import *
 from .html_style_functions import *
