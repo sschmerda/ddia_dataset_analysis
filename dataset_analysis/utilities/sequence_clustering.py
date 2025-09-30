@@ -243,9 +243,9 @@ class SequenceDistanceClustersPerGroup():
                  cluster_function: Callable,
                  dimensionality_reduction_function: Callable | None,
                  cluster_validation_functions: Tuple[Callable] | None,
-                 cluster_param_grid_generator: Type[ParaGrid],
-                 dimensionality_reduction_param_grid_generator: Type[ParaGrid] | None,
-                 cluster_validation_parameters: Tuple[ParameterGrid] | None,
+                 cluster_param_grid_generator: Type[ClusteringParaGrid],
+                 dimensionality_reduction_param_grid_generator: Type[DimReductionParaGrid] | None,
+                 cluster_validation_parameters: Tuple[ValidityIndex] | None,
                  cluster_validation_attributes: Tuple[str] | None,
                  parallelize_computation: bool):
 
