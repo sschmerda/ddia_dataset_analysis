@@ -525,6 +525,9 @@ class SequenceDistanceClustersPerGroup():
             row_name = row_names[row_index]
             annotation_vars = annotation_dict[row_name]
             for column_index, ax in enumerate(ax_row):
+
+                cluster_param_1 = remove_param_praefix(cluster_param_1, ParaGridParaType.CLUSTERING)
+                cluster_param_2 = remove_param_praefix(cluster_param_2, ParaGridParaType.CLUSTERING)
                 
                 n_sequences = self.seq_count_dict[LEARNING_ACTIVITY_SEQUENCE_COUNT_PER_GROUP_NAME_STR][row_name]
                 n_unique_sequences = self.seq_count_dict[LEARNING_ACTIVITY_UNIQUE_SEQUENCE_COUNT_PER_GROUP_NAME_STR][row_name]
@@ -567,6 +570,9 @@ class SequenceDistanceClustersPerGroup():
                             xticklabels=True, 
                             yticklabels=True,
                             ax=ax)
+
+                ax.set_xlabel(cluster_param_1)
+                ax.set_ylabel(cluster_param_2)
                             
                 # Highlight the maximum value tiles
                 for field, value in annotation_vars.optimum_values_positions:
@@ -941,6 +947,9 @@ class SequenceDistanceClustersPerGroup():
                                              number_clusters: int,
                                              percentage_clustered: float,
                                              seq_count_per_cluster: pd.DataFrame) -> str:
+
+        cluster_best_params.index = [remove_param_praefix(par, ParaGridParaType.CLUSTERING) for par in cluster_best_params.index]
+        dim_reduction_best_params.index = [remove_param_praefix(par, ParaGridParaType.DIM_REDUCTION) for par in dim_reduction_best_params.index]
 
         param_list = [cluster_param_1, cluster_param_2]
         cluster_best_params_filtered =  filter(lambda x: x[0] not in param_list, cluster_best_params.items())   
