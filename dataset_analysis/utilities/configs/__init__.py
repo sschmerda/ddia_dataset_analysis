@@ -6,3 +6,4 @@ from .group_user_learning_activity_relationship_config import *
 from .sequence_distance_config import *
 from .sequence_pairplot_config import *
 from .result_aggregation_config import *
+from .conf_int_config import *
